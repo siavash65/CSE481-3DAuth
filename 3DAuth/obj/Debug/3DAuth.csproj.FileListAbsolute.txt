@@ -1,0 +1,15 @@
+C:\Users\Administrator\Desktop\Kinect Skeletal Tracking\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\Administrator\Desktop\Kinect Skeletal Tracking\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\MainWindow.baml
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\MainWindow.g.cs
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\App.g.cs
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Administrator\Documents\GitHub\CSE481-3DAuth\3DAuth\obj\Debug\GenerateResource.write.1.tlog
