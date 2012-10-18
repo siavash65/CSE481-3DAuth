@@ -61,7 +61,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Plane.cs" />
+    <Compile Include="PointCluster.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="ReferenceFrame.cs" />
+    <Compile Include="TargetBox.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -5,20 +5,9 @@ using System.Text;
 
 namespace ThreeDAuth
 {
-    interface IPoint3f
-    {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
-    }
-
-    class GenericPoint : IPoint3f { }
-
-    class DepthPoint : GenericPoint { }
-
     class PointCluster
     {
-        private HashSet<IPoint3f> points;
+        public HashSet<IPoint3f> points { get; set; }
 
         public PointCluster() : this(new HashSet<IPoint3f>()) { }
 

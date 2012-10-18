@@ -10,27 +10,94 @@ namespace ThreeDAuth
      */
     interface IPlane
     {
-        public bool crossingPlane(PointCluster points);
-        public bool crossesPlane(IPoint3f point);
+        bool crossesPlane(PointCluster points);
+        bool crossesPlane(IPoint3f point);
     }
 
     class FlatPlane : IPlane
     {
         private float depth; // distance to torso
+        private IPoint3f center;
 
-        public FlatPlane(float depth)
+        public FlatPlane(IPoint3f center, float depth)
         {
             this.depth = depth;
+            this.center = center;
+        }
+
+        public void setCenter(IPoint3f center)
+        {
+            this.center = center;
+        }
+
+        public bool crossesPlane(IPoint3f point)
+        {
+            return point.Z < (center.Z - depth);
+        }
+
+        public bool crossesPlane(PointCluster points)
+        {
+            foreach (IPoint3f pt in points.points)
+            {
+                if (crossesPlane(pt)) return true;
+            }
+            return false;
         }
     }
 
     class CylindricalPlane : IPlane
     {
         private float depth; // distance to torso
+        private IPoint3f center;
 
-        public CylindricalPlane(float depth)
+        public CylindricalPlane(IPoint3f center, float depth)
         {
             this.depth = depth;
+            this.center = center;
+        }
+
+        public bool crossesPlane(IPoint3f point)
+        {
+            // Ignore Y axis data
+            // Return whether the length of the projected vector into xz-space is greater than the cutoff
+            return Math.Sqrt(Math.Pow(point.X - center.X, 2) + Math.Pow(point.Z - center.Z, 2)) > depth;
+        }
+
+        public bool crossesPlane(PointCluster points)
+        {
+            foreach (IPoint3f pt in points.points)
+            {
+                if (crossesPlane(pt)) return true;
+            }
+            return false;
+        }
+    }
+    
+    // Spherical plane placed around the center of the shoulders
+    class SphericalPlane : IPlane
+    {
+        private float depth; // distance to torso
+        private IPoint3f center;
+
+        public SphericalPlane(IPoint3f center, float depth)
+        {
+            this.depth = depth;
+            this.center = center;
+        }
+
+        public bool crossesPlane(IPoint3f point)
+        {
+            // Return whether the length of the vector is greater than the cutoff
+            return Math.Sqrt(Math.Pow(point.X - center.X, 2) + Math.Pow(point.Z - center.Z, 2)) > depth;
+        }
+
+        public bool crossesPlane(PointCluster points)
+        {
+            foreach (IPoint3f pt in points.points)
+            {
+                if (crossesPlane(pt)) return true;
+            }
+            return false;
         }
     }
 }

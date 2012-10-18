@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ThreeDAuth
+{
+    interface IPoint3f
+    {
+        double X { get; set; }
+        double Y { get; set; }
+        double Z { get; set; }
+    }
+
+    class Point2f
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public Point2f(double X, double y)
+        {
+            this.X = X;
+            this.Y = Y;
+        }
+    }
+
+    class GenericPoint : IPoint3f {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
+
+        public GenericPoint() : this(0, 0, 0) { }
+
+        public GenericPoint(double X, double Y, double Z)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+        }
+    }
+
+    class DepthPoint : GenericPoint { }
+
+    class Vec2f
+    {
+        Point2f p1;
+        Point2f p2;
+        double X
+        {
+            get { return Math.Abs(p2.X - p1.X); }
+        }
+
+        double Y
+        {
+            get { return Math.Abs(p2.Y - p1.Y); }
+        }
+
+        public Vec2f() { }
+        public Vec2f(Point2f p1, Point2f p2) { }
+        /*
+        public Vec2f(IPoint3f p1, IPoint3f p2) 
+        {
+            p1 = new Point2f(
+        }
+         * */
+    }
+
+    class Vec3f
+    {
+        IPoint3f p1;
+        IPoint3f p2;
+        public double X
+        {
+            get { return Math.Abs(p2.X - p1.X); }
+        }
+        public double Y 
+        {
+            get { return Math.Abs(p2.Y - p1.Y); }
+        }
+        public double Z
+        {
+            get { return Math.Abs(p2.Z - p1.Z); }
+        }
+
+        public double length()
+        {
+            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2) + Math.Pow(p1.Z - p2.Y, 2));
+        }
+    }
+}

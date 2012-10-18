@@ -8,58 +8,82 @@ namespace ThreeDAuth
     // Scheme for determining whether a point is in the target box or not
     interface ITargetBoxScheme
     {
-        public bool pointInTargetBox(IPoint3f point, IPoint3f center, float armLength, float torsoDepth);
+        bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength);
+
+        IPoint3f[] getCorners(IPoint3f center, double armLength);
     }
 
     class RigidTargetBoxScheme : ITargetBoxScheme
     {
-        private float height;
-        private float width;
+        private double height;
+        private double width;
 
-        public RigidTargetBoxScheme(float height, float width)
+        public RigidTargetBoxScheme(double height, double width)
         {
             this.height = height;
             this.width = width;
         }
 
-        public bool pointInTargetBox(IPoint3f point, IPoint3f center, float armLength, float torsoDepth)
+        public bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength)
         {
             return Math.Abs(point.X - center.X) <= (width / 2) &&
                    Math.Abs(point.Y - center.Y) <= (height / 2);
+        }
+
+        public IPoint3f[] getCorners(IPoint3f center, double armLength)
+        {
+            IPoint3f[] corners = new GenericPoint[4];
+            corners[0] = new GenericPoint(center.X - (width / 2), center.Y - (height / 2), center.Z);
+            corners[1] = new GenericPoint(center.X - (width / 2), center.Y + (height / 2), center.Z);
+            corners[2] = new GenericPoint(center.X + (width / 2), center.Y + (height / 2), center.Z);
+            corners[3] = new GenericPoint(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            return corners;
         }
     }
 
     class ArmLengthTargetBoxScheme : ITargetBoxScheme
     {
-        private float widthPercentage;
-        private float heightPercentage;
+        private double widthPercentage;
+        private double heightPercentage;
 
         // The target percentage are the percentage of arm length to use for making the target box
-        public ArmLengthTargetBoxScheme(float targetWidthPercentage, float targetHeightPercentage)
+        public ArmLengthTargetBoxScheme(double targetWidthPercentage, double targetHeightPercentage)
         {
             widthPercentage = targetWidthPercentage;
             heightPercentage = targetHeightPercentage;
         }
 
-        public ArmLengthTargetBoxScheme(float targetPercentage) : this(targetPercentage, targetPercentage) { }
+        public ArmLengthTargetBoxScheme(double targetPercentage) : this(targetPercentage, targetPercentage) { }
 
-        public bool pointInTargetBox(IPoint3f point, IPoint3f center, float armLength, float torsoDepth)
+        public bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength)
         {
-            float width = armLength * widthPercentage;
-            float height = armLength * heightPercentage;
+            double width = armLength * widthPercentage;
+            double height = armLength * heightPercentage;
             return Math.Abs(point.X - center.X) <= (width / 2) &&
                    Math.Abs(point.Y - center.Y) <= (height / 2);
+        }
+
+        public IPoint3f[] getCorners(IPoint3f center, double armLength)
+        {
+            double width = armLength * widthPercentage;
+            double height = armLength * heightPercentage;
+            IPoint3f[] corners = new GenericPoint[4];
+            corners[0] = new GenericPoint(center.X - (width / 2), center.Y - (height / 2), center.Z);
+            corners[1] = new GenericPoint(center.X - (width / 2), center.Y + (height / 2), center.Z);
+            corners[2] = new GenericPoint(center.X + (width / 2), center.Y + (height / 2), center.Z);
+            corners[3] = new GenericPoint(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            return corners;
         }
     }
 
     class TargetBox
     {
-        private ITargetBoxScheme targetBoxScheme;
-        private IPoint3f center;
-        private float armLength;
-        private float torsoDepth;
+        private ITargetBoxScheme targetBoxScheme { get; set; }
+        private IPoint3f center { get; set; }
+        private double armLength { get; set; }
+        private double torsoDepth { get; set; }
 
-        public TargetBox(ITargetBoxScheme targetBoxScheme, IPoint3f center, float armLength, float torsoDepth)
+        public TargetBox(ITargetBoxScheme targetBoxScheme, IPoint3f center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -69,7 +93,7 @@ namespace ThreeDAuth
 
         public TargetBox() : this(new RigidTargetBoxScheme(0f, 0f), new GenericPoint(), 0f, 0f) { }
 
-        public void setBox(IPoint3f center, float armLength, float torsoDepth)
+        public void setBox(IPoint3f center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -83,7 +107,23 @@ namespace ThreeDAuth
 
         public bool pointInTargetBox(IPoint3f point)
         {
-            return targetBoxScheme.pointInTargetBox(point, center, armLength, torsoDepth);
+            return targetBoxScheme.pointInTargetBox(point, center, armLength);
+        }
+
+        public IPoint3f[] getCorners()
+        {
+            return targetBoxScheme.getCorners(center, armLength);
+        }
+
+        public Vec2f[] getBoxLines()
+        {
+            IPoint3f[] corners = getCorners();
+            Vec2f[] lines = new Vec2f[4];
+            //lines[0] = new Vec2f(corners[0], corners[1]);
+            lines[1] = new Vec2f();
+            lines[2] = new Vec2f();
+            lines[3] = new Vec2f();
+            return lines;
         }
     }
 

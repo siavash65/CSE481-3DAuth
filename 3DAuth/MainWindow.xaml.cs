@@ -287,6 +287,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="drawingContext">drawing context to draw to</param>
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
+            // Draw targetbox
+            ThreeDAuth.RigidTargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(0.5f, 0.5f);
+            ThreeDAuth.IPoint3f torsoCenter = new ThreeDAuth.GenericPoint(0, 0, 0);
+            double armLength = 0.5f;
+            double torsoDepth = 0.5f;
+            ThreeDAuth.TargetBox box = new ThreeDAuth.TargetBox(scheme, torsoCenter, armLength, torsoDepth);
+            Pen drawPen = new Pen(Brushes.Red, 3);
+            //drawingContext.DrawLine(drawPen, , );
+
             // Render Torso
             this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
             this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
