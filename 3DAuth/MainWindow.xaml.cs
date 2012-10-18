@@ -292,8 +292,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             /** Begin Add By Mason **/
 
             // Draw targetbox with some dummy values
-            ThreeDAuth.RigidTargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(0.5f, 0.5f);
+            ThreeDAuth.ITargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(1.0f, 1.0f);
             ThreeDAuth.IPoint3f torsoCenter = new ThreeDAuth.GenericPoint(0, 0, 0);
+
             double armLength = 0.5f;
             double torsoDepth = 0.5f;
             ThreeDAuth.TargetBox box = new ThreeDAuth.TargetBox(scheme, torsoCenter, armLength, torsoDepth);
