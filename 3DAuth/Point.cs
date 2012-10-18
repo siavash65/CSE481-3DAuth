@@ -43,8 +43,8 @@ namespace ThreeDAuth
 
     class Vec2f
     {
-        Point2f p1;
-        Point2f p2;
+        public Point2f p1 { get; set; }
+        public Point2f p2 { get; set; }
         double X
         {
             get { return Math.Abs(p2.X - p1.X); }
