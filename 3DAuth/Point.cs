@@ -57,18 +57,18 @@ namespace ThreeDAuth
 
         public Vec2f() { }
         public Vec2f(Point2f p1, Point2f p2) { }
-        /*
+        
         public Vec2f(IPoint3f p1, IPoint3f p2) 
         {
-            p1 = new Point2f(
+            this.p1 = new Point2f(p1.X, p1.Y);
+            this.p2 = new Point2f(p2.X, p2.Y);
         }
-         * */
     }
 
     class Vec3f
     {
-        IPoint3f p1;
-        IPoint3f p2;
+        IPoint3f p1 { get; set; }
+        IPoint3f p2 { get; set; }
         public double X
         {
             get { return Math.Abs(p2.X - p1.X); }
@@ -80,6 +80,14 @@ namespace ThreeDAuth
         public double Z
         {
             get { return Math.Abs(p2.Z - p1.Z); }
+        }
+
+        public Vec3f() { }
+
+        public Vec3f(IPoint3f p1, IPoint3f p2)
+        {
+            this.p1 = p1;
+            this.p2 = p2;
         }
 
         public double length()

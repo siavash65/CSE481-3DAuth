@@ -119,10 +119,10 @@ namespace ThreeDAuth
         {
             IPoint3f[] corners = getCorners();
             Vec2f[] lines = new Vec2f[4];
-            //lines[0] = new Vec2f(corners[0], corners[1]);
-            lines[1] = new Vec2f();
-            lines[2] = new Vec2f();
-            lines[3] = new Vec2f();
+            lines[0] = new Vec2f(corners[0], corners[1]);
+            lines[1] = new Vec2f(corners[1], corners[2]);
+            lines[2] = new Vec2f(corners[2], corners[3]);
+            lines[3] = new Vec2f(corners[3], corners[1]);
             return lines;
         }
     }
