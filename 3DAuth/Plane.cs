@@ -16,10 +16,10 @@ namespace ThreeDAuth
 
     class FlatPlane : IPlane
     {
-        private float depth; // distance to torso
+        private double depth; // distance to torso
         private IPoint3f center;
 
-        public FlatPlane(IPoint3f center, float depth)
+        public FlatPlane(IPoint3f center, double depth)
         {
             this.depth = depth;
             this.center = center;

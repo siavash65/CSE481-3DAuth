@@ -17,7 +17,7 @@ namespace ThreeDAuth
         public double X { get; set; }
         public double Y { get; set; }
 
-        public Point2f(double X, double y)
+        public Point2f(double X, double Y)
         {
             this.X = X;
             this.Y = Y;
@@ -56,7 +56,11 @@ namespace ThreeDAuth
         }
 
         public Vec2f() { }
-        public Vec2f(Point2f p1, Point2f p2) { }
+        public Vec2f(Point2f p1, Point2f p2) 
+        {
+            this.p1 = p1;
+            this.p2 = p2;
+        }
         
         public Vec2f(IPoint3f p1, IPoint3f p2) 
         {

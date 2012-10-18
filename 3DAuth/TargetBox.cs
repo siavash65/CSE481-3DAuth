@@ -122,7 +122,7 @@ namespace ThreeDAuth
             lines[0] = new Vec2f(corners[0], corners[1]);
             lines[1] = new Vec2f(corners[1], corners[2]);
             lines[2] = new Vec2f(corners[2], corners[3]);
-            lines[3] = new Vec2f(corners[3], corners[1]);
+            lines[3] = new Vec2f(corners[3], corners[0]);
             return lines;
         }
     }
