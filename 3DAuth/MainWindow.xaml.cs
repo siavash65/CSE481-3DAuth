@@ -10,6 +10,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
+    using Microsoft.Win32;
+    using System;
 
 
     /// <summary>
@@ -88,6 +90,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         public MainWindow()
         {
             InitializeComponent();
+            
         }
 
         /// <summary>
@@ -438,6 +441,34 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
                 }
+            }
+        }
+
+
+        /// <summary>
+        /// Opens a file browser to select and image
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void New_Account_Click(object sender, RoutedEventArgs e)
+        {
+
+            string fileName = "";
+            OpenFileDialog browseFile = new OpenFileDialog();
+            browseFile.Title = "Select Your Image";
+            browseFile.InitialDirectory = @"Libraries\Pictures";
+            browseFile.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
+            browseFile.FilterIndex = 2;
+            browseFile.RestoreDirectory = true;
+            browseFile.ShowDialog();
+            try
+            {
+                fileName = browseFile.FileName;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
             }
         }
     }
