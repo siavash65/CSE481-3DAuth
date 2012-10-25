@@ -12,6 +12,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Kinect;
     using Microsoft.Win32;
     using System;
+    using System.Windows.Media.Imaging;
 
 
     /// <summary>
@@ -453,6 +454,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
 
+           
+
             string fileName = "";
             OpenFileDialog browseFile = new OpenFileDialog();
             browseFile.Title = "Select Your Image";
@@ -464,6 +467,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             try
             {
                 fileName = browseFile.FileName;
+                BitmapImage userImage = new BitmapImage(new Uri(fileName));
+                this.myImageBox.Source = userImage;
+                New_Account.Visibility = Visibility.Collapsed;
             }
             catch (Exception)
             {

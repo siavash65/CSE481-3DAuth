@@ -56,7 +56,7 @@
         <DockPanel Grid.Row="0" Margin="0 0 0 20">
             <Image DockPanel.Dock="Left" Source="Images\Logo.png" Stretch="None" Margin="0 10 0 5"/>
             <TextBlock DockPanel.Dock="Right" Margin="0 0 -1 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
-            <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5"/>
+            <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
         </DockPanel>
         <Viewbox Grid.Row="1" Stretch="Uniform" HorizontalAlignment="Center"/>
         <CheckBox Grid.Row="2" Style="{StaticResource SquareCheckBox}" Content="Seated Mode" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 10 10 10" Name="checkBoxSeatedMode" Checked="CheckBoxSeatedModeChanged" Unchecked="CheckBoxSeatedModeChanged"/>
@@ -65,7 +65,16 @@
                 <TextBlock Name="statusBarText" Margin="-1 0 0 0">Click 'Seated' to change skeletal pipeline type!</TextBlock>
             </StatusBarItem>
         </StatusBar>
-        <Image x:Name="Image" HorizontalAlignment="Left" Height="215" Margin="504,342,0,0" Grid.Row="1" VerticalAlignment="Top" Width="228"/>
-        <Button x:Name="New_Account" Content="Create A New User Account" HorizontalAlignment="Left" Margin="90,66,0,0" Grid.Row="1" VerticalAlignment="Top" Width="159" Height="24" Click="New_Account_Click"/>
+        <Image x:Name="Image" HorizontalAlignment="Left" Height="177" Margin="554,160,0,0" Grid.Row="1" VerticalAlignment="Top" Width="178"/>
+        <Button x:Name="New_Account" Content="Create A New User Account" HorizontalAlignment="Left" Margin="0,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="159" Height="24" Click="New_Account_Click">
+            <Button.CacheMode>
+                <BitmapCache/>
+            </Button.CacheMode>
+        </Button>
+        <Image x:Name="myImageBox" HorizontalAlignment="Left" Height="442" Margin="10,85,0,0" Grid.Row="1" VerticalAlignment="Top" Width="539">
+            <Image.Effect>
+                <DropShadowEffect/>
+            </Image.Effect>
+        </Image>
     </Grid>
 </Window>
