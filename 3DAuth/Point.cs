@@ -24,6 +24,21 @@ namespace ThreeDAuth
         }
     }
 
+    class PlanePoint
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public bool inPlane { get; set; }
+
+        public PlanePoint(double X, double Y, bool inPlane)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.inPlane = inPlane;
+        }
+    }
+
+
     class GenericPoint : IPoint3f {
         public double X { get; set; }
         public double Y { get; set; }
