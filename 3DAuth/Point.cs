@@ -22,6 +22,11 @@ namespace ThreeDAuth
             this.X = X;
             this.Y = Y;
         }
+
+        public Point2f copy()
+        {
+            return new Point2f(X, Y);
+        }
     }
 
     class PlanePoint
