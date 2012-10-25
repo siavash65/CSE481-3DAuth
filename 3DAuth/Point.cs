@@ -51,6 +51,16 @@ namespace ThreeDAuth
             this.X = X;
             this.Y = Y;
             this.Z = Z;
+
+            
+        }
+         public static GenericPoint operator +(GenericPoint firstPoint, GenericPoint secondPoint)
+        {
+            GenericPoint sumPoint = new GenericPoint();
+            sumPoint.X = firstPoint.X + secondPoint.X;
+            sumPoint.Y = firstPoint.Y + secondPoint.Y;
+            sumPoint.Z = firstPoint.Z + secondPoint.Z;
+            return sumPoint;
         }
     }
 

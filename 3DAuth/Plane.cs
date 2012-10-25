@@ -47,10 +47,10 @@ namespace ThreeDAuth
 
     class CylindricalPlane : IPlane
     {
-        private float depth; // distance to torso
+        private double depth; // distance to torso
         private IPoint3f center;
 
-        public CylindricalPlane(IPoint3f center, float depth)
+        public CylindricalPlane(IPoint3f center, double depth)
         {
             this.depth = depth;
             this.center = center;
@@ -76,10 +76,10 @@ namespace ThreeDAuth
     // Spherical plane placed around the center of the shoulders
     class SphericalPlane : IPlane
     {
-        private float depth; // distance to torso
+        private double depth; // distance to torso
         private IPoint3f center;
 
-        public SphericalPlane(IPoint3f center, float depth)
+        public SphericalPlane(IPoint3f center, double depth)
         {
             this.depth = depth;
             this.center = center;

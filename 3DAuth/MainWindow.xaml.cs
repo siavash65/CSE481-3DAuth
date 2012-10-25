@@ -234,7 +234,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         
                         if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
                         {
-                            ReferenceFrame myFrame = new ReferenceFrame();
+                            ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
                             if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
@@ -252,6 +252,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 Joint spine = skel.Joints[JointType.Spine];
                                 myFrame.computeArmLength(leftWrist, leftShoulder, rightWrist, rightShoulder);
                                 myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);
+
+
+                                if (myFrame.torsoPosition != null)
+                                {
+                                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
+                                    ThreeDAuth.GenericPoint wristRight = new ThreeDAuth.GenericPoint(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+                                    if (myPlane.crossesPlane(wristRight))
+                                    {
+                                        System.Console.WriteLine("You crossed the plane");
+                                    }
+                                }
                             }                           
                         }
                        
