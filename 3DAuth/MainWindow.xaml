@@ -71,7 +71,7 @@
                 <BitmapCache/>
             </Button.CacheMode>
         </Button>
-        <Image x:Name="myImageBox" HorizontalAlignment="Left" Height="442" Margin="10,85,0,0" Grid.Row="1" VerticalAlignment="Top" Width="539">
+        <Image x:Name="myImageBox" HorizontalAlignment="Left" Height="442" Margin="10,85,0,0" Grid.Row="1" VerticalAlignment="Top" Width="539" Stretch="Fill">
             <Image.Effect>
                 <DropShadowEffect/>
             </Image.Effect>

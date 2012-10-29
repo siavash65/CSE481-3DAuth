@@ -86,6 +86,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DrawingImage imageSource;
 
         /// <summary>
+        /// Siavash
+        /// To draw the hands on the selected image
+        /// </summary>
+        private DrawingImage handSource;
+
+        /// <summary>
+        /// Siavash
+        /// user selected image
+        /// </summary>
+        private BitmapImage userImage;
+
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -107,6 +120,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     Brushes.Red,
                     null,
                     new Rect(0, RenderHeight - ClipBoundsThickness, RenderWidth, ClipBoundsThickness));
+                
             }
 
             if (skeleton.ClippedEdges.HasFlag(FrameEdges.Top))
@@ -149,6 +163,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             // Display the drawing using our image control
             Image.Source = this.imageSource;
+
+
+            this.handSource = new DrawingImage(this.drawingGroup);
+
+            myImageBox.Source = this.handSource;
 
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
@@ -322,7 +341,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             /** End Add By Mason **/
 
+            if (userImage != null)
+            {
+                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
+         
+            }
+            
 
             // Render Torso
             this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
@@ -372,6 +397,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
                 }
             }
+
+            
+            
         }
 
         /// <summary>
@@ -454,7 +482,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
 
-           
+            
+
 
             string fileName = "";
             OpenFileDialog browseFile = new OpenFileDialog();
@@ -467,8 +496,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             try
             {
                 fileName = browseFile.FileName;
-                BitmapImage userImage = new BitmapImage(new Uri(fileName));
-                this.myImageBox.Source = userImage;
+                userImage = new BitmapImage(new Uri(fileName));
+                //this.myImageBox.Source = userImage;
                 New_Account.Visibility = Visibility.Collapsed;
             }
             catch (Exception)
