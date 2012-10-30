@@ -279,11 +279,38 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                                 if (myFrame.torsoPosition != null)
                                 {
+                                    // Anton's code
+                                    // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
+                                    // rectangle over them to give the user feedback
+
                                     ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
                                     ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+
+                                    Point right = this.SkeletonPointToScreen(rightWrist.Position);
+                                    
                                     if (myPlane.crossesPlane(wristRight))
                                     {
+                                        dc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
                                         System.Console.WriteLine("You crossed the plane");
+                                    }
+                                    else
+                                    {
+                                        dc.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                                    }
+
+
+                                    ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
+
+                                    Point left = this.SkeletonPointToScreen(leftWrist.Position);
+
+                                    if (myPlane.crossesPlane(wristLeft))
+                                    {
+                                        dc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                                        System.Console.WriteLine("You crossed the plane");
+                                    }
+                                    else
+                                    {
+                                        dc.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
                                     }
                                 }
                             }                           
