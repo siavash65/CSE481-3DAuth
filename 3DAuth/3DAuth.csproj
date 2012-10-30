@@ -61,6 +61,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="GestureLearner.cs" />
+    <Compile Include="GestureValidator.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="HandTracking.cs" />
     <Compile Include="Plane.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Point.cs" />
     <Compile Include="ReferenceFrame.cs" />
     <Compile Include="TargetBox.cs" />
+    <Compile Include="Util.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

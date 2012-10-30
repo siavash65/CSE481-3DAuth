@@ -68,8 +68,6 @@ namespace ThreeDAuth
                         // Didn't hit the target point, but getting closer
                         oldDistance = newDistance;
                     }
-
-                    //TODO check to see if have accumulated enough points to make a new target
                 }
             }
         }
