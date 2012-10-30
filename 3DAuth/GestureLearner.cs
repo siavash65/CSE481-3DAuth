@@ -8,11 +8,11 @@ namespace ThreeDAuth
     abstract class GestureLearner
     {
         protected System.Diagnostics.Stopwatch stopwatch;
-        protected Queue<Point2f> learnedGesturePath;
+        protected Queue<Point2d> learnedGesturePath;
 
-        public void givePoint(Point2f point);
+        public void givePoint(Point2d point);
 
-        public Queue<Point2f> getGesturePath()
+        public Queue<Point2d> getGesturePath()
         {
             return learnedGesturePath;
         }
@@ -40,7 +40,7 @@ namespace ThreeDAuth
             startRecording();
         }
 
-        public void givePoint(Point2f point)
+        public void givePoint(Point2d point)
         {
             if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
             {
@@ -68,7 +68,7 @@ namespace ThreeDAuth
             this.motionEpsilon = motionEpsilon;
         }
 
-        public void givePoint(Point2f point)
+        public void givePoint(Point2d point)
         {
             long elapsedMS = stopwatch.ElapsedMilliseconds;
             if (pointBuffer.Count == 0)
@@ -101,9 +101,9 @@ namespace ThreeDAuth
         private class TimePointTuple
         {
             public long timeMark { get; set; }
-            public Point2f point { get; set; }
+            public Point2d point { get; set; }
 
-            public TimePointTuple(long timeMark, Point2f point)
+            public TimePointTuple(long timeMark, Point2d point)
             {
                 this.timeMark = timeMark;
                 this.point = point.copy();

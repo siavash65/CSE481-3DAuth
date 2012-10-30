@@ -280,7 +280,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 if (myFrame.torsoPosition != null)
                                 {
                                     ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
-                                    ThreeDAuth.GenericPoint wristRight = new ThreeDAuth.GenericPoint(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+                                    ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
                                     if (myPlane.crossesPlane(wristRight))
                                     {
                                         System.Console.WriteLine("You crossed the plane");
@@ -327,13 +327,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             // Draw targetbox with some dummy values
             ThreeDAuth.ITargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(1.0f, 1.0f);
-            ThreeDAuth.IPoint3f torsoCenter = new ThreeDAuth.GenericPoint(0, 0, 0);
+            ThreeDAuth.Point3d torsoCenter = new ThreeDAuth.Point3d(0, 0, 0);
 
             double armLength = 0.5f;
             double torsoDepth = 0.5f;
             ThreeDAuth.TargetBox box = new ThreeDAuth.TargetBox(scheme, torsoCenter, armLength, torsoDepth);
             Pen redPen = new Pen(Brushes.Red, 3);
-            ThreeDAuth.Vec2f[] lines = box.getBoxLines();
+            ThreeDAuth.Vec2d[] lines = box.getBoxLines();
             for (int i = 0; i < 4; i++)
             {
                 drawingContext.DrawLine(redPen, new Point(lines[i].p1.X, lines[i].p1.Y), new Point(lines[i].p2.X, lines[i].p2.Y));

@@ -16,14 +16,14 @@ namespace ThreeDAuth
     // Given a sequence of points (in pixel-space) to hit, validates a continuously updating stream of positions
     class GestureValidator
     {
-        private Queue<Point2f> targetPoints;
-        private Queue<Point2f> manipulatableTargetPoints;
-        private HashSet<Point2f> completedTargets;
+        private Queue<Point2d> targetPoints;
+        private Queue<Point2d> manipulatableTargetPoints;
+        private HashSet<Point2d> completedTargets;
         private double oldDistance;
         private double epsilon;
         private bool failedAuthentication;
 
-        public GestureValidator(Queue<Point2f> targetPoints, double epsilonBoundary)
+        public GestureValidator(Queue<Point2d> targetPoints, double epsilonBoundary)
         {
             this.targetPoints = targetPoints;
             this.epsilon = epsilonBoundary;
@@ -33,7 +33,7 @@ namespace ThreeDAuth
         public void beginPath()
         {
             for (int i = 0; i < targetPoints.Count; i++) {
-                Point2f point = targetPoints.Dequeue();
+                Point2d point = targetPoints.Dequeue();
                 targetPoints.Enqueue(point);
                 manipulatableTargetPoints.Enqueue(point);
             }
@@ -41,9 +41,9 @@ namespace ThreeDAuth
             failedAuthentication = false;
         }
 
-        public void updatePath(Point2f newPoint)
+        public void updatePath(Point2d newPoint)
         {
-            Point2f target = manipulatableTargetPoints.Peek();
+            Point2d target = manipulatableTargetPoints.Peek();
             if (target != null && !failedAuthentication)
             {
                 double newDistance = Util.euclideanDistance(newPoint, target);

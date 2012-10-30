@@ -5,27 +5,55 @@ using System.Text;
 
 namespace ThreeDAuth
 {
-    interface IPoint3f
+    class Point3d
     {
-        double X { get; set; }
-        double Y { get; set; }
-        double Z { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
+
+        public Point3d() : this(0, 0, 0) { }
+
+        public Point3d(double X, double Y, double Z)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+        }
+
+        public static Point3d operator +(Point3d firstPoint, Point3d secondPoint)
+        {
+            Point3d sumPoint = new Point3d();
+            sumPoint.X = firstPoint.X + secondPoint.X;
+            sumPoint.Y = firstPoint.Y + secondPoint.Y;
+            sumPoint.Z = firstPoint.Z + secondPoint.Z;
+            return sumPoint;
+        }
     }
 
-    class Point2f
+    class Point2d
     {
         public double X { get; set; }
         public double Y { get; set; }
 
-        public Point2f(double X, double Y)
+        public Point2d() : this(0, 0) { }
+
+        public Point2d(double X, double Y)
         {
             this.X = X;
             this.Y = Y;
         }
 
-        public Point2f copy()
+        public Point2d copy()
         {
-            return new Point2f(X, Y);
+            return new Point2d(X, Y);
+        }
+
+        public static Point2d operator +(Point2d firstPoint, Point2d secondPoint)
+        {
+            Point2d sumPoint = new Point2d();
+            sumPoint.X = firstPoint.X + secondPoint.X;
+            sumPoint.Y = firstPoint.Y + secondPoint.Y;
+            return sumPoint;
         }
     }
 
@@ -43,38 +71,10 @@ namespace ThreeDAuth
         }
     }
 
-
-    class GenericPoint : IPoint3f {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
-
-        public GenericPoint() : this(0, 0, 0) { }
-
-        public GenericPoint(double X, double Y, double Z)
-        {
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
-
-            
-        }
-         public static GenericPoint operator +(GenericPoint firstPoint, GenericPoint secondPoint)
-        {
-            GenericPoint sumPoint = new GenericPoint();
-            sumPoint.X = firstPoint.X + secondPoint.X;
-            sumPoint.Y = firstPoint.Y + secondPoint.Y;
-            sumPoint.Z = firstPoint.Z + secondPoint.Z;
-            return sumPoint;
-        }
-    }
-
-    class DepthPoint : GenericPoint { }
-
-    class Vec2f
+    class Vec2d
     {
-        public Point2f p1 { get; set; }
-        public Point2f p2 { get; set; }
+        public Point2d p1 { get; set; }
+        public Point2d p2 { get; set; }
         double X
         {
             get { return Math.Abs(p2.X - p1.X); }
@@ -85,24 +85,24 @@ namespace ThreeDAuth
             get { return Math.Abs(p2.Y - p1.Y); }
         }
 
-        public Vec2f() { }
-        public Vec2f(Point2f p1, Point2f p2) 
+        public Vec2d() { }
+        public Vec2d(Point2d p1, Point2d p2) 
         {
             this.p1 = p1;
             this.p2 = p2;
         }
         
-        public Vec2f(IPoint3f p1, IPoint3f p2) 
+        public Vec2d(Point3d p1, Point3d p2) 
         {
-            this.p1 = new Point2f(p1.X, p1.Y);
-            this.p2 = new Point2f(p2.X, p2.Y);
+            this.p1 = new Point2d(p1.X, p1.Y);
+            this.p2 = new Point2d(p2.X, p2.Y);
         }
     }
 
-    class Vec3f
+    class Vec3d
     {
-        IPoint3f p1 { get; set; }
-        IPoint3f p2 { get; set; }
+        Point3d p1 { get; set; }
+        Point3d p2 { get; set; }
         public double X
         {
             get { return Math.Abs(p2.X - p1.X); }
@@ -116,9 +116,9 @@ namespace ThreeDAuth
             get { return Math.Abs(p2.Z - p1.Z); }
         }
 
-        public Vec3f() { }
+        public Vec3d() { }
 
-        public Vec3f(IPoint3f p1, IPoint3f p2)
+        public Vec3d(Point3d p1, Point3d p2)
         {
             this.p1 = p1;
             this.p2 = p2;

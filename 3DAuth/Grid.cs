@@ -13,12 +13,12 @@ namespace ThreeDAuth
         private int gridSquareX;
         private int gridSquareY;
         private Grid grid;
-        private Point2f upperLeftCorner;
-        private Point2f upperRightCorner;
-        private Point2f lowerRightCorner;
-        private Point2f lowerLeftCorner;
+        private Point2d upperLeftCorner;
+        private Point2d upperRightCorner;
+        private Point2d lowerRightCorner;
+        private Point2d lowerLeftCorner;
 
-        public bool containsPoint(Point2f point)
+        public bool containsPoint(Point2d point)
         {
             return (point.X >= lowerLeftCorner.X &&
                     point.X < upperRightCorner.X &&
@@ -26,14 +26,14 @@ namespace ThreeDAuth
                     point.Y < upperRightCorner.Y);
         }
 
-        public bool containsPoint(IPoint3f point)
+        public bool containsPoint(Point3d point)
         {
-            return containsPoint(new Point2f(point.X, point.Y));
+            return containsPoint(new Point2d(point.X, point.Y));
         }
 
-        public Point2f getCenter()
+        public Point2d getCenter()
         {
-            return new Point2f((lowerLeftCorner.X + upperRightCorner.X) / 2,
+            return new Point2d((lowerLeftCorner.X + upperRightCorner.X) / 2,
                                 (lowerLeftCorner.Y + upperRightCorner.Y) / 2);
         }
     }
@@ -54,7 +54,7 @@ namespace ThreeDAuth
             grid = new GridSquare[dimX, dimY];
         }
 
-        public GridSquare getGridSquareContainingPoint(IPoint3f point)
+        public GridSquare getGridSquareContainingPoint(Point3d point)
         {
             // Initially we just naively search over the entire grid, later we can build in knowledge of closeness to improve performance
             for (int row = 0; row < dimX; row++)
@@ -90,7 +90,7 @@ namespace ThreeDAuth
             currentPath = new LinkedList<GridSquare>();
         }
 
-        public void updatePath(IPoint3f point)
+        public void updatePath(Point3d point)
         {
             GridSquare currentSquare = grid.getGridSquareContainingPoint(point);
             if (currentSquare != null)
@@ -139,7 +139,7 @@ namespace ThreeDAuth
             this.failedAuthentication = false;
         }
 
-        public void updatePath(IPoint3f point)
+        public void updatePath(Point3d point)
         {
             GridSquare currentSquare = grid.getGridSquareContainingPoint(point);
             if (currentSquare != null)
@@ -153,7 +153,7 @@ namespace ThreeDAuth
                 currentTarget = manipulatableTargetSequence.Dequeue();
             }
 
-            double currentDistance = euclideanDistance(new Point2f(point.X, point.Y), currentTarget.getCenter());
+            double currentDistance = euclideanDistance(new Point2d(point.X, point.Y), currentTarget.getCenter());
             if (currentDistance > previousDistance)
             {
                 failedAuthentication = true;
@@ -164,7 +164,7 @@ namespace ThreeDAuth
             }
         }
 
-        private double euclideanDistance(Point2f p1, Point2f p2)
+        private double euclideanDistance(Point2d p1, Point2d p2)
         {
             return Math.Sqrt((p1.X - p2.X) * (p1.X - p2.X) +
                               (p1.Y - p2.Y) * (p1.Y - p2.Y));

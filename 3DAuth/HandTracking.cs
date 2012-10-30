@@ -8,11 +8,11 @@ namespace ThreeDAuth
 {
     class HandTracking
     {
-        private static GenericPoint[] leftWristDepths = null;
-        private static GenericPoint[] rightWristDepths = null;
+        private static Point3d[] leftWristDepths = null;
+        private static Point3d[] rightWristDepths = null;
 
-        private GenericPoint leftWrist;
-        private GenericPoint rightWrist;
+        private Point3d leftWrist;
+        private Point3d rightWrist;
 
         private const int MINDATAPOINTSREQ = 15;
         private static int leftWristCounter = 0;
@@ -22,37 +22,37 @@ namespace ThreeDAuth
         {
             if (leftWristDepths == null)
             {
-                leftWristDepths = new GenericPoint[MINDATAPOINTSREQ];
+                leftWristDepths = new Point3d[MINDATAPOINTSREQ];
             }
 
             if (rightWristDepths == null)
             {
-                rightWristDepths = new GenericPoint[MINDATAPOINTSREQ];
+                rightWristDepths = new Point3d[MINDATAPOINTSREQ];
             }
 
             if (leftWrist == null)
             {
-                leftWrist = new GenericPoint();
+                leftWrist = new Point3d();
             }
 
             if (rightWrist == null)
             {
-                rightWrist = new GenericPoint();
+                rightWrist = new Point3d();
             }
 
         }
 
-        private GenericPoint getPointFromJoint(Joint j)
+        private Point3d getPointFromJoint(Joint j)
         {
-            return new GenericPoint(j.Position.X, j.Position.Y, j.Position.Z);
+            return new Point3d(j.Position.X, j.Position.Y, j.Position.Z);
         }
 
-        public GenericPoint getLeftWristPos()
+        public Point3d getLeftWristPos()
         {
             return this.leftWrist;
         }
 
-        public GenericPoint getRightWristPos()
+        public Point3d getRightWristPos()
         {
             return this.rightWrist;
         }
@@ -61,8 +61,8 @@ namespace ThreeDAuth
         {
 
 
-            GenericPoint WristRightZ = getPointFromJoint(WristRight);
-            GenericPoint WristLeftZ = getPointFromJoint(WristLeft);
+            Point3d WristRightZ = getPointFromJoint(WristRight);
+            Point3d WristLeftZ = getPointFromJoint(WristLeft);
 
             if (leftWristCounter < MINDATAPOINTSREQ)
             {

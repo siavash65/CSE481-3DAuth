@@ -8,9 +8,9 @@ namespace ThreeDAuth
     // Scheme for determining whether a point is in the target box or not
     interface ITargetBoxScheme
     {
-        bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength);
+        bool pointInTargetBox(Point3d point, Point3d center, double armLength);
 
-        IPoint3f[] getCorners(IPoint3f center, double armLength);
+        Point3d[] getCorners(Point3d center, double armLength);
     }
 
     class RigidTargetBoxScheme : ITargetBoxScheme
@@ -24,19 +24,19 @@ namespace ThreeDAuth
             this.width = width;
         }
 
-        public bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength)
+        public bool pointInTargetBox(Point3d point, Point3d center, double armLength)
         {
             return Math.Abs(point.X - center.X) <= (width / 2) &&
                    Math.Abs(point.Y - center.Y) <= (height / 2);
         }
 
-        public IPoint3f[] getCorners(IPoint3f center, double armLength)
+        public Point3d[] getCorners(Point3d center, double armLength)
         {
-            IPoint3f[] corners = new GenericPoint[4];
-            corners[0] = new GenericPoint(center.X - (width / 2), center.Y - (height / 2), center.Z);
-            corners[1] = new GenericPoint(center.X - (width / 2), center.Y + (height / 2), center.Z);
-            corners[2] = new GenericPoint(center.X + (width / 2), center.Y + (height / 2), center.Z);
-            corners[3] = new GenericPoint(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            Point3d[] corners = new Point3d[4];
+            corners[0] = new Point3d(center.X - (width / 2), center.Y - (height / 2), center.Z);
+            corners[1] = new Point3d(center.X - (width / 2), center.Y + (height / 2), center.Z);
+            corners[2] = new Point3d(center.X + (width / 2), center.Y + (height / 2), center.Z);
+            corners[3] = new Point3d(center.X + (width / 2), center.Y - (height / 2), center.Z);
             return corners;
         }
     }
@@ -55,7 +55,7 @@ namespace ThreeDAuth
 
         public ArmLengthTargetBoxScheme(double targetPercentage) : this(targetPercentage, targetPercentage) { }
 
-        public bool pointInTargetBox(IPoint3f point, IPoint3f center, double armLength)
+        public bool pointInTargetBox(Point3d point, Point3d center, double armLength)
         {
             double width = armLength * widthPercentage;
             double height = armLength * heightPercentage;
@@ -63,15 +63,15 @@ namespace ThreeDAuth
                    Math.Abs(point.Y - center.Y) <= (height / 2);
         }
 
-        public IPoint3f[] getCorners(IPoint3f center, double armLength)
+        public Point3d[] getCorners(Point3d center, double armLength)
         {
             double width = armLength * widthPercentage;
             double height = armLength * heightPercentage;
-            IPoint3f[] corners = new GenericPoint[4];
-            corners[0] = new GenericPoint(center.X - (width / 2), center.Y - (height / 2), center.Z);
-            corners[1] = new GenericPoint(center.X - (width / 2), center.Y + (height / 2), center.Z);
-            corners[2] = new GenericPoint(center.X + (width / 2), center.Y + (height / 2), center.Z);
-            corners[3] = new GenericPoint(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            Point3d[] corners = new Point3d[4];
+            corners[0] = new Point3d(center.X - (width / 2), center.Y - (height / 2), center.Z);
+            corners[1] = new Point3d(center.X - (width / 2), center.Y + (height / 2), center.Z);
+            corners[2] = new Point3d(center.X + (width / 2), center.Y + (height / 2), center.Z);
+            corners[3] = new Point3d(center.X + (width / 2), center.Y - (height / 2), center.Z);
             return corners;
         }
     }
@@ -79,11 +79,11 @@ namespace ThreeDAuth
     class TargetBox
     {
         private ITargetBoxScheme targetBoxScheme { get; set; }
-        private IPoint3f center { get; set; }
+        private Point3d center { get; set; }
         private double armLength { get; set; }
         private double torsoDepth { get; set; }
 
-        public TargetBox(ITargetBoxScheme targetBoxScheme, IPoint3f center, double armLength, double torsoDepth)
+        public TargetBox(ITargetBoxScheme targetBoxScheme, Point3d center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -91,9 +91,9 @@ namespace ThreeDAuth
             this.targetBoxScheme = targetBoxScheme;
         }
 
-        public TargetBox() : this(new RigidTargetBoxScheme(0f, 0f), new GenericPoint(), 0f, 0f) { }
+        public TargetBox() : this(new RigidTargetBoxScheme(0f, 0f), new Point3d(), 0f, 0f) { }
 
-        public void setBox(IPoint3f center, double armLength, double torsoDepth)
+        public void setBox(Point3d center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -105,24 +105,24 @@ namespace ThreeDAuth
             targetBoxScheme = scheme;
         }
 
-        public bool pointInTargetBox(IPoint3f point)
+        public bool pointInTargetBox(Point3d point)
         {
             return targetBoxScheme.pointInTargetBox(point, center, armLength);
         }
 
-        public IPoint3f[] getCorners()
+        public Point3d[] getCorners()
         {
             return targetBoxScheme.getCorners(center, armLength);
         }
 
-        public Vec2f[] getBoxLines()
+        public Vec2d[] getBoxLines()
         {
-            IPoint3f[] corners = getCorners();
-            Vec2f[] lines = new Vec2f[4];
-            lines[0] = new Vec2f(corners[0], corners[1]);
-            lines[1] = new Vec2f(corners[1], corners[2]);
-            lines[2] = new Vec2f(corners[2], corners[3]);
-            lines[3] = new Vec2f(corners[3], corners[0]);
+            Point3d[] corners = getCorners();
+            Vec2d[] lines = new Vec2d[4];
+            lines[0] = new Vec2d(corners[0], corners[1]);
+            lines[1] = new Vec2d(corners[1], corners[2]);
+            lines[2] = new Vec2d(corners[2], corners[3]);
+            lines[3] = new Vec2d(corners[3], corners[0]);
             return lines;
         }
     }
@@ -149,7 +149,7 @@ namespace ThreeDAuth
             this.targetBox = targetBox;
         }
 
-        public bool pointInTargetArea(IPoint3f point)
+        public bool pointInTargetArea(Point3d point)
         {
             return plane.crossesPlane(point) && targetBox.pointInTargetBox(point);
         }

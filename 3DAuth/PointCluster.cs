@@ -7,29 +7,29 @@ namespace ThreeDAuth
 {
     class PointCluster
     {
-        public HashSet<IPoint3f> points { get; set; }
+        public HashSet<Point3d> points { get; set; }
 
-        public PointCluster() : this(new HashSet<IPoint3f>()) { }
+        public PointCluster() : this(new HashSet<Point3d>()) { }
 
-        public PointCluster(HashSet<IPoint3f> points)
+        public PointCluster(HashSet<Point3d> points)
         {
             this.points = points; ;
         }
 
-        public void addPoint(IPoint3f point)
+        public void addPoint(Point3d point)
         {
             points.Add(point);
         }
 
-        public void removePoint(IPoint3f point)
+        public void removePoint(Point3d point)
         {
             points.Remove(point);
         }
 
-        public IPoint3f getNearestPoint(IPoint3f other)
+        public Point3d getNearestPoint(Point3d other)
         {
-            IPoint3f nearestPoint = null;
-            foreach (IPoint3f pt in points)
+            Point3d nearestPoint = null;
+            foreach (Point3d pt in points)
             {
                 if (nearestPoint == null)
                 {
@@ -48,7 +48,7 @@ namespace ThreeDAuth
         }
 
         // Simple euclidean distance
-        private float distance(IPoint3f x, IPoint3f y)
+        private float distance(Point3d x, Point3d y)
         {
             return (float) Math.Sqrt( Math.Pow((x.X - y.X), 2) +
                                       Math.Pow((x.Y - y.Y), 2) +

@@ -12,8 +12,8 @@ namespace ThreeDAuth
     {
         private static double[] armLengths = null;
         public double armLength { get; protected set; }
-        private static GenericPoint[] torsoPositions = null;
-        public GenericPoint torsoPosition { get; protected set; }
+        private static Point3d[] torsoPositions = null;
+        public Point3d torsoPosition { get; protected set; }
         private static int armCounter = 0;
         private static int torsoCounter = 0;
         /*The minimum amount of data point we need to compute an accurate value and cancel
@@ -31,10 +31,10 @@ namespace ThreeDAuth
             }
             if (torsoPositions == null)
             {
-                torsoPositions = new GenericPoint[MINDATAPOINTSREQ];
+                torsoPositions = new Point3d[MINDATAPOINTSREQ];
                 for (int i = 0; i < MINDATAPOINTSREQ; i++)
                 {
-                    torsoPositions[i] = new GenericPoint();
+                    torsoPositions[i] = new Point3d();
 
                 }
             }
@@ -113,7 +113,7 @@ namespace ThreeDAuth
             }
             else
             {
-                this.torsoPosition = new GenericPoint();
+                this.torsoPosition = new Point3d();
                 for (int i = 0; i < torsoCounter; i++)
                 {
                     this.torsoPosition =
