@@ -10,7 +10,7 @@ namespace ThreeDAuth
         protected System.Diagnostics.Stopwatch stopwatch;
         protected Queue<Point2d> learnedGesturePath;
 
-        public void givePoint(Point2d point);
+        abstract public void givePoint(Point2d point);
 
         public Queue<Point2d> getGesturePath()
         {
@@ -40,7 +40,7 @@ namespace ThreeDAuth
             startRecording();
         }
 
-        public void givePoint(Point2d point)
+        override public void givePoint(Point2d point)
         {
             if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
             {
@@ -68,7 +68,7 @@ namespace ThreeDAuth
             this.motionEpsilon = motionEpsilon;
         }
 
-        public void givePoint(Point2d point)
+        override public void givePoint(Point2d point)
         {
             long elapsedMS = stopwatch.ElapsedMilliseconds;
             if (pointBuffer.Count == 0)
