@@ -85,24 +85,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private DrawingImage imageSource;
 
+        //Start By Siavash
+      
         /// <summary>
-        /// Siavash
         /// To draw the hands on the selected image
         /// </summary>
         private DrawingImage handSource;
 
         /// <summary>
-        /// Siavash
         /// user selected image
         /// </summary>
         private BitmapImage userImage;
 
+        //End by Siavash
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
+            this.WindowState = WindowState.Maximized;
             InitializeComponent();
             
         }
@@ -161,13 +163,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             // Create an image source that we can use in our image control
             this.imageSource = new DrawingImage(this.drawingGroup);
 
-            // Display the drawing using our image control
             Image.Source = this.imageSource;
+
+            //start by Siavash
+            // Display the drawing using our image control
 
 
             this.handSource = new DrawingImage(this.drawingGroup);
 
             myImageBox.Source = this.handSource;
+
+
+            //End by siavash
 
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
@@ -240,6 +247,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             using (DrawingContext dc = this.drawingGroup.Open())
             {
+               
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
@@ -333,11 +341,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
-                    }
                 }
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            }
             }
         }
 
@@ -368,13 +376,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             /** End Add By Mason **/
 
+            //Start By Siavash
             if (userImage != null)
             {
-                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
-         
+                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));         
             }
-            
+            //End by Siavash
 
             // Render Torso
             this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
@@ -480,6 +487,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
+        /*
         /// <summary>
         /// Handles the checking or unchecking of the seated mode combo box
         /// </summary>
@@ -499,7 +507,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
         }
-
+        */
 
         /// <summary>
         /// Opens a file browser to select and image
@@ -524,6 +532,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 fileName = browseFile.FileName;
                 userImage = new BitmapImage(new Uri(fileName));
+                //this.myImageBox.Source = userImage;
+                this.myImageBox.Visibility = Visibility.Visible;
                 //this.myImageBox.Source = userImage;
                 New_Account.Visibility = Visibility.Collapsed;
             }
