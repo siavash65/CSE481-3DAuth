@@ -97,6 +97,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private BitmapImage userImage;
 
+        private ThreeDAuth.ReferenceFrame myFrame;
+
+        private Joint rightWrist;
+        private Joint leftWrist;
         //End by Siavash
 
         /// <summary>
@@ -168,6 +172,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //start by Siavash
             // Display the drawing using our image control
 
+            this.myFrame = new ThreeDAuth.ReferenceFrame();
 
             this.handSource = new DrawingImage(this.drawingGroup);
 
@@ -255,7 +260,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        //**************
+                        //Start by Siavash
                         /***
                          * This parts makes sure that the skeleton is being tracked and after it can track all the 
                          * four joints that we need(left and right shoulder, left and right wrist) we send the information of
@@ -265,7 +270,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         
                         if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
                         {
-                            ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
+                            //ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
                             if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
@@ -275,57 +280,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 && skel.Joints[JointType.HipCenter].TrackingState.Equals(JointTrackingState.Tracked))
                             {
                                 Joint leftShoulder = skel.Joints[JointType.ShoulderLeft];
-                                Joint leftWrist = skel.Joints[JointType.WristLeft];
+                                leftWrist = skel.Joints[JointType.WristLeft];
                                 Joint rightShoulder = skel.Joints[JointType.ShoulderRight];
-                                Joint rightWrist = skel.Joints[JointType.WristRight];
+                                rightWrist = skel.Joints[JointType.WristRight];
                                 Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
                                 Joint hipCenter = skel.Joints[JointType.HipCenter];
                                 Joint spine = skel.Joints[JointType.Spine];
                                 myFrame.computeArmLength(leftWrist, leftShoulder, rightWrist, rightShoulder);
-                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);
-
-
-                                if (myFrame.torsoPosition != null)
-                                {
-                                    // Anton's code
-                                    // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
-                                    // rectangle over them to give the user feedback
-
-                                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
-                                    ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
-
-                                    Point right = this.SkeletonPointToScreen(rightWrist.Position);
-                                    
-                                    if (myPlane.crossesPlane(wristRight))
-                                    {
-                                        dc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
-                                        System.Console.WriteLine("You crossed the plane");
-                                    }
-                                    else
-                                    {
-                                        dc.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
-                                    }
-
-
-                                    ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
-
-                                    Point left = this.SkeletonPointToScreen(leftWrist.Position);
-
-                                    if (myPlane.crossesPlane(wristLeft))
-                                    {
-                                        dc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                                        System.Console.WriteLine("You crossed the plane");
-                                    }
-                                    else
-                                    {
-                                        dc.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                                    }
-                                }
+                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);    
                             }                           
                         }
                        
                         
-                        //****************
+                        //End by Siavash
                         RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
@@ -432,7 +399,42 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
 
-            
+            if (myFrame.torsoPosition != null)
+            {
+                // Anton's code
+                // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
+                // rectangle over them to give the user feedback
+
+                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .6);
+                ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+
+                Point right = this.SkeletonPointToScreen(rightWrist.Position);
+
+                if (myPlane.crossesPlane(wristRight))
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                    System.Console.WriteLine("You crossed the plane");
+                }
+                else
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                }
+
+
+                ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
+
+                Point left = this.SkeletonPointToScreen(leftWrist.Position);
+
+                if (myPlane.crossesPlane(wristLeft))
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    System.Console.WriteLine("You crossed the plane");
+                }
+                else
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                }
+            }
             
         }
 
@@ -534,7 +536,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 userImage = new BitmapImage(new Uri(fileName));
                 //this.myImageBox.Source = userImage;
                 this.myImageBox.Visibility = Visibility.Visible;
-                //this.myImageBox.Source = userImage;
+                this.myImageBox.Source = userImage;
+                this.myImageBox.Source = handSource;
                 New_Account.Visibility = Visibility.Collapsed;
             }
             catch (Exception)
