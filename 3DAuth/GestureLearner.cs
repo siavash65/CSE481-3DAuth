@@ -10,7 +10,7 @@ namespace ThreeDAuth
         protected System.Diagnostics.Stopwatch stopwatch;
         protected Queue<Point2d> learnedGesturePath;
 
-        abstract public void givePoint(Point2d point);
+        abstract public void GivePoint(Point point);
 
         public Queue<Point2d> getGesturePath()
         {
@@ -20,6 +20,7 @@ namespace ThreeDAuth
         public void startRecording()
         {
             stopwatch.Start();
+            learnedGesturePath = new Queue<Point2d>();
         }
 
         public void stopRecording()
@@ -38,15 +39,20 @@ namespace ThreeDAuth
             this.samplingCooldown = samplingCooldown;
             stopwatch = new System.Diagnostics.Stopwatch();
             startRecording();
+            PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
         }
 
-        override public void givePoint(Point2d point)
+        override public void GivePoint(Point point)
         {
-            if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
+            if (point is Point2d)
             {
-                learnedGesturePath.Enqueue(point.copy());
-                stopwatch.Stop();
-                stopwatch.Start();
+                Point2d newPoint = (Point2d) point;
+                if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
+                {
+                    learnedGesturePath.Enqueue(newPoint.copy());
+                    stopwatch.Stop();
+                    stopwatch.Start();
+                }
             }
         }
     }
@@ -66,34 +72,39 @@ namespace ThreeDAuth
             this.minNumberOfPoints = minNumberOfPoints;
             this.holdTime = holdTime;
             this.motionEpsilon = motionEpsilon;
+            PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
         }
 
-        override public void givePoint(Point2d point)
+        override public void GivePoint(Point point)
         {
-            long elapsedMS = stopwatch.ElapsedMilliseconds;
-            if (pointBuffer.Count == 0)
+            if (point is Point2d)
             {
-                // Enqueue the first point
-                pointBuffer.Enqueue(new TimePointTuple(elapsedMS, point));
-            }
-            else
-            {
-                if ( (elapsedMS - pointBuffer.Peek().timeMark > holdTime) &&
-                     (pointBuffer.Count >= minNumberOfPoints) ) 
+                Point2d newPoint = (Point2d) point;
+                long elapsedMS = stopwatch.ElapsedMilliseconds;
+                if (pointBuffer.Count == 0)
                 {
-                    // Have a target point
-                    learnedGesturePath.Enqueue(pointBuffer.Dequeue().point.copy());
-                    pointBuffer.Clear();
-                }
-                else if (Util.euclideanDistance(pointBuffer.Peek().point, point) < motionEpsilon)
-                {
-                    // Person is staying still
-                    pointBuffer.Enqueue(new TimePointTuple(elapsedMS, point));
+                    // Enqueue the first point
+                    pointBuffer.Enqueue(new TimePointTuple(elapsedMS, newPoint));
                 }
                 else
                 {
-                    // Not a target point and person has moved too much, so dump the queue
-                    pointBuffer.Clear();
+                    if ((elapsedMS - pointBuffer.Peek().timeMark > holdTime) &&
+                         (pointBuffer.Count >= minNumberOfPoints))
+                    {
+                        // Have a target point
+                        learnedGesturePath.Enqueue(pointBuffer.Dequeue().point.copy());
+                        pointBuffer.Clear();
+                    }
+                    else if (Util.euclideanDistance(pointBuffer.Peek().point, newPoint) < motionEpsilon)
+                    {
+                        // Person is staying still
+                        pointBuffer.Enqueue(new TimePointTuple(elapsedMS, newPoint));
+                    }
+                    else
+                    {
+                        // Not a target point and person has moved too much, so dump the queue
+                        pointBuffer.Clear();
+                    }
                 }
             }
         }

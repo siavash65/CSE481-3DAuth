@@ -5,7 +5,9 @@ using System.Text;
 
 namespace ThreeDAuth
 {
-    class Point3d
+    interface Point { }
+
+    class Point3d : Point
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -30,7 +32,7 @@ namespace ThreeDAuth
         }
     }
 
-    class Point2d
+    class Point2d : Point
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -57,7 +59,7 @@ namespace ThreeDAuth
         }
     }
 
-    class PlanePoint
+    class PlanePoint : Point2d
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -68,6 +70,11 @@ namespace ThreeDAuth
             this.X = X;
             this.Y = Y;
             this.inPlane = inPlane;
+        }
+
+        public Point2d getPoint2d()
+        {
+            return new Point2d(X, Y);
         }
     }
 
