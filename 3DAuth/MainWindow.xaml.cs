@@ -104,6 +104,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         //End by Siavash
 
         /// <summary>
+        /// Anton
+        /// Point Distributor to implement observer pattern
+        /// </summary>
+        private ThreeDAuth.PointDistributor pDistributor;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -168,6 +174,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.imageSource = new DrawingImage(this.drawingGroup);
 
             Image.Source = this.imageSource;
+
+            pDistributor = ThreeDAuth.PointDistributor.GetInstance();
 
             //start by Siavash
             // Display the drawing using our image control
@@ -270,6 +278,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         
                         if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
                         {
+                            
+                            if (!skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.NotTracked)) {
+                                leftWrist = skel.Joints[JointType.WristLeft];
+                            }
+
+                            if (!skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.NotTracked))
+                            {
+                                rightWrist = skel.Joints[JointType.WristRight];
+                            } 
+
+                            
                             //ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
                             if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
@@ -280,13 +299,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 && skel.Joints[JointType.HipCenter].TrackingState.Equals(JointTrackingState.Tracked))
                             {
                                 Joint leftShoulder = skel.Joints[JointType.ShoulderLeft];
-                                leftWrist = skel.Joints[JointType.WristLeft];
+                                Joint leftWristTemp = skel.Joints[JointType.WristLeft];
                                 Joint rightShoulder = skel.Joints[JointType.ShoulderRight];
-                                rightWrist = skel.Joints[JointType.WristRight];
+                                Joint rightWristTemp = skel.Joints[JointType.WristRight];
                                 Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
                                 Joint hipCenter = skel.Joints[JointType.HipCenter];
                                 Joint spine = skel.Joints[JointType.Spine];
-                                myFrame.computeArmLength(leftWrist, leftShoulder, rightWrist, rightShoulder);
+                                myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
                                 myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);    
                             }                           
                         }
@@ -410,7 +429,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 Point right = this.SkeletonPointToScreen(rightWrist.Position);
 
-                if (myPlane.crossesPlane(wristRight))
+                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.X, right.Y, myPlane.crossesPlane(wristRight));
+
+                pDistributor.GivePoint(arrived);
+
+                if (arrived.inPlane)
                 {
                     drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
                     System.Console.WriteLine("You crossed the plane");
