@@ -11,12 +11,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Microsoft.Samples.Kinect.SkeletonBasics
+namespace ThreeDAuth
 {
     /// <summary>
     /// Interaction logic for Graph.xaml
     /// </summary>
-    public partial class Graph : Window
+    public partial class GraphWindow : Window
     {
         /// <summary>
         /// Width of output drawing
@@ -42,14 +42,33 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Drawing image that we will display
         /// </summary>
         private DrawingImage imageSource;
+        
+
+
+
+        private class DistanceTimeTuple {
+            public double Distance { get; set; }
+            public long Time { get; set; }
+
+            public DistanceTimeTuple(double dist, long time) {
+                this.Distance = dist;
+                this.Time = time;
+            }
+        }
+        private Queue<DistanceTimeTuple> currentPointBuffer;
+
+        private static int MAX_NUM_POINTS_TO_DISPLAY = 50;
+
 
 
         /// <summary>
         /// Initializes a new instance of the Graph class.
         /// </summary>
-        public Graph()
+        public GraphWindow()
         {
             //InitializeComponent();
+            currentPointBuffer = new Queue<DistanceTimeTuple>();
+            CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
         }
 
 
@@ -79,225 +98,52 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
         }
 
-
-
-        /// <summary>
-        /// Event handler for Kinect sensor's SkeletonFrameReady event
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        private void AddDistance(double distance, long elapsedTimeMS) 
         {
-            Skeleton[] skeletons = new Skeleton[0];
-
-            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
-            {
-                if (skeletonFrame != null)
-                {
-                    skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
-                    skeletonFrame.CopySkeletonDataTo(skeletons);
-                }
+            DistanceTimeTuple newPoint = new DistanceTimeTuple(distance, elapsedTimeMS);
+            currentPointBuffer.Enqueue(newPoint);
+            while (currentPointBuffer.Count > MAX_NUM_POINTS_TO_DISPLAY) {
+                // Pull the oldest point off and throw it away
+                currentPointBuffer.Dequeue();
             }
+            DrawGraph();
+        }
 
-            using (DrawingContext dc = this.drawingGroup.Open())
+        private double getTimePixelPosition(long currentTime, long minTime, long maxTime) 
+        {
+            return (1.0 * currentTime / (1.0 * maxTime - 1.0 * minTime)) * GraphImageBox.ActualWidth;
+        }
+
+        private double getDistPixelPosition(double currentDist, double minDist, double maxDist) 
+        {
+            return (currentDist / (maxDist - minDist)) * GraphImageBox.ActualHeight;
+        }
+
+
+        private void DrawGraph()
+        {
+            using( DrawingContext dc = this.drawingGroup.Open() ) 
             {
-                // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
-                if (skeletons.Length != 0)
+                double maxDistance = double.MinValue;
+                double minDistance = double.MaxValue;
+                long maxTime = long.MinValue;
+                long minTime = long.MaxValue;
+                foreach (DistanceTimeTuple point in currentPointBuffer)
                 {
-                    foreach (Skeleton skel in skeletons)
-                    {
-                        //**************
-                        /***
-                         * This parts makes sure that the skeleton is being tracked and after it can track all the 
-                         * four joints that we need(left and right shoulder, left and right wrist) we send the information of
-                         * these joints to compute the length of the arm.
-                         * 
-                         */
-                        
-                        if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
-                        {
-                            ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
-                            if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.ShoulderCenter].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.Spine].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.HipCenter].TrackingState.Equals(JointTrackingState.Tracked))
-                            {
-                                Joint leftShoulder = skel.Joints[JointType.ShoulderLeft];
-                                Joint leftWrist = skel.Joints[JointType.WristLeft];
-                                Joint rightShoulder = skel.Joints[JointType.ShoulderRight];
-                                Joint rightWrist = skel.Joints[JointType.WristRight];
-                                Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
-                                Joint hipCenter = skel.Joints[JointType.HipCenter];
-                                Joint spine = skel.Joints[JointType.Spine];
-                                myFrame.computeArmLength(leftWrist, leftShoulder, rightWrist, rightShoulder);
-                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);
-
-
-                                if (myFrame.torsoPosition != null)
-                                {
-                                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
-                                    ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
-                                    if (myPlane.crossesPlane(wristRight))
-                                    {
-                                        System.Console.WriteLine("You crossed the plane");
-                                    }
-                                }
-                            }                           
-                        }
-                       
-                        
-                        //****************
-                        RenderClippedEdges(skel, dc);
-
-                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            this.DrawBonesAndJoints(skel, dc);
-                        }
-                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
-                        {
-                            dc.DrawEllipse(
-                            this.centerPointBrush,
-                            null,
-                            this.SkeletonPointToScreen(skel.Position),
-                            BodyCenterThickness,
-                            BodyCenterThickness);
-                        }
-                    }
+                    maxDistance = Math.Max(point.Distance, maxDistance);
+                    minDistance = Math.Min(point.Distance, minDistance);
+                    maxTime = Math.Max(point.Time, maxTime);
+                    minTime = Math.Min(point.Time, minTime);
                 }
 
-                // prevent drawing outside of our render area
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                foreach (DistanceTimeTuple point in currentPointBuffer) 
+                {
+                    System.Windows.Point centerPoint = 
+                        new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
+                                                 getDistPixelPosition(point.Distance, minDistance, maxDistance));
+                    dc.DrawEllipse(Brushes.Red, null, centerPoint, 10, 10);
+                }
             }
         }
-        /*
-        /// <summary>
-        /// Draws a skeleton's bones and joints
-        /// </summary>
-        /// <param name="skeleton">skeleton to draw</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
-        {
-
-
-            /** Begin Add By Mason **/
-
-            // Draw targetbox with some dummy values
-            ThreeDAuth.ITargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(1.0f, 1.0f);
-            ThreeDAuth.Point3d torsoCenter = new ThreeDAuth.Point3d(0, 0, 0);
-
-            double armLength = 0.5f;
-            double torsoDepth = 0.5f;
-            ThreeDAuth.TargetBox box = new ThreeDAuth.TargetBox(scheme, torsoCenter, armLength, torsoDepth);
-            Pen redPen = new Pen(Brushes.Red, 3);
-            ThreeDAuth.Vec2d[] lines = box.getBoxLines();
-            for (int i = 0; i < 4; i++)
-            {
-                drawingContext.DrawLine(redPen, new Point(lines[i].p1.X, lines[i].p1.Y), new Point(lines[i].p2.X, lines[i].p2.Y));
-            }
-
-            /** End Add By Mason **/
-
-            if (userImage != null)
-            {
-                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-            }
-            
-
-            // Render Torso
-            this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
-            this.DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
-            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
-
-            // Left Arm
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
-
-            // Right Arm
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
-            this.DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
-            this.DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
-
-            // Left Leg
-            this.DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
-
-            // Right Leg
-            this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
-            this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
-            this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
- 
-            // Render Joints
-            foreach (Joint joint in skeleton.Joints)
-            {
-                Brush drawBrush = null;
-
-                if (joint.TrackingState == JointTrackingState.Tracked)
-                {
-                    drawBrush = this.trackedJointBrush;                    
-                }
-                else if (joint.TrackingState == JointTrackingState.Inferred)
-                {
-                    drawBrush = this.inferredJointBrush;                    
-                }
-
-                if (drawBrush != null)
-                {
-                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
-                }
-            }
-
-            
-            
-        }
-        */
-
-        /// <summary>
-        /// Draws a bone line between two joints
-        /// </summary>
-        /// <param name="skeleton">skeleton to draw bones from</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        /// <param name="jointType0">joint to start drawing from</param>
-        /// <param name="jointType1">joint to end drawing at</param>
-        /*
-        private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
-        {
-            Joint joint0 = skeleton.Joints[jointType0];
-            Joint joint1 = skeleton.Joints[jointType1];
-
-            // If we can't find either of these joints, exit
-            if (joint0.TrackingState == JointTrackingState.NotTracked ||
-                joint1.TrackingState == JointTrackingState.NotTracked)
-            {
-                return;
-            }
-
-            // Don't draw if both points are inferred
-            if (joint0.TrackingState == JointTrackingState.Inferred &&
-                joint1.TrackingState == JointTrackingState.Inferred)
-            {
-                return;
-            }
-
-            // We assume all drawn bones are inferred unless BOTH joints are tracked
-            Pen drawPen = this.inferredBonePen;
-            if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
-            {
-                drawPen = this.trackedBonePen;
-            }
-
-            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
-        }
-        */
     }
 }

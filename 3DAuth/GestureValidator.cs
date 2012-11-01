@@ -11,7 +11,10 @@ namespace ThreeDAuth
     // Version for closest points to trajectory
     // Cover fraction of points
     //
+    // Kalman filter
+    // Particle filter
 
+    delegate void UpdateTargetDistance(double distance, long timeMS);
 
     // Given a sequence of points (in pixel-space) to hit, validates a continuously updating stream of positions
     class GestureValidator
@@ -22,6 +25,21 @@ namespace ThreeDAuth
         private double oldDistance;
         private double epsilon;
         private bool failedAuthentication;
+        private System.Diagnostics.Stopwatch timer;
+
+        private event UpdateTargetDistance _onDistanceUpdated;
+
+        public event UpdateTargetDistance OnDistanceUpdated
+        {
+            add
+            {
+                _onDistanceUpdated += value;
+            }
+            remove
+            {
+                _onDistanceUpdated -= value;
+            }
+        }
 
         public GestureValidator(Queue<Point2d> targetPoints, double epsilonBoundary)
         {
@@ -31,6 +49,8 @@ namespace ThreeDAuth
             manipulatableTargetPoints = new Queue<Point2d>();
             completedTargets = new HashSet<Point2d>();
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
+            CurrentObjectBag.SCurrentGestureValidator = this;
+            timer = new System.Diagnostics.Stopwatch();
         }
 
         public void beginPath()
@@ -42,6 +62,7 @@ namespace ThreeDAuth
             }
             oldDistance = double.MaxValue;
             failedAuthentication = false;
+            timer.Start();
         }
 
         public void GivePoint(Point point)
@@ -68,6 +89,11 @@ namespace ThreeDAuth
                             {
                                 oldDistance = Util.euclideanDistance(newPoint, manipulatableTargetPoints.Peek());
                             }
+                            else
+                            {
+                                // Validated successfully
+                                timer.Stop();
+                            }
                         }
                         else
                         {
@@ -76,12 +102,31 @@ namespace ThreeDAuth
                         }
                     }
                 }
+                Notify();
             }
+        }
+
+        public double GetDistanceToCurrentTarget()
+        {
+            return oldDistance;
+        }
+
+        public long GetTotalElapsedMS()
+        {
+            return timer.ElapsedMilliseconds;
         }
 
         public bool successfulAuthentication()
         {
             return (!failedAuthentication) && (manipulatableTargetPoints.Count == 0);
+        }
+
+        private void Notify()
+        {
+            if (_onDistanceUpdated != null)
+            {
+                _onDistanceUpdated(GetDistanceToCurrentTarget(), GetTotalElapsedMS());
+            }
         }
     }
 }

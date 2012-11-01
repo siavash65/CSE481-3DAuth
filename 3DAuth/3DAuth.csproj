@@ -61,8 +61,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CurrentObjectBag.cs" />
     <Compile Include="GestureLearner.cs" />
     <Compile Include="GestureValidator.cs" />
+    <Compile Include="Graph.xaml.cs">
+      <DependentUpon>Graph.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Grid.cs" />
     <Compile Include="HandTracking.cs" />
     <Compile Include="Plane.cs" />
@@ -72,6 +77,10 @@
     <Compile Include="ReferenceFrame.cs" />
     <Compile Include="TargetBox.cs" />
     <Compile Include="Util.cs" />
+    <Page Include="Graph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
