@@ -44,6 +44,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -68,6 +70,9 @@
       <DependentUpon>Graph.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GraphPage.xaml.cs">
+      <DependentUpon>GraphPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Grid.cs" />
     <Compile Include="HandTracking.cs" />
     <Compile Include="Plane.cs" />
@@ -78,6 +83,10 @@
     <Compile Include="TargetBox.cs" />
     <Compile Include="Util.cs" />
     <Page Include="Graph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GraphPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
