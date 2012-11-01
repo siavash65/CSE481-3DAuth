@@ -1,4 +1,5 @@
-﻿//------------------------------------------------------------------------------
+﻿
+//------------------------------------------------------------------------------
 // <copyright file="MainWindow.xaml.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -86,7 +87,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DrawingImage imageSource;
 
         //Start By Siavash
-      
+
+        private DrawingGroup liveFeedbackGroup;
+
         /// <summary>
         /// To draw the hands on the selected image
         /// </summary>
@@ -104,19 +107,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         //End by Siavash
 
         /// <summary>
-        /// Anton
-        /// Point Distributor to implement observer pattern
-        /// </summary>
-        private ThreeDAuth.PointDistributor pDistributor;
-
-        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
             this.WindowState = WindowState.Maximized;
             InitializeComponent();
-            
+
         }
 
         /// <summary>
@@ -132,7 +129,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     Brushes.Red,
                     null,
                     new Rect(0, RenderHeight - ClipBoundsThickness, RenderWidth, ClipBoundsThickness));
-                
+
             }
 
             if (skeleton.ClippedEdges.HasFlag(FrameEdges.Top))
@@ -175,14 +172,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             Image.Source = this.imageSource;
 
-            pDistributor = ThreeDAuth.PointDistributor.GetInstance();
-
             //start by Siavash
             // Display the drawing using our image control
 
+            this.liveFeedbackGroup = new DrawingGroup();
+
             this.myFrame = new ThreeDAuth.ReferenceFrame();
 
-            this.handSource = new DrawingImage(this.drawingGroup);
+            this.handSource = new DrawingImage(this.liveFeedbackGroup);
 
             myImageBox.Source = this.handSource;
 
@@ -258,38 +255,38 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
 
-            using (DrawingContext dc = this.drawingGroup.Open())
+            //Start Siavash
+            using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
             {
-               
+
                 // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                lfdc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
                 if (skeletons.Length != 0)
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        //Start by Siavash
+
                         /***
                          * This parts makes sure that the skeleton is being tracked and after it can track all the 
                          * four joints that we need(left and right shoulder, left and right wrist) we send the information of
                          * these joints to compute the length of the arm.
                          * 
                          */
-                        
+
                         if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
                         {
-                            
-                            if (!skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.NotTracked)) {
+
+                            if (!skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.NotTracked))
+                            {
                                 leftWrist = skel.Joints[JointType.WristLeft];
                             }
 
                             if (!skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.NotTracked))
                             {
                                 rightWrist = skel.Joints[JointType.WristRight];
-                            } 
+                            }
 
-                            
-                            //ThreeDAuth.ReferenceFrame myFrame = new ThreeDAuth.ReferenceFrame();
                             if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
                                 && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
@@ -306,12 +303,38 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 Joint hipCenter = skel.Joints[JointType.HipCenter];
                                 Joint spine = skel.Joints[JointType.Spine];
                                 myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
-                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);    
-                            }                           
+                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);
+                            }
                         }
-                       
-                        
-                        //End by Siavash
+
+                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+                            this.drawHands(lfdc);
+                        }
+                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+                        {
+                            this.drawHands(lfdc);
+                        }
+                    }
+                    // prevent drawing outside of our render area
+                    this.liveFeedbackGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                }
+            }
+
+            //End by Siavash
+
+
+
+            using (DrawingContext dc = this.drawingGroup.Open())
+            {
+
+                // Draw a transparent background to set the render size
+                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                if (skeletons.Length != 0)
+                {
+                    foreach (Skeleton skel in skeletons)
+                    {
                         RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
@@ -327,11 +350,57 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
+                    }
+                    // prevent drawing outside of our render area
+                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                }
+            }
+        }
+
+        private void drawHands(DrawingContext drawingContext)
+        {
+            //Start Siavash
+            if (userImage != null)
+            {
+                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            }
+            //End Siavash
+
+            if (myFrame.torsoPosition != null)
+            {
+                // Anton's code
+                // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
+                // rectangle over them to give the user feedback
+
+                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .6);
+                ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+
+                Point right = this.SkeletonPointToScreen(rightWrist.Position);
+
+                if (myPlane.crossesPlane(wristRight))
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                    System.Console.WriteLine("You crossed the plane");
+                }
+                else
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
                 }
 
-                // prevent drawing outside of our render area
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-            }
+
+                ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
+
+                Point left = this.SkeletonPointToScreen(leftWrist.Position);
+
+                if (myPlane.crossesPlane(wristLeft))
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    System.Console.WriteLine("You crossed the plane");
+                }
+                else
+                {
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                }
             }
         }
 
@@ -342,32 +411,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="drawingContext">drawing context to draw to</param>
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
-
-
-            /** Begin Add By Mason **/
-
-            // Draw targetbox with some dummy values
-            ThreeDAuth.ITargetBoxScheme scheme = new ThreeDAuth.RigidTargetBoxScheme(1.0f, 1.0f);
-            ThreeDAuth.Point3d torsoCenter = new ThreeDAuth.Point3d(0, 0, 0);
-
-            double armLength = 0.5f;
-            double torsoDepth = 0.5f;
-            ThreeDAuth.TargetBox box = new ThreeDAuth.TargetBox(scheme, torsoCenter, armLength, torsoDepth);
-            Pen redPen = new Pen(Brushes.Red, 3);
-            ThreeDAuth.Vec2d[] lines = box.getBoxLines();
-            for (int i = 0; i < 4; i++)
-            {
-                drawingContext.DrawLine(redPen, new Point(lines[i].p1.X, lines[i].p1.Y), new Point(lines[i].p2.X, lines[i].p2.Y));
-            }
-
-            /** End Add By Mason **/
-
-            //Start By Siavash
-            if (userImage != null)
-            {
-                drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));         
-            }
-            //End by Siavash
 
             // Render Torso
             this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
@@ -397,7 +440,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
             this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
             this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
- 
+
             // Render Joints
             foreach (Joint joint in skeleton.Joints)
             {
@@ -405,11 +448,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (joint.TrackingState == JointTrackingState.Tracked)
                 {
-                    drawBrush = this.trackedJointBrush;                    
+                    drawBrush = this.trackedJointBrush;
                 }
                 else if (joint.TrackingState == JointTrackingState.Inferred)
                 {
-                    drawBrush = this.inferredJointBrush;                    
+                    drawBrush = this.inferredJointBrush;
                 }
 
                 if (drawBrush != null)
@@ -417,48 +460,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
                 }
             }
-
-            if (myFrame.torsoPosition != null)
-            {
-                // Anton's code
-                // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
-                // rectangle over them to give the user feedback
-
-                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .6);
-                ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
-
-                Point right = this.SkeletonPointToScreen(rightWrist.Position);
-
-                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.X, right.Y, myPlane.crossesPlane(wristRight));
-
-                pDistributor.GivePoint(arrived);
-
-                if (arrived.inPlane)
-                {
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
-                    System.Console.WriteLine("You crossed the plane");
-                }
-                else
-                {
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
-                }
-
-
-                ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
-
-                Point left = this.SkeletonPointToScreen(leftWrist.Position);
-
-                if (myPlane.crossesPlane(wristLeft))
-                {
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                    System.Console.WriteLine("You crossed the plane");
-                }
-                else
-                {
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                }
-            }
-            
         }
 
         /// <summary>
@@ -542,7 +543,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
 
-            
+
 
 
             string fileName = "";
