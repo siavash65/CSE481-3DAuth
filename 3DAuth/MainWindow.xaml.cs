@@ -228,7 +228,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             if (null == this.sensor)
             {
-                this.statusBarText.Text = Properties.Resources.NoKinectReady;
+                //this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
         }
 
