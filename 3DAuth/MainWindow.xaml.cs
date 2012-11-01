@@ -268,7 +268,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
 
                 // Draw a transparent background to set the render size
-                lfdc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                if (userImage == null)
+                {
+                    lfdc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                }
+                else
+                {
+                    lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            
+                }
 
                 if (skeletons.Length != 0)
                 {
@@ -544,17 +552,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         */
-
-        /// <summary>
-        /// Opens a file browser to select and image
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
-
-
-
 
             string fileName = "";
             OpenFileDialog browseFile = new OpenFileDialog();
@@ -568,17 +567,27 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 fileName = browseFile.FileName;
                 userImage = new BitmapImage(new Uri(fileName));
-                //this.myImageBox.Source = userImage;
                 this.myImageBox.Visibility = Visibility.Visible;
                 this.myImageBox.Source = userImage;
                 this.myImageBox.Source = handSource;
-                New_Account.Visibility = Visibility.Collapsed;
+                
             }
             catch (Exception)
             {
                 MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
             }
+        }
+
+        private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+
+            this.layoutGrid.Height = this.mainWindow.ActualHeight;
+            this.layoutGrid.Width = this.mainWindow.ActualWidth;
+            this.myImageBox.Height = this.layoutGrid.Height * .8;
+            this.myImageBox.Width = this.layoutGrid.Width * .8;
+            this.Image.Height = this.layoutGrid.Height * .1;
+            this.Image.Width = this.layoutGrid.Width * .1;
         }
     }
 }
