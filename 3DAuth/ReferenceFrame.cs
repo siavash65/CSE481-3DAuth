@@ -39,6 +39,8 @@ namespace ThreeDAuth
                 }
             }
 
+            this.torsoPosition = new Point3d();
+
         }
 
 
@@ -62,6 +64,7 @@ namespace ThreeDAuth
             double leftArm = Math.Sqrt(leftArmX * leftArmX + leftArmY * leftArmY + leftArmZ * leftArmZ);
             double rightArm = Math.Sqrt(rightArmX * rightArmX + rightArmY * rightArmY + rightArmZ * rightArmZ);
 
+            this.armLength = (leftArm + rightArm) / 2;
 
             /*
              * The length of both arms changes depending on the location of the person due to noise in data 
@@ -69,6 +72,7 @@ namespace ThreeDAuth
              * so we collect at least 50 data points of the four joint we need and calculate the avregae
              * 
              */
+            /*
             if (armCounter < MINDATAPOINTSREQ)
             {
                 armLengths[armCounter] = (leftArm + rightArm) / 2;
@@ -80,15 +84,9 @@ namespace ThreeDAuth
                 {
                     this.armLength += armLengths[i];
                 }
-                this.armLength /= (armCounter);
-                //System.Console.WriteLine("Arm length is: " + this.armLength);
-            }
-            //System.Console.WriteLine("x is: " + leftArmX + "  y is: " + leftArmY + " z is: " + leftArmZ);
-            //System.Console.WriteLine("Left Arm: " + leftArm + " Right Arm: " + rightArm + " Average length : " + (leftArm+rightArm)/2);
-
-
-
-
+                //this.armLength /= (armCounter);
+                this.armLength = (leftArm + rightArm) / 2;
+            }*/
         }
 
         /// <summary>
@@ -103,6 +101,13 @@ namespace ThreeDAuth
             double spineZ = spine.Position.Z;
             double hipCenterZ = hipCenter.Position.Z;
 
+
+
+            this.torsoPosition.X = (shoulderCenter.Position.X + spine.Position.X + hipCenter.Position.X) / 3;
+            this.torsoPosition.Y = (shoulderCenter.Position.Y + spine.Position.Y + hipCenter.Position.Y) / 3;
+            this.torsoPosition.Z = (shoulderCenter.Position.Z + spine.Position.Z + hipCenter.Position.Z) / 3;
+
+            /*
             //System.Console.WriteLine("shoulder z is: " + shoulderCenterZ + " spine z is: " + spineZ + " hipCenter z is: " + hipCenterZ);
             if (torsoCounter < MINDATAPOINTSREQ)
             {
@@ -124,6 +129,7 @@ namespace ThreeDAuth
                 this.torsoPosition.Z /= (torsoCounter);
                 //System.Console.WriteLine("The depth of torso is: " + this.torsoPosition);
             }
+             */
         }
     }
 }

@@ -380,7 +380,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                 // rectangle over them to give the user feedback
 
-                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .5);
+                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
                 ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
                 Point right = this.SkeletonPointToScreen(rightWrist.Position);
