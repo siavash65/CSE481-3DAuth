@@ -107,6 +107,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         //End by Siavash
 
         /// <summary>
+        /// Anton
+        /// Point Distributor to implement observer pattern
+        /// </summary>
+        private ThreeDAuth.PointDistributor pDistributor;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -169,6 +175,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             // Create an image source that we can use in our image control
             this.imageSource = new DrawingImage(this.drawingGroup);
+
+            pDistributor = ThreeDAuth.PointDistributor.GetInstance();
 
             Image.Source = this.imageSource;
 
@@ -372,15 +380,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                 // rectangle over them to give the user feedback
 
-                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .6);
+                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .5);
                 ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
                 Point right = this.SkeletonPointToScreen(rightWrist.Position);
 
-                if (myPlane.crossesPlane(wristRight))
+                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.X, right.Y, myPlane.crossesPlane(wristRight));
+
+                pDistributor.GivePoint(arrived);
+
+                if (arrived.inPlane)
                 {
                     drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
-                    System.Console.WriteLine("You crossed the plane");
                 }
                 else
                 {
@@ -395,7 +406,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (myPlane.crossesPlane(wristLeft))
                 {
                     drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                    System.Console.WriteLine("You crossed the plane");
                 }
                 else
                 {
