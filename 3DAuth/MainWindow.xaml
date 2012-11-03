@@ -66,6 +66,16 @@
                     <BitmapCache/>
                 </Button.CacheMode>
             </Button>
+            <Button x:Name="Start" DockPanel.Dock="Left" Content="Start" Margin="10,10,0,5" Width="50" Height="24" Click="Start_Click">
+                <Button.CacheMode>
+                    <BitmapCache/>
+                </Button.CacheMode>
+            </Button>
+            <Button x:Name="Stop" DockPanel.Dock="Left" Content="Stop" Margin="10,10,0,5" Width="50" Height="24" Click="Stop_Click">
+                <Button.CacheMode>
+                    <BitmapCache/>
+                </Button.CacheMode>
+            </Button>
             <TextBlock DockPanel.Dock="Right" Margin="0 0 20 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
             <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
         </DockPanel>
