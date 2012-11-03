@@ -31,7 +31,7 @@ namespace ThreeDAuth
         /// <summary>
         /// Pen used for drawing bones that are currently tracked
         /// </summary>
-        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
+        private readonly Pen mypen = new Pen(Brushes.Green, 6);
 
         /// <summary>
         /// Drawing group for skeleton rendering output
@@ -66,9 +66,20 @@ namespace ThreeDAuth
         /// </summary>
         public GraphWindow()
         {
-            //InitializeComponent();
+            InitializeComponent();
             currentPointBuffer = new Queue<DistanceTimeTuple>();
-            CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
+
+            // Create the drawing group we'll use for drawing
+            this.drawingGroup = new DrawingGroup();
+
+            // Create an image source that we can use in our image control
+            this.imageSource = new DrawingImage(this.drawingGroup);
+
+            // Display the drawing using our image control
+            GraphImageBox.Source = this.imageSource;
+
+            AddDistance(2, 1); 
+          // CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
         }
 
 

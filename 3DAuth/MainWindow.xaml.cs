@@ -14,6 +14,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Win32;
     using System;
     using System.Windows.Media.Imaging;
+    using System.Windows.Controls;
 
 
     /// <summary>
@@ -589,5 +590,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.Image.Height = this.layoutGrid.Height * .1;
             this.Image.Width = this.layoutGrid.Width * .1;
         }
+
+        private void graphPage(object sender, RoutedEventArgs e)
+        {
+            ThreeDAuth.GraphWindow grap = new ThreeDAuth.GraphWindow();
+            grap.Show();
+        }
+
     }
 }
