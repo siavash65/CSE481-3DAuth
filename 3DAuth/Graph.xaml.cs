@@ -67,18 +67,7 @@ namespace ThreeDAuth
         public GraphWindow()
         {
             InitializeComponent();
-            currentPointBuffer = new Queue<DistanceTimeTuple>();
 
-            // Create the drawing group we'll use for drawing
-            this.drawingGroup = new DrawingGroup();
-
-            // Create an image source that we can use in our image control
-            this.imageSource = new DrawingImage(this.drawingGroup);
-
-            // Display the drawing using our image control
-            GraphImageBox.Source = this.imageSource;
-
-            AddDistance(2, 1); 
           // CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
         }
 
@@ -98,6 +87,19 @@ namespace ThreeDAuth
 
             // Display the drawing using our image control
             GraphImageBox.Source = this.imageSource;
+
+            currentPointBuffer = new Queue<DistanceTimeTuple>();
+
+            // Create the drawing group we'll use for drawing
+            this.drawingGroup = new DrawingGroup();
+
+            // Create an image source that we can use in our image control
+            this.imageSource = new DrawingImage(this.drawingGroup);
+
+            // Display the drawing using our image control
+            GraphImageBox.Source = this.imageSource;
+
+            AddDistance(2, 1); 
         }
 
         /// <summary>
@@ -122,12 +124,16 @@ namespace ThreeDAuth
 
         private double getTimePixelPosition(long currentTime, long minTime, long maxTime) 
         {
-            return (1.0 * currentTime / (1.0 * maxTime - 1.0 * minTime)) * GraphImageBox.ActualWidth;
+            // returns NAN because maxTime = minTime
+            // return (1.0 * currentTime / (1.0 * maxTime - 1.0 * minTime)) * GraphImageBox.ActualWidth;
+            return 100.0;
         }
 
         private double getDistPixelPosition(double currentDist, double minDist, double maxDist) 
         {
-            return (currentDist / (maxDist - minDist)) * GraphImageBox.ActualHeight;
+            // returns NAN because maxdist = minDist
+            // return (currentDist / (maxDist - minDist)) * GraphImageBox.ActualHeight;
+            return 100.0;
         }
 
 
@@ -145,14 +151,20 @@ namespace ThreeDAuth
                     minDistance = Math.Min(point.Distance, minDistance);
                     maxTime = Math.Max(point.Time, maxTime);
                     minTime = Math.Min(point.Time, minTime);
+
+                    System.Windows.Point centerPoint =
+                             new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
+                             getDistPixelPosition(point.Distance, minDistance, maxDistance));
+                    
+                    dc.DrawEllipse(Brushes.Red, null, centerPoint, 2, 2);
                 }
 
                 foreach (DistanceTimeTuple point in currentPointBuffer) 
                 {
-                    System.Windows.Point centerPoint = 
-                        new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
-                                                 getDistPixelPosition(point.Distance, minDistance, maxDistance));
-                    dc.DrawEllipse(Brushes.Red, null, centerPoint, 10, 10);
+                    //System.Windows.Point centerPoint = 
+                    //    new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
+                  //                               getDistPixelPosition(point.Distance, minDistance, maxDistance));
+                  //  dc.DrawEllipse(Brushes.Red, null, centerPoint, 10, 10);
                 }
             }
         }

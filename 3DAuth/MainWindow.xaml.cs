@@ -114,6 +114,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private ThreeDAuth.PointDistributor pDistributor;
 
         /// <summary>
+        /// Anton
+        /// Point Distributor to implement observer pattern
+        /// </summary>
+        private ThreeDAuth.DiscreteGestureLearner gLearner;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -178,6 +184,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.imageSource = new DrawingImage(this.drawingGroup);
 
             pDistributor = ThreeDAuth.PointDistributor.GetInstance();
+            
+            // create a new gesture learner
+            gLearner = new ThreeDAuth.DiscreteGestureLearner(2000, 5);
 
             Image.Source = this.imageSource;
 
@@ -414,11 +423,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (myPlane.crossesPlane(wristLeft))
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
                 }
                 else
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
                 }
             }
         }
@@ -578,6 +587,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
             }
+
+           
         }
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
@@ -595,6 +606,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             ThreeDAuth.GraphWindow grap = new ThreeDAuth.GraphWindow();
             grap.Show();
+        }
+
+        private void Start_Click(object sender, RoutedEventArgs e)
+        {
+            gLearner.startRecording();
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            gLearner.stopRecording();
+            System.Console.WriteLine(gLearner.getGesturePath().Count);
         }
 
     }
