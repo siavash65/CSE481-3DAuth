@@ -604,7 +604,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void graphPage(object sender, RoutedEventArgs e)
         {
-            ThreeDAuth.GraphWindow grap = new ThreeDAuth.GraphWindow();
+            ThreeDAuth.GraphWindow grap = new ThreeDAuth.GraphWindow(this);
             grap.Show();
         }
 

@@ -42,9 +42,6 @@ namespace ThreeDAuth
         /// Drawing image that we will display
         /// </summary>
         private DrawingImage imageSource;
-        
-
-
 
         private class DistanceTimeTuple {
             public double Distance { get; set; }
@@ -57,20 +54,36 @@ namespace ThreeDAuth
         }
         private Queue<DistanceTimeTuple> currentPointBuffer;
 
-        private static int MAX_NUM_POINTS_TO_DISPLAY = 50;
+        private const long WindowTimeWidth = 10 * 1000; // 10 seconds
 
+        private Microsoft.Samples.Kinect.SkeletonBasics.MainWindow owningWindow;
 
+        private const int TargetNumPointsToDisplay = 200;
+
+        private double MaxWindowDistSeen;
 
         /// <summary>
         /// Initializes a new instance of the Graph class.
         /// </summary>
-        public GraphWindow()
+        public GraphWindow(Microsoft.Samples.Kinect.SkeletonBasics.MainWindow owningWindow)
         {
             InitializeComponent();
 
-          // CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
+            this.owningWindow = owningWindow;
+
+            MaxWindowDistSeen = 0;
+
+            if (CurrentObjectBag.SCurrentGestureValidator != null)
+            {
+                CurrentObjectBag.SCurrentGestureValidator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
+            }
+            CurrentObjectBag.SOnGestureValidatorChanged += SetGestureValidator;
         }
 
+        private void SetGestureValidator(GestureValidator validator)
+        {
+            validator.OnDistanceUpdated += new UpdateTargetDistance(AddDistance);
+        }
 
         /// <summary>
         /// Execute startup tasks
@@ -99,7 +112,7 @@ namespace ThreeDAuth
             // Display the drawing using our image control
             GraphImageBox.Source = this.imageSource;
 
-            AddDistance(2, 1); 
+            //AddDistance(2, 1); 
         }
 
         /// <summary>
@@ -115,25 +128,27 @@ namespace ThreeDAuth
         {
             DistanceTimeTuple newPoint = new DistanceTimeTuple(distance, elapsedTimeMS);
             currentPointBuffer.Enqueue(newPoint);
-            while (currentPointBuffer.Count > MAX_NUM_POINTS_TO_DISPLAY) {
+            while (currentPointBuffer.Count > TargetNumPointsToDisplay)
+            {
                 // Pull the oldest point off and throw it away
                 currentPointBuffer.Dequeue();
             }
             DrawGraph();
         }
 
-        private double getTimePixelPosition(long currentTime, long minTime, long maxTime) 
+        private double getTimePixelPosition(long currentTime, long leftEnd) 
         {
-            // returns NAN because maxTime = minTime
-            // return (1.0 * currentTime / (1.0 * maxTime - 1.0 * minTime)) * GraphImageBox.ActualWidth;
-            return 100.0;
+            // WindowTimeWidth is a constant, which should be > 0 (or else you graph nothing since the range of time you can graph has width 0)
+            return ((1.0 * currentTime - 1.0 * leftEnd) / 1.0 * WindowTimeWidth) * GraphImageBox.ActualWidth;
         }
 
-        private double getDistPixelPosition(double currentDist, double minDist, double maxDist) 
+        private double getDistPixelPosition(double currentDist, double windowDistHeight) 
         {
-            // returns NAN because maxdist = minDist
-            // return (currentDist / (maxDist - minDist)) * GraphImageBox.ActualHeight;
-            return 100.0;
+            // Note: Window distance height measures starting at 0, so we just divide by windowDistHeight rather than (windowDistHeight - 0)
+            return (currentDist / windowDistHeight) * GraphImageBox.ActualHeight;
+
+            // Note: The only way windowDistHeight can be zero is if the diagonal length of the image box was 0, which would mean
+            // the image was infinitely thin, which shouldn't really happen
         }
 
 
@@ -141,30 +156,48 @@ namespace ThreeDAuth
         {
             using( DrawingContext dc = this.drawingGroup.Open() ) 
             {
-                double maxDistance = double.MinValue;
-                double minDistance = double.MaxValue;
                 long maxTime = long.MinValue;
                 long minTime = long.MaxValue;
+
+
+                // The maximum distance between two anchor points is the diagonal distance across the drawable screen
+                double windowDistHeight = Math.Sqrt( Math.Pow(owningWindow.myImageBox.ActualHeight, 2) +
+                                                     Math.Pow(owningWindow.myImageBox.ActualWidth, 2) );
+                // We want our graph size to be bounded by the largest window size ever seen
+                MaxWindowDistSeen = Math.Max(windowDistHeight, MaxWindowDistSeen);
+
+                // If we have exactly TargetNumPointsToDisplay many points to display, then they should fill the graph area,
+                // and use that point size for every other scenario
+                double pointRadius = Math.Min(GraphImageBox.ActualWidth, GraphImageBox.ActualHeight) / TargetNumPointsToDisplay;
                 foreach (DistanceTimeTuple point in currentPointBuffer)
                 {
-                    maxDistance = Math.Max(point.Distance, maxDistance);
-                    minDistance = Math.Min(point.Distance, minDistance);
                     maxTime = Math.Max(point.Time, maxTime);
                     minTime = Math.Min(point.Time, minTime);
-
-                    System.Windows.Point centerPoint =
-                             new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
-                             getDistPixelPosition(point.Distance, minDistance, maxDistance));
-                    
-                    dc.DrawEllipse(Brushes.Red, null, centerPoint, 2, 2);
                 }
 
-                foreach (DistanceTimeTuple point in currentPointBuffer) 
+                long totalWidth = maxTime - minTime;
+
+                // since we're scrolling to the right in a sense, we only care about the value at the right edge and back track from there
+                // however, if our entire set of points would not fill the graph window horizontally, then we consider from the left
+                if (maxTime - minTime >= WindowTimeWidth)
                 {
-                    //System.Windows.Point centerPoint = 
-                    //    new System.Windows.Point(getTimePixelPosition(point.Time, minTime, maxTime),
-                  //                               getDistPixelPosition(point.Distance, minDistance, maxDistance));
-                  //  dc.DrawEllipse(Brushes.Red, null, centerPoint, 10, 10);
+                    minTime = maxTime - WindowTimeWidth;
+                }
+
+                if (MaxWindowDistSeen > 0 && WindowTimeWidth > 0)
+                {
+                    foreach (DistanceTimeTuple point in currentPointBuffer)
+                    {
+                        if (point.Time >= minTime)
+                        {
+                            System.Windows.Point centerPoint =
+                                     new System.Windows.Point(getTimePixelPosition(point.Time, minTime),
+                                     getDistPixelPosition(point.Distance, MaxWindowDistSeen));
+
+                            dc.DrawEllipse(Brushes.Red, null, centerPoint, pointRadius, pointRadius);
+                        }
+
+                    }
                 }
             }
         }
