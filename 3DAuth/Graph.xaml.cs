@@ -139,13 +139,13 @@ namespace ThreeDAuth
         private double getTimePixelPosition(long currentTime, long leftEnd) 
         {
             // WindowTimeWidth is a constant, which should be > 0 (or else you graph nothing since the range of time you can graph has width 0)
-            return ((1.0 * currentTime - 1.0 * leftEnd) / 1.0 * WindowTimeWidth) * GraphImageBox.ActualWidth;
+            return ((1.0 * currentTime - 1.0 * leftEnd) / (1.0 * WindowTimeWidth)) * GraphImageBox.Width;
         }
 
         private double getDistPixelPosition(double currentDist, double windowDistHeight) 
         {
             // Note: Window distance height measures starting at 0, so we just divide by windowDistHeight rather than (windowDistHeight - 0)
-            return (currentDist / windowDistHeight) * GraphImageBox.ActualHeight;
+            return (currentDist / windowDistHeight) * GraphImageBox.Height;
 
             // Note: The only way windowDistHeight can be zero is if the diagonal length of the image box was 0, which would mean
             // the image was infinitely thin, which shouldn't really happen
@@ -168,7 +168,8 @@ namespace ThreeDAuth
 
                 // If we have exactly TargetNumPointsToDisplay many points to display, then they should fill the graph area,
                 // and use that point size for every other scenario
-                double pointRadius = Math.Min(GraphImageBox.ActualWidth, GraphImageBox.ActualHeight) / TargetNumPointsToDisplay;
+                //double pointRadius = Math.Min(GraphImageBox.ActualWidth, GraphImageBox.ActualHeight) / TargetNumPointsToDisplay;
+                double pointRadius = Math.Min(GraphImageBox.Width, GraphImageBox.Height) / TargetNumPointsToDisplay;
                 foreach (DistanceTimeTuple point in currentPointBuffer)
                 {
                     maxTime = Math.Max(point.Time, maxTime);
@@ -186,6 +187,9 @@ namespace ThreeDAuth
 
                 if (MaxWindowDistSeen > 0 && WindowTimeWidth > 0)
                 {
+                    System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int) GraphImageBox.Width, (int) GraphImageBox.Height);
+                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp);
+
                     foreach (DistanceTimeTuple point in currentPointBuffer)
                     {
                         if (point.Time >= minTime)
@@ -194,10 +198,19 @@ namespace ThreeDAuth
                                      new System.Windows.Point(getTimePixelPosition(point.Time, minTime),
                                      getDistPixelPosition(point.Distance, MaxWindowDistSeen));
 
-                            dc.DrawEllipse(Brushes.Red, null, centerPoint, pointRadius, pointRadius);
+                            //dc.DrawEllipse(Brushes.Red, null, centerPoint, pointRadius, pointRadius);
+                            int xPos = (int) (centerPoint.X - pointRadius);
+                            int yPos = (int) (GraphImageBox.Height - (centerPoint.Y - pointRadius));
+                            g.DrawEllipse(new System.Drawing.Pen(System.Drawing.Color.Red, 2), xPos, yPos, (int) (pointRadius * 2), (int) (pointRadius * 2));
+                            //dc.DrawRoundedRectangle(Brushes.Red, null, new Rect(centerPoint.X - pointRadius, centerPoint.Y - pointRadius, pointRadius * 2, pointRadius * 2), null, pointRadius, null, pointRadius, null);
                         }
-
                     }
+                    GraphImageBox.Source = 
+                        System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                            bmp.GetHbitmap(),
+                            IntPtr.Zero,
+                            System.Windows.Int32Rect.Empty,
+                            BitmapSizeOptions.FromWidthAndHeight((int)GraphImageBox.Width, (int)GraphImageBox.Height));
                 }
             }
         }

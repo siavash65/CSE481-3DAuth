@@ -115,9 +115,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Anton
-        /// Point Distributor to implement observer pattern
+        /// Gesture learner
         /// </summary>
         private ThreeDAuth.DiscreteGestureLearner gLearner;
+
+        /// <summary>
+        /// Maosn
+        /// Gesture validator
+        /// </summary>
+        private ThreeDAuth.GestureValidator gValidator;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -429,6 +435,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
                 }
+
+
+
+                // Mason's code
+                // If we're learning a gesture, draw the learned points
+                if (gLearner != null && gLearner.isRecording)
+                {
+                    System.Collections.Generic.Queue<ThreeDAuth.Point2d> currentPoints = gLearner.getGesturePath();
+                    foreach (ThreeDAuth.Point2d point in currentPoints) 
+                    {
+                        drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.X, point.Y, 30, 30), null, 14, null, 14, null);
+
+                    }
+                }
             }
         }
 
@@ -617,6 +637,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             gLearner.stopRecording();
             System.Console.WriteLine(gLearner.getGesturePath().Count);
+        }
+
+        private void Validate_Click(object sender, RoutedEventArgs e)
+        {
+            if (gLearner.isRecording)
+            {
+                gLearner.stopRecording();
+            }
+            System.Collections.Generic.Queue<ThreeDAuth.Point2d> path = gLearner.getGesturePath();
+            if (path != null)
+            {
+                gValidator = new ThreeDAuth.GestureValidator(path, 50);
+                gValidator.beginPath();
+            }
         }
 
     }

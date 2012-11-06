@@ -6,6 +6,7 @@ using System.Text;
 namespace ThreeDAuth
 {
     delegate void GiveGestureValidatorReference(GestureValidator validator);
+    delegate void GiveGestureLearnerReference(GestureLearner learner);
 
     // singleton that holds references to current objects such as:
     // current gesture validator
@@ -13,17 +14,39 @@ namespace ThreeDAuth
     {
         private static CurrentObjectBag instance;
 
-        private GestureValidator _CurrentGestureValidator;
 
-        public GestureValidator CurrentGestureValidator {
+        private GestureValidator _CurrentGestureValidator;
+        private GestureLearner _CurrentGestureLearner;
+
+        public GestureValidator CurrentGestureValidator
+        {
             get
             {
                 return _CurrentGestureValidator;
             }
-            set 
+            set
             {
                 _CurrentGestureValidator = value;
-                _onGestureValidatorChanged(value);
+                if (_onGestureValidatorChanged != null)
+                {
+                    _onGestureValidatorChanged(value);
+                }
+            }
+        }
+
+        public GestureLearner CurrentGestureLearner
+        {
+            get
+            {
+                return _CurrentGestureLearner;
+            }
+            set
+            {
+                _CurrentGestureLearner = value;
+                if (_onGestureLearnerChanged != null)
+                {
+                    _onGestureLearnerChanged(value);
+                }
             }
         }
 
@@ -40,6 +63,19 @@ namespace ThreeDAuth
             }
         }
 
+        // S prefix is for the static reference
+        public static GestureLearner SCurrentGestureLearner
+        {
+            get
+            {
+                return CurrentObjectBag.GetInstance().CurrentGestureLearner;
+            }
+            set
+            {
+                CurrentObjectBag.GetInstance().CurrentGestureLearner = value;
+            }
+        }
+
         private CurrentObjectBag() { }
 
         public static CurrentObjectBag GetInstance()
@@ -51,10 +87,10 @@ namespace ThreeDAuth
             return instance;
         }
 
-
         // listeners
 
         private event GiveGestureValidatorReference _onGestureValidatorChanged;
+        private event GiveGestureLearnerReference _onGestureLearnerChanged;
 
         public event GiveGestureValidatorReference onGestureValidatorChanged
         {
@@ -68,6 +104,18 @@ namespace ThreeDAuth
             }
         }
 
+        public event GiveGestureLearnerReference onGestureLearnerChanged
+        {
+            add
+            {
+                _onGestureLearnerChanged += value;
+            }
+            remove
+            {
+                _onGestureLearnerChanged -= value;
+            }
+        }
+
         public static event GiveGestureValidatorReference SOnGestureValidatorChanged
         {
             add
@@ -77,6 +125,18 @@ namespace ThreeDAuth
             remove
             {
                 CurrentObjectBag.GetInstance().onGestureValidatorChanged -= value;
+            }
+        }
+
+        public static event GiveGestureLearnerReference SOnGestureLearnerChanged
+        {
+            add
+            {
+                CurrentObjectBag.GetInstance().onGestureLearnerChanged += value;
+            }
+            remove
+            {
+                CurrentObjectBag.GetInstance().onGestureLearnerChanged -= value;
             }
         }
     }

@@ -10,6 +10,15 @@ namespace ThreeDAuth
         protected System.Diagnostics.Stopwatch stopwatch;
         protected Queue<Point2d> learnedGesturePath;
 
+        protected bool _isRecording = false;
+        public bool isRecording 
+        {
+            get
+            {
+                return _isRecording;
+            }
+        }
+
         abstract public void GivePoint(Point point);
 
         public Queue<Point2d> getGesturePath()
@@ -21,11 +30,13 @@ namespace ThreeDAuth
         {
             stopwatch.Start();
             learnedGesturePath = new Queue<Point2d>();
+            _isRecording = true;
         }
 
         public void stopRecording()
         {
             stopwatch.Stop();
+            _isRecording = false;
         }
     }
 
@@ -40,18 +51,25 @@ namespace ThreeDAuth
             stopwatch = new System.Diagnostics.Stopwatch();
             startRecording();
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
+
+            // Give the current object back a reference to us
+            CurrentObjectBag.SCurrentGestureLearner = this;
         }
 
         override public void GivePoint(Point point)
         {
-            if (point is Point2d)
+            if (point is PlanePoint)
             {
-                Point2d newPoint = (Point2d) point;
-                if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
+                PlanePoint planePoint = (PlanePoint)point;
+                if (planePoint.inPlane)
                 {
-                    learnedGesturePath.Enqueue(newPoint.copy());
-                    stopwatch.Stop();
-                    stopwatch.Start();
+                    Point2d newPoint = (Point2d)point;
+                    if (stopwatch.ElapsedMilliseconds >= samplingCooldown)
+                    {
+                        learnedGesturePath.Enqueue(newPoint.copy());
+                        stopwatch.Stop();
+                        stopwatch.Start();
+                    }
                 }
             }
         }
@@ -73,37 +91,47 @@ namespace ThreeDAuth
             this.holdTime = holdTime;
             this.motionEpsilon = motionEpsilon;
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
+
+            // Give the current object back a reference to us
+            CurrentObjectBag.SCurrentGestureLearner = this;
         }
 
         override public void GivePoint(Point point)
         {
-            if (point is Point2d)
+            if (point is PlanePoint)
             {
-                Point2d newPoint = (Point2d) point;
-                long elapsedMS = stopwatch.ElapsedMilliseconds;
-                if (pointBuffer.Count == 0)
+                PlanePoint planePoint = (PlanePoint) point;
+                if (planePoint.inPlane)
                 {
-                    // Enqueue the first point
-                    pointBuffer.Enqueue(new TimePointTuple(elapsedMS, newPoint));
-                }
-                else
-                {
-                    if ((elapsedMS - pointBuffer.Peek().timeMark > holdTime) &&
-                         (pointBuffer.Count >= minNumberOfPoints))
+                    Point2d newPoint = (Point2d)point;
+                    long elapsedMS = stopwatch.ElapsedMilliseconds;
+                    if (pointBuffer.Count == 0)
                     {
-                        // Have a target point
-                        learnedGesturePath.Enqueue(pointBuffer.Dequeue().point.copy());
-                        pointBuffer.Clear();
-                    }
-                    else if (Util.euclideanDistance(pointBuffer.Peek().point, newPoint) < motionEpsilon)
-                    {
-                        // Person is staying still
+                        // Enqueue the first point
                         pointBuffer.Enqueue(new TimePointTuple(elapsedMS, newPoint));
                     }
                     else
                     {
-                        // Not a target point and person has moved too much, so dump the queue
-                        pointBuffer.Clear();
+                        if ((elapsedMS - pointBuffer.Peek().timeMark > holdTime) &&
+                             (pointBuffer.Count >= minNumberOfPoints))
+                        {
+                            // Have a target point
+
+                            Point2d p = pointBuffer.Peek().point;
+                            //Console.WriteLine("Storing point : (" + p.X + ", " + p.Y + ")");
+                            learnedGesturePath.Enqueue(pointBuffer.Dequeue().point.copy());
+                            pointBuffer.Clear();
+                        }
+                        else if (Util.euclideanDistance(pointBuffer.Peek().point, newPoint) < motionEpsilon)
+                        {
+                            // Person is staying still
+                            pointBuffer.Enqueue(new TimePointTuple(elapsedMS, newPoint));
+                        }
+                        else
+                        {
+                            // Not a target point and person has moved too much, so dump the queue
+                            pointBuffer.Clear();
+                        }
                     }
                 }
             }

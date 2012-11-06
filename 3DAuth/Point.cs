@@ -37,7 +37,7 @@ namespace ThreeDAuth
         public double X { get; set; }
         public double Y { get; set; }
 
-        public Point2d() : this(0, 0) { }
+        protected Point2d() : this(0, 0) { }
 
         public Point2d(double X, double Y)
         {
@@ -57,12 +57,15 @@ namespace ThreeDAuth
             sumPoint.Y = firstPoint.Y + secondPoint.Y;
             return sumPoint;
         }
+
+        public override string ToString()
+        {
+            return "(" + X + ", " + Y + ")";
+        }
     }
 
     class PlanePoint : Point2d
     {
-        public double X { get; set; }
-        public double Y { get; set; }
         public bool inPlane { get; set; }
 
         public PlanePoint(double X, double Y, bool inPlane)
@@ -75,6 +78,11 @@ namespace ThreeDAuth
         public Point2d getPoint2d()
         {
             return new Point2d(X, Y);
+        }
+
+        public override string ToString()
+        {
+            return "(" + X + ", " + Y + ", " + inPlane + ")";
         }
     }
 

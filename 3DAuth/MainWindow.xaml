@@ -61,7 +61,7 @@
                     <BitmapCache/>
                 </Button.CacheMode>
             </Button>
-            <Button x:Name="Graph" DockPanel.Dock="Left" Content="Graph" Margin="10,10,0,5" Width="159" Height="24" Click="graphPage">
+            <Button x:Name="Graph" DockPanel.Dock="Left" Content="Graph" Margin="10,10,0,5" Width="75" Height="24" Click="graphPage">
                 <Button.CacheMode>
                     <BitmapCache/>
                 </Button.CacheMode>
@@ -78,6 +78,11 @@
             </Button>
             <TextBlock DockPanel.Dock="Right" Margin="0 0 20 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
             <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
+            <Button Content="Validate" Height="24" Name="button1" Width="50" Click="Validate_Click">
+                <Button.CacheMode>
+                    <BitmapCache />
+                </Button.CacheMode>
+            </Button>
         </DockPanel>
         <Viewbox Grid.Row="1" Stretch="Fill" HorizontalAlignment="Center"/>
         <StatusBar Grid.Row="3" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">

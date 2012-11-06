@@ -27,6 +27,16 @@ namespace ThreeDAuth
         private bool failedAuthentication;
         private System.Diagnostics.Stopwatch timer;
 
+        private bool _startedPath; // Don't fail them before they start (it's rude)
+
+        public bool startedPath
+        {
+            get
+            {
+                return _startedPath;
+            }
+        }
+
         private event UpdateTargetDistance _onDistanceUpdated;
 
         public event UpdateTargetDistance OnDistanceUpdated
@@ -45,16 +55,20 @@ namespace ThreeDAuth
         {
             this.targetPoints = targetPoints;
             this.epsilon = epsilonBoundary;
-            beginPath();
             manipulatableTargetPoints = new Queue<Point2d>();
             completedTargets = new HashSet<Point2d>();
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
             CurrentObjectBag.SCurrentGestureValidator = this;
             timer = new System.Diagnostics.Stopwatch();
+            beginPath();
+
+            // Give the current object back a reference to us
+            CurrentObjectBag.SCurrentGestureValidator = this;
         }
 
         public void beginPath()
         {
+            manipulatableTargetPoints.Clear();
             for (int i = 0; i < targetPoints.Count; i++) {
                 Point2d point = targetPoints.Dequeue();
                 targetPoints.Enqueue(point);
@@ -62,47 +76,69 @@ namespace ThreeDAuth
             }
             oldDistance = double.MaxValue;
             failedAuthentication = false;
+            _startedPath = false;
             timer.Start();
         }
 
         public void GivePoint(Point point)
         {
-            if (point is Point2d) 
+            if (manipulatableTargetPoints.Count > 0)
             {
-                Point2d newPoint = (Point2d) point;
-                Point2d target = manipulatableTargetPoints.Peek();
-                if (target != null && !failedAuthentication)
+                if (point is PlanePoint)
                 {
-                    double newDistance = Util.euclideanDistance(newPoint, target);
-                    if (newDistance > oldDistance)
+                    PlanePoint planePoint = (PlanePoint)point;
+                    if (planePoint.inPlane)
                     {
-                        // Made a move away from the target point, so failed authentication
-                        failedAuthentication = true;
-                    }
-                    else
-                    {
-                        if (newDistance < epsilon)
+                        Point2d newPoint = (Point2d)point;
+                        Point2d target = manipulatableTargetPoints.Peek();
+                        double newDistance = Util.euclideanDistance(newPoint, target);
+                        if (!_startedPath)
                         {
-                            // Hit the target point, so remove it and target the next one
-                            manipulatableTargetPoints.Dequeue();
-                            if (manipulatableTargetPoints.Count > 0)
+                            if (newDistance < epsilon)
                             {
-                                oldDistance = Util.euclideanDistance(newPoint, manipulatableTargetPoints.Peek());
-                            }
-                            else
-                            {
-                                // Validated successfully
-                                timer.Stop();
+                                _startedPath = true;
+                                Console.WriteLine("Started path");
                             }
                         }
                         else
                         {
-                            // Didn't hit the target point, but getting closer
-                            oldDistance = newDistance;
+                            if (target != null && !failedAuthentication)
+                            {
+                                if ((newDistance - 3 * epsilon) > oldDistance)
+                                {
+                                    // Made a move away from the target point, so failed authentication
+                                    failedAuthentication = true;
+                                    Console.WriteLine("Failure :( ");
+                                }
+                                else
+                                {
+                                    if (newDistance < epsilon)
+                                    {
+                                        // Hit the target point, so remove it and target the next one
+                                        Console.WriteLine("Hit a target point");
+                                        manipulatableTargetPoints.Dequeue();
+                                        if (manipulatableTargetPoints.Count > 0)
+                                        {
+                                            oldDistance = Util.euclideanDistance(newPoint, manipulatableTargetPoints.Peek());
+                                        }
+                                        else
+                                        {
+                                            // Validated successfully
+                                            timer.Stop();
+                                            Console.WriteLine("*** Successfully Validated ***");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Didn't hit the target point, but getting closer
+                                        oldDistance = newDistance;
+                                    }
+                                }
+                            }
+                            Notify();
                         }
                     }
                 }
-                Notify();
             }
         }
 
