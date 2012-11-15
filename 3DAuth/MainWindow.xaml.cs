@@ -304,6 +304,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 
                     // Flood fill from this point then send a point to the distributor
+
+                    // If the nearest point hasn't broken the plane, then don't bother doing anything with it
+
+
                     // The array index is computed as x + y*width,
                     // So x = idx % width
                     // y = (idx - x)/width
@@ -311,7 +315,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int yIdx = (closestIdx - xIdx) / depthFrame.Width;
                     ThreeDAuth.PointCluster cluster = ThreeDAuth.Util.FloodFill(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height, DEPTH_CUTOFF);
                     ThreeDAuth.DepthPoint centroid = cluster.Centroid;
-
+                    ThreeDAuth.PlanePoint planePointCentroid = new ThreeDAuth.PlanePoint(centroid.x, centroid.y, true);
+                    ThreeDAuth.PointDistributor.GetInstance().GivePoint(planePointCentroid);
                 }
             }
         }

@@ -12,6 +12,7 @@ namespace ThreeDAuth
     {
         bool crossesPlane(PointCluster points);
         bool crossesPlane(Point3d point);
+        bool crossesPlane(DepthPoint point);
     }
 
     class FlatPlane : IPlane
@@ -37,7 +38,7 @@ namespace ThreeDAuth
 
         public bool crossesPlane(PointCluster points)
         {
-            foreach (Point3d pt in points.points)
+            foreach (DepthPoint pt in points.points)
             {
                 if (crossesPlane(pt)) return true;
             }
@@ -65,7 +66,7 @@ namespace ThreeDAuth
 
         public bool crossesPlane(PointCluster points)
         {
-            foreach (Point3d pt in points.points)
+            foreach (DepthPoint pt in points.points)
             {
                 if (crossesPlane(pt)) return true;
             }
@@ -93,7 +94,7 @@ namespace ThreeDAuth
 
         public bool crossesPlane(PointCluster points)
         {
-            foreach (Point3d pt in points.points)
+            foreach (DepthPoint pt in points.points)
             {
                 if (crossesPlane(pt)) return true;
             }
