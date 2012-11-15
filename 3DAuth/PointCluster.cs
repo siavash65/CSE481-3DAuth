@@ -7,29 +7,67 @@ namespace ThreeDAuth
 {
     class PointCluster
     {
-        public HashSet<Point3d> points { get; set; }
+        public HashSet<DepthPoint> points { get; set; }
 
-        public PointCluster() : this(new HashSet<Point3d>()) { }
-
-        public PointCluster(HashSet<Point3d> points)
+        public DepthPoint Centroid
         {
-            this.points = points; ;
+            get
+            {
+                if (points == null || points.Count == 0)
+                {
+                    return null;
+                }
+                DepthPoint sum = new DepthPoint(0, 0, 0);
+                foreach (DepthPoint point in points)
+                {
+                    sum += point;
+                }
+                return sum / points.Count; 
+            }
         }
 
-        public void addPoint(Point3d point)
+        public double Radius
+        {
+            get
+            {
+                if (points == null | points.Count == 0)
+                {
+                    return 0.0;
+                }
+                // n^2 operation, could probably be improved
+                double maxDist = double.MinValue;
+                foreach (DepthPoint outerPoint in points)
+                {
+                    foreach (DepthPoint innerPoint in points)
+                    {
+                        maxDist = Math.Max(maxDist, distance(outerPoint, innerPoint));
+                    }
+                }
+                return maxDist / 2.0;
+            }
+        }
+
+        public PointCluster() : this(new HashSet<DepthPoint>()) { }
+
+        public PointCluster(HashSet<DepthPoint> points)
+        {
+            this.points = points;
+        }
+
+        public void addPoint(DepthPoint point)
         {
             points.Add(point);
         }
 
-        public void removePoint(Point3d point)
+        public void removePoint(DepthPoint point)
         {
             points.Remove(point);
         }
 
-        public Point3d getNearestPoint(Point3d other)
+        public DepthPoint getNearestPoint(DepthPoint other)
         {
-            Point3d nearestPoint = null;
-            foreach (Point3d pt in points)
+            DepthPoint nearestPoint = null;
+            foreach (DepthPoint pt in points)
             {
                 if (nearestPoint == null)
                 {
@@ -47,12 +85,17 @@ namespace ThreeDAuth
             return nearestPoint;
         }
 
+        public Cube GetBoundingBox
+
+
         // Simple euclidean distance
-        private float distance(Point3d x, Point3d y)
+
+        private float distance(DepthPoint x, DepthPoint y)
         {
-            return (float) Math.Sqrt( Math.Pow((x.X - y.X), 2) +
-                                      Math.Pow((x.Y - y.Y), 2) +
-                                      Math.Pow((x.Z - y.Z), 2) );
+            return (float)Math.Sqrt(Math.Pow((x.x - y.x), 2) +
+                                      Math.Pow((x.y - y.y), 2) +
+                                      Math.Pow((x.depth - y.depth), 2));
         }
     }
+
 }
