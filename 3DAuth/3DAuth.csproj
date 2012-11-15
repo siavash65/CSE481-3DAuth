@@ -74,6 +74,7 @@
       <DependentUpon>GraphPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Grid.cs" />
+    <Compile Include="HandTracker.cs" />
     <Compile Include="HandTracking.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="PointCluster.cs" />

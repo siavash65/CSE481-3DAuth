@@ -15,7 +15,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System;
     using System.Windows.Media.Imaging;
     using System.Windows.Controls;
-
+    using System.Collections.Generic;
+    using System.Runtime.InteropServices;
+    using System.Drawing.Imaging;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -105,6 +107,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private Joint rightWrist;
         private Joint leftWrist;
+        private short[] imadeData;
+        private DepthImagePixel[] imagePixelData;
+        private int maxDepth;
+        private int minDepth;
+        private DepthImagePixel closestPoint;
+        private int counter = 0;
+        private System.Drawing.Bitmap bmap;
+
         //End by Siavash
 
         /// <summary>
@@ -225,9 +235,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             if (null != this.sensor)
             {
+
+               
                 // Turn on the skeleton stream to receive skeleton frames
                 this.sensor.SkeletonStream.Enable();
 
+                //Start Siavash
+                this.sensor.DepthStream.Enable();
+
+                this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+
+                //End Siavash
+                
                 // Add an event handler to be called whenever there is new color frame data
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
 
@@ -246,6 +265,86 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 //this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
+        }
+
+
+        /// <summary>
+        /// Start Siavash
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SensorDepthFrameReady(object sender, DepthImageFrameReadyEventArgs e)
+        {
+            using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
+            {
+                if (depthFrame != null)
+                {
+                    this.maxDepth = depthFrame.MaxDepth;
+                    this.minDepth = depthFrame.MinDepth;
+                    this.closestPoint.Depth = Convert.ToInt16(this.maxDepth);
+
+                    if (this.imagePixelData == null || this.imadeData == null)
+                    {
+                        this.imadeData = new short[depthFrame.PixelDataLength];
+                        this.imagePixelData = new DepthImagePixel[depthFrame.PixelDataLength];
+                    }
+
+                    depthFrame.CopyDepthImagePixelDataTo(imagePixelData);
+                    depthFrame.CopyPixelDataTo(imadeData);
+                    
+                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height);
+                    findTheClosestPoint(depthFrame.PixelDataLength);
+
+
+                
+                }
+            }
+        }
+
+        /// <summary>
+        /// Siavash
+        /// </summary>
+        /// <param name="depthFrame"></param>
+        /// <param name="p1"></param>
+        /// <param name="p2"></param>
+        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2)
+        {
+                bmap = new System.Drawing.Bitmap(depthFrame.Width, depthFrame.Height, System.Drawing.Imaging.PixelFormat.Format16bppRgb555);
+                System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
+                    , depthFrame.Height), ImageLockMode.WriteOnly, bmap.PixelFormat);
+                IntPtr ptr = bmapdata.Scan0;
+                Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
+                bmap.UnlockBits(bmapdata);
+                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
+                this.myImageBox.Source =
+                System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    bmap.GetHbitmap(),
+                    IntPtr.Zero,
+                    System.Windows.Int32Rect.Empty,
+                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));
+        }
+
+        /// <summary>
+        /// Siavash
+        /// </summary>
+        /// <param name="pixelDataLenght"></param>
+        private void findTheClosestPoint(int pixelDataLenght)
+        {
+     
+            for (int i = 0; i < pixelDataLenght/2; i++)
+            {
+                if (this.imagePixelData[i].IsKnownDepth == true)
+                {
+                    if (this.imagePixelData[i].Depth > minDepth && this.imagePixelData[i].Depth < this.closestPoint.Depth)
+                    {
+                        this.closestPoint = this.imagePixelData[i];
+
+                    }   
+                }
+            }
+            //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
+            //this.counter++;
+             
         }
 
         /// <summary>
@@ -268,6 +367,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+       
+
             Skeleton[] skeletons = new Skeleton[0];
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
@@ -396,6 +497,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
+
             //End Siavash
 
             if (myFrame.torsoPosition != null)
