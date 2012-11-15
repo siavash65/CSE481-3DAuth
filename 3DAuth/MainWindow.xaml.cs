@@ -109,6 +109,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private Joint leftWrist;
         private short[] imadeData;
         private DepthImagePixel[] imagePixelData;
+        private int pixelIndex;
         private int maxDepth;
         private int minDepth;
         private DepthImagePixel closestPoint;
@@ -238,7 +239,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                
                 // Turn on the skeleton stream to receive skeleton frames
-                this.sensor.SkeletonStream.Enable();
+                //this.sensor.SkeletonStream.Enable();
 
                 //Start Siavash
                 this.sensor.DepthStream.Enable();
@@ -248,7 +249,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 //End Siavash
                 
                 // Add an event handler to be called whenever there is new color frame data
-                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+               // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
 
                 // Start the sensor!
                 try
@@ -291,9 +292,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     depthFrame.CopyDepthImagePixelDataTo(imagePixelData);
                     depthFrame.CopyPixelDataTo(imadeData);
-                    
-                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height);
+
                     findTheClosestPoint(depthFrame.PixelDataLength);
+                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height);
+                    
 
 
                 
@@ -315,13 +317,27 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 IntPtr ptr = bmapdata.Scan0;
                 Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
                 bmap.UnlockBits(bmapdata);
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
+                /*System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
                 this.myImageBox.Source =
                 System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                     bmap.GetHbitmap(),
                     IntPtr.Zero,
                     System.Windows.Int32Rect.Empty,
-                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));
+                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));*/
+                using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
+                {
+                    lfdc.DrawImage(System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    bmap.GetHbitmap(),
+                    IntPtr.Zero,
+                    System.Windows.Int32Rect.Empty,
+                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height)),
+                    new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                    int handx = pixelIndex % depthFrame.Width;
+                    int handy = pixelIndex / depthFrame.Width;
+                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(handx, handy, 30, 30), null, 14, null, 14, null);
+                }
+
         }
 
         /// <summary>
@@ -331,17 +347,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void findTheClosestPoint(int pixelDataLenght)
         {
      
-            for (int i = 0; i < pixelDataLenght/2; i++)
+            for (int i = 0; i < pixelDataLenght;)
             {
                 if (this.imagePixelData[i].IsKnownDepth == true)
                 {
                     if (this.imagePixelData[i].Depth > minDepth && this.imagePixelData[i].Depth < this.closestPoint.Depth)
                     {
                         this.closestPoint = this.imagePixelData[i];
-
+                        this.pixelIndex = i;
                     }   
                 }
+                i = i + 2;
             }
+
             //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
             //this.counter++;
              
