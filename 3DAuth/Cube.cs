@@ -111,22 +111,22 @@ namespace ThreeDAuth
         }
     }
 
-    class Rectangle : Cube
+    class BoundingRectangle : Cube
     {
-        public Rectangle()
+        public BoundingRectangle()
         {
             this._vertices = new int[4, 2];
         }
 
-        public Rectangle(int[,] vertices)
+        public BoundingRectangle(int[,] vertices)
         {
             this._vertices = vertices;
         }
 
-        public static Rectangle CreateBoundingRectangle(PointCluster points)
+        public static BoundingRectangle CreateBoundingRectangle(PointCluster points)
         {
             Cube cube = CreateBoundingCube(points);
-            Rectangle result = new Rectangle();
+            BoundingRectangle result = new BoundingRectangle();
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 2; j++)

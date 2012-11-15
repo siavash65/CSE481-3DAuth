@@ -18,7 +18,8 @@ namespace ThreeDAuth
         {
             return euclideanDistance(p1.getPoint2d(), p2.getPoint2d());
         }
-        public PointCluster floodFill(short[] depthData, int x, int y, int width, int height, int cutoff)
+
+        public static PointCluster FloodFill(short[] depthData, int x, int y, int width, int height, int mmCutoff)
         {
             // Queue of tuples storing <newX, newY, previousDepth>
             Queue<Tuple<int, int, short>> explorePoints = new Queue<Tuple<int, int, short>>();
@@ -31,7 +32,7 @@ namespace ThreeDAuth
             {
                 Tuple<int, int, short> currentPoint = explorePoints.Dequeue();
                 short currentDepth = depthData[currentPoint.Item1 + currentPoint.Item2 * width];
-                if (Math.Abs(currentDepth - currentPoint.Item3) < cutoff)
+                if (Math.Abs(currentDepth - currentPoint.Item3) < mmCutoff)
                 {
                     resultPoints.Add(new DepthPoint(currentPoint.Item1, currentPoint.Item2, currentDepth));
 
@@ -72,6 +73,5 @@ namespace ThreeDAuth
             return result;
         }
 
-    }
     }
 }

@@ -63,6 +63,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Cube.cs" />
     <Compile Include="CurrentObjectBag.cs" />
     <Compile Include="GestureLearner.cs" />
     <Compile Include="GestureValidator.cs" />

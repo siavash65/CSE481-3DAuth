@@ -131,10 +131,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private ThreeDAuth.DiscreteGestureLearner gLearner;
 
         /// <summary>
-        /// Maosn
+        /// Mason
         /// Gesture validator
         /// </summary>
         private ThreeDAuth.GestureValidator gValidator;
+
+        /// <summary>
+        /// Mason
+        /// Depth cutoff for flood fill in mm
+        /// </summary>
+        private static const int DEPTH_CUTOFF = 50; // 50 mm
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -293,12 +299,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     depthFrame.CopyDepthImagePixelDataTo(imagePixelData);
                     depthFrame.CopyPixelDataTo(imadeData);
 
-                    findTheClosestPoint(depthFrame.PixelDataLength);
+                    int closestIdx = findTheClosestPoint(depthFrame.PixelDataLength);
                     showDepthView(depthFrame, depthFrame.Width, depthFrame.Height);
-                    
 
 
-                
+                    // Flood fill from this point then send a point to the distributor
+                    // The array index is computed as x + y*width,
+                    // So x = idx % width
+                    // y = (idx - x)/width
+                    int xIdx = closestIdx % depthFrame.Width;
+                    int yIdx = (closestIdx - xIdx) / depthFrame.Width;
+                    ThreeDAuth.PointCluster cluster = ThreeDAuth.Util.FloodFill(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height, DEPTH_CUTOFF);
+                    ThreeDAuth.DepthPoint centroid = cluster.Centroid;
+
                 }
             }
         }
@@ -342,12 +355,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Siavash
+        /// 
+        /// Mason - returns the index of the closest point
         /// </summary>
         /// <param name="pixelDataLenght"></param>
-        private void findTheClosestPoint(int pixelDataLenght)
+        private int findTheClosestPoint(int pixelDataLenght)
         {
-     
-            for (int i = 0; i < pixelDataLenght;)
+            int i = 0;
+            for (i = 0; i < pixelDataLenght;)
             {
                 if (this.imagePixelData[i].IsKnownDepth == true)
                 {
@@ -359,10 +374,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 i = i + 2;
             }
-
             //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
             //this.counter++;
-             
+            return i;
         }
 
         /// <summary>

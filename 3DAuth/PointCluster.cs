@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace ThreeDAuth
 {
@@ -80,12 +81,19 @@ namespace ThreeDAuth
                         nearestPoint = pt;
                     }
                 }
-
             }
             return nearestPoint;
         }
 
-        public Cube GetBoundingBox
+        public Cube GetBoundingCube()
+        {
+            return Cube.CreateBoundingCube(this);
+        }
+
+        public BoundingRectangle GetBoundingRectangle()
+        {
+            return BoundingRectangle.CreateBoundingRectangle(this);
+        }
 
 
         // Simple euclidean distance
