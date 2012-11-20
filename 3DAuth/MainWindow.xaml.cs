@@ -140,7 +140,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Mason
         /// Depth cutoff for flood fill in mm
         /// </summary>
-        private static const int DEPTH_CUTOFF = 50; // 50 mm
+        private const int DEPTH_CUTOFF = 10; // 50 mm
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -299,8 +299,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     depthFrame.CopyDepthImagePixelDataTo(imagePixelData);
                     depthFrame.CopyPixelDataTo(imadeData);
 
-                    int closestIdx = findTheClosestPoint(depthFrame.PixelDataLength);
-                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height);
+                    findTheClosestPoint(depthFrame.PixelDataLength);
+                   
 
 
                     // Flood fill from this point then send a point to the distributor
@@ -311,15 +311,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // The array index is computed as x + y*width,
                     // So x = idx % width
                     // y = (idx - x)/width
-                    int xIdx = closestIdx % depthFrame.Width;
-                    int yIdx = (closestIdx - xIdx) / depthFrame.Width;
-                    ThreeDAuth.PointCluster cluster = ThreeDAuth.Util.FloodFill(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height, DEPTH_CUTOFF);
-                    ThreeDAuth.DepthPoint centroid = cluster.Centroid;
-                    ThreeDAuth.PlanePoint planePointCentroid = new ThreeDAuth.PlanePoint(centroid.x, centroid.y, true);
-                    ThreeDAuth.PointDistributor.GetInstance().GivePoint(planePointCentroid);
+                    int xIdx = this.pixelIndex % depthFrame.Width;
+                    int yIdx = this.pixelIndex / depthFrame.Width;
+                    /*ThreeDAuth.PointCluster*/
+                    myPointCluster = ThreeDAuth.Util.FloodFill(imagePixelData, xIdx, yIdx, depthFrame.Width - 1, depthFrame.Height - 1, DEPTH_CUTOFF);
+                    //Console.WriteLine("Flood filled point count: " + cluster.points.Count);
+                    ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
+                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
+                    Console.WriteLine("Centroid: " + centroid);
+                    //ThreeDAuth.PointDistributor.SGivePoint(centroid);
                 }
             }
         }
+
+        private ThreeDAuth.PointCluster myPointCluster;
 
         /// <summary>
         /// Siavash
@@ -327,7 +332,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="depthFrame"></param>
         /// <param name="p1"></param>
         /// <param name="p2"></param>
-        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2)
+        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2,ThreeDAuth.DepthPoint hand)
         {
                 bmap = new System.Drawing.Bitmap(depthFrame.Width, depthFrame.Height, System.Drawing.Imaging.PixelFormat.Format16bppRgb555);
                 System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
@@ -342,6 +347,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     IntPtr.Zero,
                     System.Windows.Int32Rect.Empty,
                     BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));*/
+
+                ThreeDAuth.BoundingRectangle rect = ThreeDAuth.BoundingRectangle.CreateBoundingRectangle(myPointCluster);
                 using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
                 {
                     lfdc.DrawImage(System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
@@ -353,7 +360,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     int handx = pixelIndex % depthFrame.Width;
                     int handy = pixelIndex / depthFrame.Width;
-                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(handx, handy, 30, 30), null, 14, null, 14, null);
+                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                    lfdc.DrawRectangle(Brushes.Red, null, new Rect(rect.vertices[0,0], rect.vertices[3,1], Math.Abs(rect.vertices[1,0] - rect.vertices[0,0]), Math.Abs(rect.vertices[3,1] - rect.vertices[0, 1])));
                 }
 
         }
@@ -364,7 +372,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Mason - returns the index of the closest point
         /// </summary>
         /// <param name="pixelDataLenght"></param>
-        private int findTheClosestPoint(int pixelDataLenght)
+        private void findTheClosestPoint(int pixelDataLenght)
         {
             int i = 0;
             for (i = 0; i < pixelDataLenght;)
@@ -381,7 +389,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
             //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
             //this.counter++;
-            return i;
+           
         }
 
         /// <summary>
@@ -473,7 +481,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 Joint hipCenter = skel.Joints[JointType.HipCenter];
                                 Joint spine = skel.Joints[JointType.Spine];
                                 myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
-                                myFrame.computerTorsoDepth(shoulderCenter, spine, hipCenter);
+                                ThreeDAuth.DepthPoint shoulderDepthPoint = this.SkeletonPointToScreen(shoulderCenter.Position);
+                                ThreeDAuth.DepthPoint spineDepthPoint = this.SkeletonPointToScreen(spine.Position);
+                                ThreeDAuth.DepthPoint hipCenterDepthPoint = this.SkeletonPointToScreen(hipCenter.Position);
+                                myFrame.computerTorsoDepth(shoulderDepthPoint, spineDepthPoint, hipCenterDepthPoint);
                             }
                         }
 
@@ -516,7 +527,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             dc.DrawEllipse(
                             this.centerPointBrush,
                             null,
-                            this.SkeletonPointToScreen(skel.Position),
+                            this.SkeletonPointToScreen(skel.Position).GetPoint(),
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
@@ -546,27 +557,27 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
                 ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
-                Point right = this.SkeletonPointToScreen(rightWrist.Position);
+                ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
 
-                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.X, right.Y, myPlane.crossesPlane(wristRight));
+                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.x, right.y, myPlane.crossesPlane(right));
 
                 pDistributor.GivePoint(arrived);
 
                 if (arrived.inPlane)
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
                 }
                 else
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.X, right.Y, 30, 30), null, 14, null, 14, null);
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
                 }
 
 
                 ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
 
-                Point left = this.SkeletonPointToScreen(leftWrist.Position);
+                ThreeDAuth.DepthPoint left = this.SkeletonPointToScreen(leftWrist.Position);
 
-                if (myPlane.crossesPlane(wristLeft))
+                if (myPlane.crossesPlane(left))
                 {
                     //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
                 }
@@ -644,7 +655,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (drawBrush != null)
                 {
-                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
+                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position).GetPoint(), JointThickness, JointThickness);
                 }
             }
         }
@@ -654,14 +665,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         /// <param name="skelpoint">point to map</param>
         /// <returns>mapped point</returns>
-        private Point SkeletonPointToScreen(SkeletonPoint skelpoint)
+        private ThreeDAuth.DepthPoint SkeletonPointToScreen(SkeletonPoint skelpoint)
         {
             // Convert point to depth space.  
             // We are not using depth directly, but we do want the points in our 640x480 output resolution.
+            DepthImagePoint depthPoint = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
+            /*
             DepthImagePoint depthPoint = this.sensor.MapSkeletonPointToDepth(
                                                                              skelpoint,
                                                                              DepthImageFormat.Resolution640x480Fps30);
-            return new Point(depthPoint.X, depthPoint.Y);
+             * */
+            return new ThreeDAuth.DepthPoint(depthPoint.X, depthPoint.Y, (short) depthPoint.Depth);
         }
 
         /// <summary>
@@ -697,7 +711,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 drawPen = this.trackedBonePen;
             }
 
-            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
+            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position).GetPoint(), this.SkeletonPointToScreen(joint1.Position).GetPoint());
         }
 
         /*

@@ -11,29 +11,27 @@ namespace ThreeDAuth
     interface IPlane
     {
         bool crossesPlane(PointCluster points);
-        bool crossesPlane(Point3d point);
         bool crossesPlane(DepthPoint point);
     }
 
     class FlatPlane : IPlane
     {
         private double depth; // distance to torso
-        private Point3d center;
+        private DepthPoint center;
 
-        public FlatPlane(Point3d center, double depth)
+        public FlatPlane(DepthPoint center, double depth)
         {
             this.depth = depth;
             this.center = center;
         }
 
-        public void setCenter(Point3d center)
+        public void setCenter(DepthPoint center)
         {
             this.center = center;
         }
-
-        public bool crossesPlane(Point3d point)
+        public bool crossesPlane(DepthPoint point)
         {
-            return point.Z < (center.Z - depth);
+            return point.depth < (center.depth - depth);
         }
 
         public bool crossesPlane(PointCluster points)
@@ -49,19 +47,19 @@ namespace ThreeDAuth
     class CylindricalPlane : IPlane
     {
         private double depth; // distance to torso
-        private Point3d center;
+        private DepthPoint center;
 
-        public CylindricalPlane(Point3d center, double depth)
+        public CylindricalPlane(DepthPoint center, double depth)
         {
             this.depth = depth;
             this.center = center;
         }
 
-        public bool crossesPlane(Point3d point)
+        public bool crossesPlane(DepthPoint point)
         {
             // Ignore Y axis data
             // Return whether the length of the projected vector into xz-space is greater than the cutoff
-            return Math.Sqrt(Math.Pow(point.X - center.X, 2) + Math.Pow(point.Z - center.Z, 2)) > depth;
+            return Math.Sqrt(Math.Pow(point.x - center.x, 2) + Math.Pow(point.depth - center.depth, 2)) > depth;
         }
 
         public bool crossesPlane(PointCluster points)
@@ -78,18 +76,18 @@ namespace ThreeDAuth
     class SphericalPlane : IPlane
     {
         private double depth; // distance to torso
-        private Point3d center;
+        private DepthPoint center;
 
-        public SphericalPlane(Point3d center, double depth)
+        public SphericalPlane(DepthPoint center, double depth)
         {
             this.depth = depth;
             this.center = center;
         }
 
-        public bool crossesPlane(Point3d point)
+        public bool crossesPlane(DepthPoint point)
         {
             // Return whether the length of the vector is greater than the cutoff
-            return Math.Sqrt(Math.Pow(point.X - center.X, 2) + Math.Pow(point.Z - center.Z, 2)) > depth;
+            return Math.Sqrt(Math.Pow(point.x - center.x, 2) + Math.Pow(point.depth - center.depth, 2)) > depth;
         }
 
         public bool crossesPlane(PointCluster points)
