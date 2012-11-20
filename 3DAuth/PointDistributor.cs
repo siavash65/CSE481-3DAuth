@@ -38,6 +38,11 @@ namespace ThreeDAuth
             }
         }
 
+        public static void SGivePoint(Point p)
+        {
+            PointDistributor.GetInstance().GivePoint(p);
+        }
+
         public void GivePoint(Point p)
         {
             this.CurrentPoint = p;

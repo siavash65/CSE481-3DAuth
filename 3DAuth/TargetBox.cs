@@ -8,9 +8,9 @@ namespace ThreeDAuth
     // Scheme for determining whether a point is in the target box or not
     interface ITargetBoxScheme
     {
-        bool pointInTargetBox(Point3d point, Point3d center, double armLength);
+        bool pointInTargetBox(DepthPoint point, DepthPoint center, double armLength);
 
-        Point3d[] getCorners(Point3d center, double armLength);
+        DepthPoint[] getCorners(DepthPoint center, double armLength);
     }
 
     class RigidTargetBoxScheme : ITargetBoxScheme
@@ -24,19 +24,19 @@ namespace ThreeDAuth
             this.width = width;
         }
 
-        public bool pointInTargetBox(Point3d point, Point3d center, double armLength)
+        public bool pointInTargetBox(DepthPoint point, DepthPoint center, double armLength)
         {
-            return Math.Abs(point.X - center.X) <= (width / 2) &&
-                   Math.Abs(point.Y - center.Y) <= (height / 2);
+            return Math.Abs(point.x - center.x) <= (width / 2) &&
+                   Math.Abs(point.y - center.y) <= (height / 2);
         }
 
-        public Point3d[] getCorners(Point3d center, double armLength)
+        public DepthPoint[] getCorners(DepthPoint center, double armLength)
         {
-            Point3d[] corners = new Point3d[4];
-            corners[0] = new Point3d(center.X - (width / 2), center.Y - (height / 2), center.Z);
-            corners[1] = new Point3d(center.X - (width / 2), center.Y + (height / 2), center.Z);
-            corners[2] = new Point3d(center.X + (width / 2), center.Y + (height / 2), center.Z);
-            corners[3] = new Point3d(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            DepthPoint[] corners = new DepthPoint[4];
+            corners[0] = new DepthPoint((int) (center.x - (width / 2)), (int) (center.y - (height / 2)), center.depth);
+            corners[1] = new DepthPoint((int) (center.x - (width / 2)), (int) (center.y + (height / 2)), center.depth);
+            corners[2] = new DepthPoint((int) (center.x + (width / 2)), (int) (center.y + (height / 2)), center.depth);
+            corners[3] = new DepthPoint((int) (center.x + (width / 2)), (int) (center.y - (height / 2)), center.depth);
             return corners;
         }
     }
@@ -55,23 +55,23 @@ namespace ThreeDAuth
 
         public ArmLengthTargetBoxScheme(double targetPercentage) : this(targetPercentage, targetPercentage) { }
 
-        public bool pointInTargetBox(Point3d point, Point3d center, double armLength)
+        public bool pointInTargetBox(DepthPoint point, DepthPoint center, double armLength)
         {
             double width = armLength * widthPercentage;
             double height = armLength * heightPercentage;
-            return Math.Abs(point.X - center.X) <= (width / 2) &&
-                   Math.Abs(point.Y - center.Y) <= (height / 2);
+            return Math.Abs(point.x - center.x) <= (width / 2) &&
+                   Math.Abs(point.y - center.y) <= (height / 2);
         }
 
-        public Point3d[] getCorners(Point3d center, double armLength)
+        public DepthPoint[] getCorners(DepthPoint center, double armLength)
         {
             double width = armLength * widthPercentage;
             double height = armLength * heightPercentage;
-            Point3d[] corners = new Point3d[4];
-            corners[0] = new Point3d(center.X - (width / 2), center.Y - (height / 2), center.Z);
-            corners[1] = new Point3d(center.X - (width / 2), center.Y + (height / 2), center.Z);
-            corners[2] = new Point3d(center.X + (width / 2), center.Y + (height / 2), center.Z);
-            corners[3] = new Point3d(center.X + (width / 2), center.Y - (height / 2), center.Z);
+            DepthPoint[] corners = new DepthPoint[4];
+            corners[0] = new DepthPoint((int)(center.x - (width / 2)), (int)(center.y - (height / 2)), center.depth);
+            corners[1] = new DepthPoint((int)(center.x - (width / 2)), (int)(center.y + (height / 2)), center.depth);
+            corners[2] = new DepthPoint((int)(center.x + (width / 2)), (int)(center.y + (height / 2)), center.depth);
+            corners[3] = new DepthPoint((int)(center.x + (width / 2)), (int)(center.y - (height / 2)), center.depth);
             return corners;
         }
     }
@@ -79,11 +79,11 @@ namespace ThreeDAuth
     class TargetBox
     {
         private ITargetBoxScheme targetBoxScheme { get; set; }
-        private Point3d center { get; set; }
+        private DepthPoint center { get; set; }
         private double armLength { get; set; }
         private double torsoDepth { get; set; }
 
-        public TargetBox(ITargetBoxScheme targetBoxScheme, Point3d center, double armLength, double torsoDepth)
+        public TargetBox(ITargetBoxScheme targetBoxScheme, DepthPoint center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -91,9 +91,9 @@ namespace ThreeDAuth
             this.targetBoxScheme = targetBoxScheme;
         }
 
-        public TargetBox() : this(new RigidTargetBoxScheme(0f, 0f), new Point3d(), 0f, 0f) { }
+        public TargetBox() : this(new RigidTargetBoxScheme(0f, 0f), new DepthPoint(), 0f, 0f) { }
 
-        public void setBox(Point3d center, double armLength, double torsoDepth)
+        public void setBox(DepthPoint center, double armLength, double torsoDepth)
         {
             this.center = center;
             this.armLength = armLength;
@@ -105,19 +105,19 @@ namespace ThreeDAuth
             targetBoxScheme = scheme;
         }
 
-        public bool pointInTargetBox(Point3d point)
+        public bool pointInTargetBox(DepthPoint point)
         {
             return targetBoxScheme.pointInTargetBox(point, center, armLength);
         }
 
-        public Point3d[] getCorners()
+        public DepthPoint[] getCorners()
         {
             return targetBoxScheme.getCorners(center, armLength);
         }
 
         public Vec2d[] getBoxLines()
         {
-            Point3d[] corners = getCorners();
+            DepthPoint[] corners = getCorners();
             Vec2d[] lines = new Vec2d[4];
             lines[0] = new Vec2d(corners[0], corners[1]);
             lines[1] = new Vec2d(corners[1], corners[2]);
@@ -149,7 +149,7 @@ namespace ThreeDAuth
             this.targetBox = targetBox;
         }
 
-        public bool pointInTargetArea(Point3d point)
+        public bool pointInTargetArea(DepthPoint point)
         {
             return plane.crossesPlane(point) && targetBox.pointInTargetBox(point);
         }

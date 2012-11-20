@@ -12,8 +12,8 @@ namespace ThreeDAuth
     {
         private static double[] armLengths = null;
         public double armLength { get; protected set; }
-        private static Point3d[] torsoPositions = null;
-        public Point3d torsoPosition { get; protected set; }
+        private static DepthPoint[] torsoPositions = null;
+        public DepthPoint torsoPosition { get; protected set; }
         private static int armCounter = 0;
         private static int torsoCounter = 0;
         /*The minimum amount of data point we need to compute an accurate value and cancel
@@ -31,15 +31,15 @@ namespace ThreeDAuth
             }
             if (torsoPositions == null)
             {
-                torsoPositions = new Point3d[MINDATAPOINTSREQ];
+                torsoPositions = new DepthPoint[MINDATAPOINTSREQ];
                 for (int i = 0; i < MINDATAPOINTSREQ; i++)
                 {
-                    torsoPositions[i] = new Point3d();
+                    torsoPositions[i] = new DepthPoint();
 
                 }
             }
 
-            this.torsoPosition = new Point3d();
+            this.torsoPosition = new DepthPoint();
 
         }
 
@@ -95,17 +95,21 @@ namespace ThreeDAuth
         /// <param name="shoulderCenter"></param>
         /// <param name="spine"></param>
         /// <param name="hipCenter"></param>
-        internal void computerTorsoDepth(Joint shoulderCenter, Joint spine, Joint hipCenter)
+        internal void computerTorsoDepth(DepthPoint shoulderCenter, DepthPoint spine, DepthPoint hipCenter)
         {
-            double shoulderCenterZ = shoulderCenter.Position.Z;
-            double spineZ = spine.Position.Z;
-            double hipCenterZ = hipCenter.Position.Z;
+            short shoulderCenterZ = shoulderCenter.depth;
+            short spineZ = spine.depth;
+            short hipCenterZ = hipCenter.depth;
 
+            this.torsoPosition = new DepthPoint((shoulderCenter.x + spine.x + hipCenter.x) / 3,
+                                                (shoulderCenter.y + spine.y + hipCenter.y) / 3,
+                                                (short) ((shoulderCenter.depth + spine.depth + hipCenter.depth) / 3));
 
-
-            this.torsoPosition.X = (shoulderCenter.Position.X + spine.Position.X + hipCenter.Position.X) / 3;
-            this.torsoPosition.Y = (shoulderCenter.Position.Y + spine.Position.Y + hipCenter.Position.Y) / 3;
-            this.torsoPosition.Z = (shoulderCenter.Position.Z + spine.Position.Z + hipCenter.Position.Z) / 3;
+            /*
+            this.torsoPosition.x = (shoulderCenter.x + spine.x + hipCenter.x) / 3;
+            this.torsoPosition.y = (shoulderCenter.y + spine.y + hipCenter.y) / 3;
+            this.torsoPosition.depth = (shoulderCenter.depth + spine.Position.Z + hipCenter.Position.Z) / 3;
+             * */
 
             /*
             //System.Console.WriteLine("shoulder z is: " + shoulderCenterZ + " spine z is: " + spineZ + " hipCenter z is: " + hipCenterZ);

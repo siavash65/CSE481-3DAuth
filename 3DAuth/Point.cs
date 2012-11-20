@@ -126,6 +126,12 @@ namespace ThreeDAuth
             this.p1 = new Point2d(p1.X, p1.Y);
             this.p2 = new Point2d(p2.X, p2.Y);
         }
+
+        public Vec2d(DepthPoint p1, DepthPoint p2)
+        {
+            this.p1 = new Point2d(p1.x, p1.y);
+            this.p2 = new Point2d(p2.x, p2.y);
+        }
     }
 
     class Vec3d
@@ -175,6 +181,11 @@ namespace ThreeDAuth
             get { return point.Item3; }
         }
 
+        public DepthPoint()
+        {
+            point = new Tuple<int, int, short>(0,0,0);
+        }
+
         public DepthPoint(Tuple<int, int, short> point)
         {
             this.point = point;
@@ -203,6 +214,16 @@ namespace ThreeDAuth
         public static DepthPoint operator /(DepthPoint firstPoint, double constant)
         {
             return firstPoint * (1.0 / constant);
+        }
+
+        public System.Windows.Point GetPoint()
+        {
+            return new System.Windows.Point(x, y);
+        }
+
+        public override string ToString()
+        {
+            return "(" + x + ", " + y + ", " + depth + ")";
         }
     }
 }
