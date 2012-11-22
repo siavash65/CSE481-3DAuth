@@ -65,6 +65,7 @@
     </ApplicationDefinition>
     <Compile Include="Cube.cs" />
     <Compile Include="CurrentObjectBag.cs" />
+    <Compile Include="Filtering.cs" />
     <Compile Include="GestureLearner.cs" />
     <Compile Include="GestureValidator.cs" />
     <Compile Include="Graph.xaml.cs">

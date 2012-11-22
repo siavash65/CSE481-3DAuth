@@ -140,7 +140,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Mason
         /// Depth cutoff for flood fill in mm
         /// </summary>
-        private const int DEPTH_CUTOFF = 10; // 50 mm
+        private const int DEPTH_CUTOFF = 10;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -274,6 +274,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
+        private int closestPointCounter = 0;
+        private int CLOSEST_POINT_COUNTER_CUTOFF = 1;
 
         /// <summary>
         /// Start Siavash
@@ -299,7 +301,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     depthFrame.CopyDepthImagePixelDataTo(imagePixelData);
                     depthFrame.CopyPixelDataTo(imadeData);
 
-                    findTheClosestPoint(depthFrame.PixelDataLength);
+                    // This cutoff allows us to control how often the closest point is calculated (it doesn't necessarily need to be calculated every frame)
+                    closestPointCounter %= CLOSEST_POINT_COUNTER_CUTOFF;
+                    if (closestPointCounter == 0)
+                    {
+                        findTheClosestPoint(depthFrame.PixelDataLength);
+                    }
+                    //closestPointCounter++;
                    
 
 
@@ -314,11 +322,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int xIdx = this.pixelIndex % depthFrame.Width;
                     int yIdx = this.pixelIndex / depthFrame.Width;
                     /*ThreeDAuth.PointCluster*/
-                    myPointCluster = ThreeDAuth.Util.FloodFill(imagePixelData, xIdx, yIdx, depthFrame.Width - 1, depthFrame.Height - 1, DEPTH_CUTOFF);
+                    myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, 3* DEPTH_CUTOFF);
                     //Console.WriteLine("Flood filled point count: " + cluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
                     showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
-                    Console.WriteLine("Centroid: " + centroid);
+                    //Console.WriteLine("Centroid: " + centroid);
                     //ThreeDAuth.PointDistributor.SGivePoint(centroid);
                 }
             }
@@ -360,8 +368,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     int handx = pixelIndex % depthFrame.Width;
                     int handy = pixelIndex / depthFrame.Width;
-                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
-                    lfdc.DrawRectangle(Brushes.Red, null, new Rect(rect.vertices[0,0], rect.vertices[3,1], Math.Abs(rect.vertices[1,0] - rect.vertices[0,0]), Math.Abs(rect.vertices[3,1] - rect.vertices[0, 1])));
+                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
+                    //lfdc.DrawRectangle(Brushes.Red, null, new Rect(rect.vertices[0,0], rect.vertices[3,1], Math.Abs(rect.vertices[1,0] - rect.vertices[0,0]), Math.Abs(rect.vertices[3,1] - rect.vertices[0, 1])));
+
+                    Console.WriteLine(myPointCluster.points.Count);
+                    foreach (ThreeDAuth.DepthPoint point in myPointCluster.points) 
+                    {
+                        lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
+                    }
                 }
 
         }

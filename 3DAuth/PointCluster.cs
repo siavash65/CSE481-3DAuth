@@ -10,6 +10,8 @@ namespace ThreeDAuth
     {
         public HashSet<DepthPoint> points { get; set; }
 
+        private HashSet<System.Windows.Point> positionPoints;
+
         public DepthPoint Centroid
         {
             get
@@ -53,6 +55,11 @@ namespace ThreeDAuth
         public PointCluster(HashSet<DepthPoint> points)
         {
             this.points = points;
+            this.positionPoints = new HashSet<System.Windows.Point>();
+            foreach (DepthPoint point in points)
+            {
+                positionPoints.Add(point.GetPoint());
+            }
         }
 
         public void addPoint(DepthPoint point)
@@ -96,13 +103,56 @@ namespace ThreeDAuth
         }
 
 
+        public void Prune()
+        {
+            HashSet<System.Windows.Point> removePoints = new HashSet<System.Windows.Point>();
+            foreach (DepthPoint basePoint in points)
+            {
+                if (!removePoints.Contains(basePoint.GetPoint()))
+                {
+                    System.Windows.Point[] neighbors = 
+                    {
+                        new System.Windows.Point(basePoint.x - 1, basePoint.y - 1),
+                        new System.Windows.Point(basePoint.x - 1, basePoint.y),
+                        new System.Windows.Point(basePoint.x - 1, basePoint.y + 1),
+                        new System.Windows.Point(basePoint.x, basePoint.y - 1),
+                        new System.Windows.Point(basePoint.x, basePoint.y + 1),
+                        new System.Windows.Point(basePoint.x + 1, basePoint.y - 1),
+                        new System.Windows.Point(basePoint.x + 1, basePoint.y),
+                        new System.Windows.Point(basePoint.x + 1, basePoint.y + 1),
+                    };
+
+                    foreach (System.Windows.Point point in neighbors)
+                    {
+                        if (positionPoints.Contains(point)) removePoints.Add(point);
+                    }
+                }
+            }
+            HashSet<DepthPoint> removeDepthPoints = new HashSet<DepthPoint>();
+            foreach (DepthPoint point in points)
+            {
+                if (removePoints.Contains(point.GetPoint())) removeDepthPoints.Add(point);
+            }
+            foreach (DepthPoint point in removeDepthPoints)
+            {
+                points.Remove(point);
+                positionPoints.Remove(point.GetPoint());
+            }
+        }
+
+
+        private int manhattanDistance2d(DepthPoint x, DepthPoint y)
+        {
+            return Math.Abs(x.x - y.x) + Math.Abs(x.y - y.y);
+        }
+
         // Simple euclidean distance
 
-        private float distance(DepthPoint x, DepthPoint y)
+        private double distance(DepthPoint x, DepthPoint y)
         {
-            return (float)Math.Sqrt(Math.Pow((x.x - y.x), 2) +
-                                      Math.Pow((x.y - y.y), 2) +
-                                      Math.Pow((x.depth - y.depth), 2));
+            return Math.Sqrt(Math.Pow((x.x - y.x), 2) +
+                             Math.Pow((x.y - y.y), 2) +
+                             Math.Pow((x.depth - y.depth), 2));
         }
     }
 

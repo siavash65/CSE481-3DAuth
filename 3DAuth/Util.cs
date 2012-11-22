@@ -20,7 +20,55 @@ namespace ThreeDAuth
             return euclideanDistance(p1.getPoint2d(), p2.getPoint2d());
         }
 
+        public static double EuclideanDistance2d(DepthPoint p1, DepthPoint p2)
+        {
+            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +
+                                (p1.y - p2.y) * (p1.y - p2.y));
+        }
+
+        private static int PIXEL_WIDTH_EPSILON = 100;
+        private static int PIXEL_HEIGHT_EPSILON = 100;
+        private static int MAX_PIXELS = 10000;
+
+        /// <summary>
+        /// NOT a flood fill, standin for testing
+        /// </summary>
+        /// <param name="depthData"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="mmCutoff"></param>
+        /// <returns></returns>
         public static PointCluster FloodFill(DepthImagePixel[] depthData, int x, int y, int width, int height, int mmCutoff)
+        {
+            HashSet<DepthPoint> resultPoints = new HashSet<DepthPoint>();
+            for (int i = 0; i < depthData.Length; i++)
+            {
+                if (depthData[i].Depth > 400 && depthData[i].Depth < 4000 && depthData[i].Depth < 1000)
+                {
+                    int xIdx = i % width;
+                    int yIdx = i / width;
+                    resultPoints.Add(new DepthPoint(xIdx, yIdx, depthData[i].Depth));
+                }
+            }
+            PointCluster result = new PointCluster(resultPoints);
+            Console.WriteLine("Before pruning: " + result.points.Count);
+            result.Prune();
+            return result;
+        }
+
+        /// <summary>
+        /// DO NOT REMOVE
+        /// </summary>
+        /// <param name="depthData"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="mmCutoff"></param>
+        /// <returns></returns>
+        public static PointCluster FloodFill2(DepthImagePixel[] depthData, int x, int y, int width, int height, int mmCutoff)
         {
             // Queue of tuples storing <newX, newY, previousDepth>
             Queue<Tuple<int, int, DepthImagePixel>> explorePoints = new Queue<Tuple<int, int, DepthImagePixel>>();
@@ -32,14 +80,17 @@ namespace ThreeDAuth
 
             explorePoints.Enqueue(new Tuple<int, int, DepthImagePixel>(x, y, depthData[x + y * width]));
             exploredPoints.Add(new Tuple<int, int>(x, y));
-            while (explorePoints.Count > 0)
+            float baseDepth = depthData[x + y * width].Depth;
+            while (explorePoints.Count > 0 && resultPoints.Count < MAX_PIXELS)
             {
                 Tuple<int, int, DepthImagePixel> currentPoint = explorePoints.Dequeue();
                 DepthImagePixel currentDepth = depthData[currentPoint.Item1 + currentPoint.Item2 * width];
-                if (Math.Abs(currentDepth.Depth - currentPoint.Item3.Depth) < mmCutoff)
+                if (//Math.Abs(currentDepth.Depth - currentPoint.Item3.Depth) < mmCutoff && 
+                    Math.Abs(currentDepth.Depth - baseDepth) < mmCutoff &&
+                    Math.Abs(currentPoint.Item1 - x) < PIXEL_WIDTH_EPSILON && Math.Abs(currentPoint.Item2 - y) < PIXEL_HEIGHT_EPSILON)
                 {
                     resultPoints.Add(new DepthPoint(currentPoint.Item1, currentPoint.Item2, currentDepth.Depth));
-
+                    
                     // Add the neighboring points to be explored
                     Tuple<int, int, DepthImagePixel> leftNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 - 1, currentPoint.Item2, currentDepth);
                     Tuple<int, int, DepthImagePixel> rightNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 + 1, currentPoint.Item2, currentDepth);
@@ -74,8 +125,9 @@ namespace ThreeDAuth
                 }
             }
             PointCluster result = new PointCluster(resultPoints);
-            exploredPoints.Clear();
-            explorePoints.Clear();
+            result.Prune();
+            //exploredPoints.Clear();
+            //explorePoints.Clear();
             return result;
         }
 
