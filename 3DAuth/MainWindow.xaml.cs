@@ -140,7 +140,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Mason
         /// Depth cutoff for flood fill in mm
         /// </summary>
-        private const int DEPTH_CUTOFF = 10;
+        private const int DEPTH_CUTOFF = 50;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -305,9 +305,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     closestPointCounter %= CLOSEST_POINT_COUNTER_CUTOFF;
                     if (closestPointCounter == 0)
                     {
-                        findTheClosestPoint(depthFrame.PixelDataLength);
+                        findTheClosestPoint(depthFrame.PixelDataLength, depthFrame.Width, depthFrame.Height);
                     }
-                    //closestPointCounter++;
+                    closestPointCounter++;
                    
 
 
@@ -322,9 +322,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int xIdx = this.pixelIndex % depthFrame.Width;
                     int yIdx = this.pixelIndex / depthFrame.Width;
                     /*ThreeDAuth.PointCluster*/
-                    myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, 3* DEPTH_CUTOFF);
+                    myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
                     //Console.WriteLine("Flood filled point count: " + cluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
+                    // send centroid to filter
+                    // get filteredCentroid
                     showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
                     //Console.WriteLine("Centroid: " + centroid);
                     //ThreeDAuth.PointDistributor.SGivePoint(centroid);
@@ -346,7 +348,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
                     , depthFrame.Height), ImageLockMode.WriteOnly, bmap.PixelFormat);
                 IntPtr ptr = bmapdata.Scan0;
-                Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
+                //Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
                 bmap.UnlockBits(bmapdata);
                 /*System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
                 this.myImageBox.Source =
@@ -368,17 +370,28 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     int handx = pixelIndex % depthFrame.Width;
                     int handy = pixelIndex / depthFrame.Width;
-                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
+                    //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
                     //lfdc.DrawRectangle(Brushes.Red, null, new Rect(rect.vertices[0,0], rect.vertices[3,1], Math.Abs(rect.vertices[1,0] - rect.vertices[0,0]), Math.Abs(rect.vertices[3,1] - rect.vertices[0, 1])));
 
                     Console.WriteLine(myPointCluster.points.Count);
-                    foreach (ThreeDAuth.DepthPoint point in myPointCluster.points) 
+
+                    foreach (ThreeDAuth.DepthPoint point in myPointCluster.points)
                     {
                         lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
                     }
+
+                    int xPos = badPoint % depthFrame.Width;
+                    int yPos = badPoint / depthFrame.Width;
+                    //lfdc.DrawRoundedRectangle(Brushes.Green, null, new Rect(xPos - 15, yPos - 15, 30, 30), null, 14, null, 14, null);
+
+                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
                 }
 
         }
+
+        private int NEIGHBOR_CUTOFF = 100; // mm
+        private int badPoint;
+
 
         /// <summary>
         /// Siavash
@@ -386,21 +399,46 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Mason - returns the index of the closest point
         /// </summary>
         /// <param name="pixelDataLenght"></param>
-        private void findTheClosestPoint(int pixelDataLenght)
+        private void findTheClosestPoint(int pixelDataLenght, int windowWidth, int windowHeight)
         {
             int i = 0;
+            int closestBadPoint = -1;
+            int closestBadPointDepth = 10000000;
             for (i = 0; i < pixelDataLenght;)
             {
                 if (this.imagePixelData[i].IsKnownDepth == true)
                 {
-                    if (this.imagePixelData[i].Depth > minDepth && this.imagePixelData[i].Depth < this.closestPoint.Depth)
+                    short currentDepth = this.imagePixelData[i].Depth;
+                    if (currentDepth > minDepth && currentDepth < this.closestPoint.Depth)
                     {
-                        this.closestPoint = this.imagePixelData[i];
-                        this.pixelIndex = i;
+                        int leftIdx = i > 0 ? i - 1 : i;
+                        int rightIdx = i < pixelDataLenght + 1 ? i + 1 : i;
+                        int upIdx = i > windowWidth ? i - windowWidth : i;
+                        int downIdx= i < windowHeight * windowWidth - windowWidth ? i + windowWidth : i;
+                        int goodCount = 0;
+                        if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
+                        if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
+                        if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
+                        if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
+
+                        if (goodCount >= 3)
+                        {
+                            this.closestPoint = this.imagePixelData[i];
+                            this.pixelIndex = i;
+                        }
+                        else
+                        {
+                            if (currentDepth < closestBadPointDepth)
+                            {
+                                closestBadPoint = i;
+                                closestBadPointDepth = currentDepth;
+                            }
+                        }
                     }   
                 }
                 i = i + 2;
             }
+            badPoint = closestBadPoint;
             //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
             //this.counter++;
            

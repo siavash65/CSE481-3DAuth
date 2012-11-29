@@ -28,7 +28,7 @@ namespace ThreeDAuth
 
         private static int PIXEL_WIDTH_EPSILON = 100;
         private static int PIXEL_HEIGHT_EPSILON = 100;
-        private static int MAX_PIXELS = 10000;
+        private static int MAX_PIXELS = 4 * 500;
 
         /// <summary>
         /// NOT a flood fill, standin for testing
@@ -45,6 +45,8 @@ namespace ThreeDAuth
             HashSet<DepthPoint> resultPoints = new HashSet<DepthPoint>();
             for (int i = 0; i < depthData.Length; i++)
             {
+                if (resultPoints.Count > MAX_PIXELS)
+                    break;
                 if (depthData[i].Depth > 400 && depthData[i].Depth < 4000 && depthData[i].Depth < 1000)
                 {
                     int xIdx = i % width;
