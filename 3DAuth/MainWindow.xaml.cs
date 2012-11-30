@@ -245,7 +245,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                
                 // Turn on the skeleton stream to receive skeleton frames
-                //this.sensor.SkeletonStream.Enable();
+                this.sensor.SkeletonStream.Enable();
 
                 //Start Siavash
                 this.sensor.DepthStream.Enable();
@@ -255,7 +255,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 //End Siavash
                 
                 // Add an event handler to be called whenever there is new color frame data
-               // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+               this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
 
                 // Start the sensor!
                 try
@@ -368,28 +368,34 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height)),
                     new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
-                    int handx = pixelIndex % depthFrame.Width;
-                    int handy = pixelIndex / depthFrame.Width;
-                    //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
-                    //lfdc.DrawRectangle(Brushes.Red, null, new Rect(rect.vertices[0,0], rect.vertices[3,1], Math.Abs(rect.vertices[1,0] - rect.vertices[0,0]), Math.Abs(rect.vertices[3,1] - rect.vertices[0, 1])));
-
-                    Console.WriteLine(myPointCluster.points.Count);
-
+                    if (userImage != null)
+                    {
+                        lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                    }
+                   
+                    //Console.WriteLine(myPointCluster.points.Count);
+                    /*
                     foreach (ThreeDAuth.DepthPoint point in myPointCluster.points)
                     {
                         lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
                     }
-
+                    
                     int xPos = badPoint % depthFrame.Width;
                     int yPos = badPoint / depthFrame.Width;
-                    //lfdc.DrawRoundedRectangle(Brushes.Green, null, new Rect(xPos - 15, yPos - 15, 30, 30), null, 14, null, 14, null);
-
+                    lfdc.DrawRoundedRectangle(Brushes.Green, null, new Rect(xPos - 15, yPos - 15, 30, 30), null, 14, null, 14, null);
+                    if (rightWrist.TrackingState == JointTrackingState.Tracked)
+                    {
+                        ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
+                        lfdc.DrawRoundedRectangle(Brushes.Gold, null, new Rect(right.x - 15, right.y - 15, 30, 30), null, 14, null, 14, null);
+                    } 
+                     */ 
                     lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
+                    
                 }
 
         }
 
-        private int NEIGHBOR_CUTOFF = 100; // mm
+        private int NEIGHBOR_CUTOFF = 50; // mm
         private int badPoint;
 
 
@@ -439,8 +445,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 i = i + 2;
             }
             badPoint = closestBadPoint;
-            //Console.WriteLine("The closest point depth is: " + this.closestPoint.Depth + " ( " + this.counter + " )");
-            //this.counter++;
            
         }
 
@@ -478,7 +482,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             //Start Siavash
-            using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
+            /*using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
             {
 
                 // Draw a transparent background to set the render size
@@ -491,7 +495,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             
                 }
-
+            */
                 if (skeletons.Length != 0)
                 {
                     foreach (Skeleton skel in skeletons)
@@ -542,17 +546,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            this.drawHands(lfdc);
+                            //this.drawHands(lfdc);
                         }
                         else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
                         {
-                            this.drawHands(lfdc);
+                            //this.drawHands(lfdc);
                         }
                     }
                     // prevent drawing outside of our render area
                     this.liveFeedbackGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
                 }
-            }
+            //}
 
             //End by Siavash
 
@@ -803,8 +807,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 fileName = browseFile.FileName;
                 userImage = new BitmapImage(new Uri(fileName));
                 this.myImageBox.Visibility = Visibility.Visible;
-                this.myImageBox.Source = userImage;
-                this.myImageBox.Source = handSource;
+                //this.myImageBox.Source = userImage;
                 
             }
             catch (Exception)
