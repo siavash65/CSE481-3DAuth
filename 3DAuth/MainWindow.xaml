@@ -1,6 +1,7 @@
 ﻿<Window x:Name="mainWindow" x:Class="Microsoft.Samples.Kinect.SkeletonBasics.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:me="clr-namespace:ThreeDAuth"
         Title="3DAuth" Height="735" Width="770" Loaded="WindowLoaded" Closing="WindowClosing" SizeChanged="WindowSizeChanged" MinHeight="600" MinWidth="900">
 
     <Window.Resources>
@@ -84,7 +85,9 @@
                 </Button.CacheMode>
             </Button>
         </DockPanel>
-        <Viewbox Grid.Row="1" Stretch="Fill" HorizontalAlignment="Center"/>
+        <Viewbox Grid.Row="1" Stretch="Fill" HorizontalAlignment="Center">
+            <me:FaceTrackingViewer x:Name="faceTrackingViewer" />
+        </Viewbox>
         <StatusBar Grid.Row="3" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem Padding="0 0 0 10"></StatusBarItem>
         </StatusBar>

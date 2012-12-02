@@ -13,11 +13,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Kinect;
     using Microsoft.Win32;
     using System;
+    using System.Windows.Data;
     using System.Windows.Media.Imaging;
     using System.Windows.Controls;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using System.Drawing.Imaging;
+    using ThreeDAuth;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -149,6 +151,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             this.WindowState = WindowState.Maximized;
             InitializeComponent();
+
+            // Anton
+            var faceTrackingViewerBinding = new Binding("Kinect") { Source = sensor };
+            faceTrackingViewer.SetBinding(FaceTrackingViewer.KinectProperty, faceTrackingViewerBinding);
 
         }
 
