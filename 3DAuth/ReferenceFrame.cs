@@ -97,9 +97,9 @@ namespace ThreeDAuth
         /// <param name="hipCenter"></param>
         internal void computerTorsoDepth(DepthPoint shoulderCenter, DepthPoint spine, DepthPoint hipCenter)
         {
-            short shoulderCenterZ = shoulderCenter.depth;
-            short spineZ = spine.depth;
-            short hipCenterZ = hipCenter.depth;
+            long shoulderCenterZ = shoulderCenter.depth;
+            long spineZ = spine.depth;
+            long hipCenterZ = hipCenter.depth;
 
             this.torsoPosition = new DepthPoint((shoulderCenter.x + spine.x + hipCenter.x) / 3,
                                                 (shoulderCenter.y + spine.y + hipCenter.y) / 3,

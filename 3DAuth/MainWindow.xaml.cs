@@ -336,7 +336,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
                     // send centroid to filter
                     // get filteredCentroid
-                    showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
+
+                    //showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
+                    //pDistributor.GivePoint(centroid);
+                    using (DrawingContext dc = this.liveFeedbackGroup.Open())
+                    {
+                        drawHands(dc, centroid);
+                    }
+
                     //Console.WriteLine("Centroid: " + centroid);
                     //ThreeDAuth.PointDistributor.SGivePoint(centroid);
                 }
@@ -381,7 +388,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
                         lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
                     }
-                   
+                    
                     //Console.WriteLine(myPointCluster.points.Count);
                     /*
                     foreach (ThreeDAuth.DepthPoint point in myPointCluster.points)
@@ -398,8 +405,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         lfdc.DrawRoundedRectangle(Brushes.Gold, null, new Rect(right.x - 15, right.y - 15, 30, 30), null, 14, null, 14, null);
                     } 
                      */ 
-                    lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
-                    
+                    //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
+                    ThreeDAuth.PointDistributor.SGivePoint(hand);
                 }
 
         }
@@ -612,7 +619,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        private void drawHands(DrawingContext drawingContext)
+        private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand)
         {
             //Start Siavash
             if (userImage != null)
@@ -629,21 +636,28 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // rectangle over them to give the user feedback
 
                 ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
-                ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
+                //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
+                //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
-                ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
+                //ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
 
-                ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.x, right.y, myPlane.crossesPlane(right));
+                //ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.x, right.y, myPlane.crossesPlane(right));
 
-                pDistributor.GivePoint(arrived);
+                //pDistributor.GivePoint(arrived);
+                Console.WriteLine("Depth: " + hand.depth);
+                ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
+                pDistributor.GivePoint(hand);
 
-                if (arrived.inPlane)
+                //if (arrived.inPlane)
+                if (planePoint.inPlane)
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                    //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
                 }
                 else
                 {
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                    //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
                 }
 
 
@@ -749,7 +763,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                                                              skelpoint,
                                                                              DepthImageFormat.Resolution640x480Fps30);
              * */
-            return new ThreeDAuth.DepthPoint(depthPoint.X, depthPoint.Y, (short) depthPoint.Depth);
+            return new ThreeDAuth.DepthPoint(depthPoint.X, depthPoint.Y, (long)depthPoint.Depth);
         }
 
         /// <summary>

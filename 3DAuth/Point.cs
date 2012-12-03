@@ -167,7 +167,7 @@ namespace ThreeDAuth
 
     class DepthPoint : Point
     {
-        private Tuple<int, int, short> point;
+        private Tuple<int, int, long> point;
         public int x
         {
             get { return point.Item1; }
@@ -176,38 +176,38 @@ namespace ThreeDAuth
         {
             get { return point.Item2; }
         }
-        public short depth
+        public long depth
         {
             get { return point.Item3; }
         }
 
         public DepthPoint()
         {
-            point = new Tuple<int, int, short>(0,0,0);
+            point = new Tuple<int, int, long>(0, 0, 0);
         }
 
-        public DepthPoint(Tuple<int, int, short> point)
+        public DepthPoint(Tuple<int, int, long> point)
         {
             this.point = point;
         }
 
-        public DepthPoint(int x, int y, short depth)
+        public DepthPoint(int x, int y, long depth)
         {
-            this.point = new Tuple<int, int, short>(x, y, depth);
+            this.point = new Tuple<int, int, long>(x, y, depth);
         }
 
         public static DepthPoint operator +(DepthPoint firstPoint, DepthPoint secondPoint)
         {
             return new DepthPoint(firstPoint.x + secondPoint.x,
                                   firstPoint.y + secondPoint.y,
-                                  (short)(firstPoint.depth + secondPoint.depth));
+                                  (long)(firstPoint.depth + secondPoint.depth));
         }
 
         public static DepthPoint operator *(DepthPoint firstPoint, double constant)
         {
             DepthPoint multPoint = new DepthPoint((int)(firstPoint.x * constant),
                                                   (int)(firstPoint.y * constant),
-                                                  (short)(firstPoint.depth * constant));
+                                                  (long)(firstPoint.depth * constant));
             return multPoint;
         }
 

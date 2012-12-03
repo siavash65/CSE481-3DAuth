@@ -31,6 +31,7 @@ namespace ThreeDAuth
         }
         public bool crossesPlane(DepthPoint point)
         {
+            Console.WriteLine("Difference: " + (point.depth - (center.depth - depth)));
             return point.depth < (center.depth - depth);
         }
 

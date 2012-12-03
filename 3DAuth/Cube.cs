@@ -17,16 +17,16 @@ namespace ThreeDAuth
          *  |/     |/
          *  3------2           
          */
-        protected int[,] _vertices;
+        protected long[,] _vertices;
 
-        public int[,] vertices
+        public long[,] vertices
         {
             get { return _vertices; }
         }
 
         public Cube()
         {
-            _vertices = new int[8, 3];
+            _vertices = new long[8, 3];
             for (int i = 0; i < 8; i++)
             {
                 vertices[i, 0] = 0;
@@ -35,7 +35,7 @@ namespace ThreeDAuth
             }
         }
 
-        public Cube(int[,] vertices)
+        public Cube(long[,] vertices)
         {
             this._vertices = vertices;
         }
@@ -115,10 +115,10 @@ namespace ThreeDAuth
     {
         public BoundingRectangle()
         {
-            this._vertices = new int[4, 2];
+            this._vertices = new long[4, 2];
         }
 
-        public BoundingRectangle(int[,] vertices)
+        public BoundingRectangle(long[,] vertices)
         {
             this._vertices = vertices;
         }

@@ -83,6 +83,7 @@ namespace ThreeDAuth
             explorePoints.Enqueue(new Tuple<int, int, DepthImagePixel>(x, y, depthData[x + y * width]));
             exploredPoints.Add(new Tuple<int, int>(x, y));
             float baseDepth = depthData[x + y * width].Depth;
+            Console.WriteLine("Base Depth: " + baseDepth);
             while (explorePoints.Count > 0 && resultPoints.Count < MAX_PIXELS)
             {
                 Tuple<int, int, DepthImagePixel> currentPoint = explorePoints.Dequeue();
