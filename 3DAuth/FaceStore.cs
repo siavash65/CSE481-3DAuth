@@ -64,6 +64,7 @@ namespace ThreeDAuth
 
         public void updateData(EnumIndexableCollection<FeaturePoint, Vector3DF> pts)
         {
+            Console.WriteLine(count);
             if (count > NUM_SAMPLES)
             {
                 Console.WriteLine("Done Scanning....");

@@ -153,8 +153,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             InitializeComponent();
 
             // Anton
-            var faceTrackingViewerBinding = new Binding("Kinect") { Source = sensor };
-            faceTrackingViewer.SetBinding(FaceTrackingViewer.KinectProperty, faceTrackingViewerBinding);
+            //var faceTrackingViewerBinding = new Binding("Kinect") { Source = sensor };
+            
 
         }
 
@@ -249,7 +249,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (null != this.sensor)
             {
 
-               
+                this.sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
+
                 // Turn on the skeleton stream to receive skeleton frames
                 this.sensor.SkeletonStream.Enable();
 
@@ -262,6 +263,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 
                 // Add an event handler to be called whenever there is new color frame data
                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+               //this.sensor.AllFramesReady += this.KinectSensorOnAllFramesReady;
+               faceTrackingViewer.setSensor(this.sensor); 
 
                 // Start the sensor!
                 try
@@ -466,6 +469,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.sensor.Stop();
             }
         }
+
+        // Anton
+        private void KinectSensorOnAllFramesReady(object sender, AllFramesReadyEventArgs allFramesReadyEventArgs)
+        {
+            //Console.WriteLine("All frames ready");
+        }
+
+
+
 
         /// <summary>
         /// Event handler for Kinect sensor's SkeletonFrameReady event

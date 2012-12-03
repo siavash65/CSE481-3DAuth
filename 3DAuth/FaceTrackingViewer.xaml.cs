@@ -19,12 +19,14 @@ namespace ThreeDAuth
     /// </summary>
     public partial class FaceTrackingViewer : UserControl, IDisposable
     {
-        public static readonly DependencyProperty KinectProperty = DependencyProperty.Register(
+       /* public static readonly DependencyProperty KinectProperty = DependencyProperty.Register(
             "Kinect",
             typeof(KinectSensor),
             typeof(FaceTrackingViewer),
             new PropertyMetadata(
-                null, (o, args) => ((FaceTrackingViewer)o).OnSensorChanged((KinectSensor)args.OldValue, (KinectSensor)args.NewValue)));
+                null, (o, args) => ((FaceTrackingViewer)o).OnSensorChanged((KinectSensor)args.OldValue, (KinectSensor)args.NewValue)));*/
+
+        private KinectSensor sensor;
 
         private const uint MaxMissedFrames = 100;
 
@@ -44,7 +46,21 @@ namespace ThreeDAuth
 
         public FaceTrackingViewer()
         {
+            //this.sensor = kinect;
             this.InitializeComponent();
+            
+            //sensor.AllFramesReady += this.OnAllFramesReady;
+            Console.WriteLine("Done Initializing---------------------------------------------------------------------------------");
+        }
+
+        public void setSensor(KinectSensor kinect) {
+            if (kinect != null)
+            {
+                this.sensor = kinect;
+                sensor.AllFramesReady += this.OnAllFramesReady;
+                Console.WriteLine("Sensor Set  ---------------------------------------------------------------------------------");
+            }
+
         }
 
         ~FaceTrackingViewer()
@@ -52,7 +68,7 @@ namespace ThreeDAuth
             this.Dispose(false);
         }
 
-        public KinectSensor Kinect
+       /* public KinectSensor Kinect
         {
             get
             {
@@ -63,7 +79,7 @@ namespace ThreeDAuth
             {
                 this.SetValue(KinectProperty, value);
             }
-        }
+        }*/
 
         public void Dispose()
         {
@@ -96,6 +112,8 @@ namespace ThreeDAuth
             DepthImageFrame depthImageFrame = null;
             SkeletonFrame skeletonFrame = null;
 
+            
+
             try
             {
                 colorImageFrame = allFramesReadyEventArgs.OpenColorImageFrame();
@@ -104,6 +122,7 @@ namespace ThreeDAuth
 
                 if (colorImageFrame == null || depthImageFrame == null || skeletonFrame == null)
                 {
+
                     return;
                 }
 
@@ -144,12 +163,14 @@ namespace ThreeDAuth
                 depthImageFrame.CopyPixelDataTo(this.depthImage);
                 skeletonFrame.CopySkeletonDataTo(this.skeletonData);
 
+                //Console.WriteLine(skeletonFrame.SkeletonArrayLength);
                 // Update the list of trackers and the trackers with the current frame information
                 foreach (Skeleton skeleton in this.skeletonData)
                 {
                     if (skeleton.TrackingState == SkeletonTrackingState.Tracked
                         || skeleton.TrackingState == SkeletonTrackingState.PositionOnly)
                     {
+                        //Console.WriteLine("All Frames Ready---------------------------------------------------------------------------");
                         // We want keep a record of any skeleton, tracked or untracked.
                         if (!this.trackedSkeletons.ContainsKey(skeleton.TrackingId))
                         {
@@ -160,7 +181,7 @@ namespace ThreeDAuth
                         SkeletonFaceTracker skeletonFaceTracker;
                         if (this.trackedSkeletons.TryGetValue(skeleton.TrackingId, out skeletonFaceTracker))
                         {
-                            skeletonFaceTracker.OnFrameReady(this.Kinect, colorImageFormat, colorImage, depthImageFormat, depthImage, skeleton);
+                            skeletonFaceTracker.OnFrameReady(this.sensor, colorImageFormat, colorImage, depthImageFormat, depthImage, skeleton);
                             skeletonFaceTracker.LastTrackedFrame = skeletonFrame.FrameNumber;
                         }
                     }
@@ -351,6 +372,7 @@ namespace ThreeDAuth
                         }
 
                         this.facePoints = frame.GetProjected3DShape();
+                        Console.WriteLine("Updating Data------------------------------------------------------");
                         store.updateData(frame.Get3DShape());
                     }
                 }
