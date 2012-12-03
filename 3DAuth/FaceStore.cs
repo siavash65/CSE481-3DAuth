@@ -26,7 +26,9 @@ namespace ThreeDAuth
         float[] totals;
         int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34 };
 
-        private const int NUM_SAMPLES = 150;
+        private const int NUM_SAMPLES = 50;
+
+        FaceClassifier classifier;
 
         public float getDist(Vector3DF point1, Vector3DF point2)
         {
@@ -42,6 +44,7 @@ namespace ThreeDAuth
         public FaceStore()
         {
             count = 0;
+            classifier = new FaceClassifier();
 
             features = new List<FeaturePair>();
             initFeatures();
@@ -63,12 +66,10 @@ namespace ThreeDAuth
         }
 
         public void updateData(EnumIndexableCollection<FeaturePoint, Vector3DF> pts)
-        {
-            Console.WriteLine(count);
+        {   
             if (count > NUM_SAMPLES)
             {
-                Console.WriteLine("Done Scanning....");
-                Environment.Exit(0);
+                //Environment.Exit(0);
                 return;
             }
             else if (count == NUM_SAMPLES)
@@ -91,10 +92,11 @@ namespace ThreeDAuth
                 writer.Close();
 
                 count++;
-
+                classifier.verifyUser(totals);
             }
             else
             {
+                Console.WriteLine(count);
                 count++;
 
                 for (int i = 0; i < features.Count; i++)

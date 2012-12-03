@@ -65,6 +65,7 @@
     </ApplicationDefinition>
     <Compile Include="Cube.cs" />
     <Compile Include="CurrentObjectBag.cs" />
+    <Compile Include="FaceClassifier.cs" />
     <Compile Include="FaceStore.cs" />
     <Compile Include="FaceTrackingViewer.xaml.cs">
       <DependentUpon>FaceTrackingViewer.xaml</DependentUpon>

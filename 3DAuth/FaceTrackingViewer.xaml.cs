@@ -102,7 +102,7 @@ namespace ThreeDAuth
             base.OnRender(drawingContext);
             foreach (SkeletonFaceTracker faceInformation in this.trackedSkeletons.Values)
             {
-                faceInformation.DrawFaceModel(drawingContext);
+                //faceInformation.DrawFaceModel(drawingContext);
             }
         }
 
@@ -372,7 +372,7 @@ namespace ThreeDAuth
                         }
 
                         this.facePoints = frame.GetProjected3DShape();
-                        Console.WriteLine("Updating Data------------------------------------------------------");
+                        
                         store.updateData(frame.Get3DShape());
                     }
                 }
