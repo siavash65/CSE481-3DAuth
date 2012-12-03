@@ -28,6 +28,8 @@ namespace ThreeDAuth
 
         private KinectSensor sensor;
 
+        private FaceClassifier classifier;
+
         private const uint MaxMissedFrames = 100;
 
         private readonly Dictionary<int, SkeletonFaceTracker> trackedSkeletons = new Dictionary<int, SkeletonFaceTracker>();
@@ -46,6 +48,8 @@ namespace ThreeDAuth
 
         public FaceTrackingViewer()
         {
+            classifier = new FaceClassifier();
+            
             //this.sensor = kinect;
             this.InitializeComponent();
             
@@ -174,7 +178,7 @@ namespace ThreeDAuth
                         // We want keep a record of any skeleton, tracked or untracked.
                         if (!this.trackedSkeletons.ContainsKey(skeleton.TrackingId))
                         {
-                            this.trackedSkeletons.Add(skeleton.TrackingId, new SkeletonFaceTracker());
+                            this.trackedSkeletons.Add(skeleton.TrackingId, new SkeletonFaceTracker(classifier));
                         }
 
                         // Give each tracker the upated frame.
@@ -277,9 +281,9 @@ namespace ThreeDAuth
 
             public int LastTrackedFrame { get; set; }
 
-            public SkeletonFaceTracker()
+            public SkeletonFaceTracker(FaceClassifier fc)
             {
-                store = new FaceStore();
+                store = new FaceStore(fc);
             }
 
             public void Dispose()

@@ -41,10 +41,10 @@ namespace ThreeDAuth
             return distance;
         }
 
-        public FaceStore()
+        public FaceStore(FaceClassifier fc)
         {
             count = 0;
-            classifier = new FaceClassifier();
+            classifier = fc;
 
             features = new List<FeaturePair>();
             initFeatures();
@@ -70,6 +70,7 @@ namespace ThreeDAuth
             if (count > NUM_SAMPLES)
             {
                 //Environment.Exit(0);
+                
                 return;
             }
             else if (count == NUM_SAMPLES)

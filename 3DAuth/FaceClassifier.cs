@@ -56,6 +56,32 @@ namespace ThreeDAuth
             }
 
 
+            XmlElement newUser = data.CreateElement("user");
+            XmlElement newUserName = data.CreateElement("name");
+            XmlElement faceParams = data.CreateElement("face-params");
+
+            for (int j = 0; j < vals.Length; j++)
+            {
+                XmlElement param = data.CreateElement("param");
+                XmlElement id = data.CreateElement("id");
+                XmlElement mean = data.CreateElement("mean");
+                XmlElement sdv = data.CreateElement("stdev");
+
+                id.Value = (j + 1).ToString();
+                mean.Value = (vals[j]).ToString();
+                sdv.Value = "0";
+                param.AppendChild(id);
+                param.AppendChild(mean);
+                param.AppendChild(sdv);
+
+                faceParams.AppendChild(param);
+            }
+
+            newUser.AppendChild(newUserName);
+            newUser.AppendChild(faceParams);
+
+            data.AppendChild(newUser);
+
             Console.WriteLine("New User");
             return null;
         }
