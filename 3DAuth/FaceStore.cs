@@ -79,7 +79,7 @@ namespace ThreeDAuth
                 String s = DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
 
 
-                StreamWriter writer = new StreamWriter("C:\\Users\\3DAuth\\Documents\\Facial Testing\\" + s + ".txt");
+                StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
                 writer.WriteLine("Anton");
 
 

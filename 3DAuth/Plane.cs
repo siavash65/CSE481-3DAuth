@@ -21,7 +21,7 @@ namespace ThreeDAuth
 
         public FlatPlane(DepthPoint center, double depth)
         {
-            this.depth = depth;
+            this.depth = depth * 1000; // Assuming we get depth in meters from the skeleton tracker
             this.center = center;
         }
 
@@ -31,7 +31,7 @@ namespace ThreeDAuth
         }
         public bool crossesPlane(DepthPoint point)
         {
-            Console.WriteLine("Difference: " + (point.depth - (center.depth - depth)));
+            //Console.WriteLine("Difference: " + (point.depth - (center.depth - depth)));
             return point.depth < (center.depth - depth);
         }
 

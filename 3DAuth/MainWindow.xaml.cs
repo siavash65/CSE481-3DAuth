@@ -145,6 +145,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private const int DEPTH_CUTOFF = 50;
 
         /// <summary>
+        /// Mason
+        /// Gaussian filter on position and motion
+        /// </summary>
+        private ThreeDAuth.PositionMotionFilter positionMotionFilter;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -154,8 +160,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             // Anton
             //var faceTrackingViewerBinding = new Binding("Kinect") { Source = sensor };
-            
 
+            positionMotionFilter = new ThreeDAuth.PositionMotionFilter();
         }
 
         /// <summary>
@@ -264,7 +270,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // Add an event handler to be called whenever there is new color frame data
                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                //this.sensor.AllFramesReady += this.KinectSensorOnAllFramesReady;
-               faceTrackingViewer.setSensor(this.sensor); 
+               
+                //faceTrackingViewer.setSensor(this.sensor); 
 
                 // Start the sensor!
                 try
@@ -334,15 +341,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
                     //Console.WriteLine("Flood filled point count: " + cluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
-                    // send centroid to filter
-                    // get filteredCentroid
+
+                    // send centroid to filter and draw if valid
+                    using (DrawingContext dc = this.liveFeedbackGroup.Open())
+                    {
+                        drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid));
+                    }
 
                     //showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
                     //pDistributor.GivePoint(centroid);
-                    using (DrawingContext dc = this.liveFeedbackGroup.Open())
-                    {
-                        drawHands(dc, centroid);
-                    }
 
                     //Console.WriteLine("Centroid: " + centroid);
                     //ThreeDAuth.PointDistributor.SGivePoint(centroid);
@@ -619,7 +626,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand)
+        private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand, bool drawHand)
         {
             //Start Siavash
             if (userImage != null)
@@ -628,63 +635,65 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             //End Siavash
-
-            if (myFrame.torsoPosition != null)
+            if (drawHand)
             {
-                // Anton's code
-                // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
-                // rectangle over them to give the user feedback
-
-                ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
-                //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
-                //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
-
-                //ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
-
-                //ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.x, right.y, myPlane.crossesPlane(right));
-
-                //pDistributor.GivePoint(arrived);
-                Console.WriteLine("Depth: " + hand.depth);
-                ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
-                pDistributor.GivePoint(hand);
-
-                //if (arrived.inPlane)
-                if (planePoint.inPlane)
+                if (myFrame.torsoPosition != null)
                 {
-                    //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
-                    drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
-                }
-                else
-                {
-                    //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
-                    drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
-                }
+                    // Anton's code
+                    // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
+                    // rectangle over them to give the user feedback
 
+                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
+                    //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
+                    //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
-                ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
+                    //ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
 
-                ThreeDAuth.DepthPoint left = this.SkeletonPointToScreen(leftWrist.Position);
+                    //ThreeDAuth.PlanePoint arrived = new ThreeDAuth.PlanePoint(right.x, right.y, myPlane.crossesPlane(right));
 
-                if (myPlane.crossesPlane(left))
-                {
-                    //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                }
-                else
-                {
-                    //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
-                }
+                    //pDistributor.GivePoint(arrived);
+                    //Console.WriteLine("Depth: " + hand.depth);
+                    ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
+                    pDistributor.GivePoint(hand);
 
-
-
-                // Mason's code
-                // If we're learning a gesture, draw the learned points
-                if (gLearner != null && gLearner.isRecording)
-                {
-                    System.Collections.Generic.Queue<ThreeDAuth.Point2d> currentPoints = gLearner.getGesturePath();
-                    foreach (ThreeDAuth.Point2d point in currentPoints) 
+                    //if (arrived.inPlane)
+                    if (planePoint.inPlane)
                     {
-                        drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.X, point.Y, 30, 30), null, 14, null, 14, null);
+                        //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                        drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                    }
+                    else
+                    {
+                        //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
+                        drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                    }
 
+
+                    ThreeDAuth.Point3d wristLeft = new ThreeDAuth.Point3d(leftWrist.Position.X, leftWrist.Position.Y, leftWrist.Position.Z);
+
+                    ThreeDAuth.DepthPoint left = this.SkeletonPointToScreen(leftWrist.Position);
+
+                    if (myPlane.crossesPlane(left))
+                    {
+                        //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    }
+                    else
+                    {
+                        //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(left.X, left.Y, 30, 30), null, 14, null, 14, null);
+                    }
+
+
+
+                    // Mason's code
+                    // If we're learning a gesture, draw the learned points
+                    if (gLearner != null && gLearner.isRecording)
+                    {
+                        System.Collections.Generic.Queue<ThreeDAuth.Point2d> currentPoints = gLearner.getGesturePath();
+                        foreach (ThreeDAuth.Point2d point in currentPoints)
+                        {
+                            drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.X, point.Y, 30, 30), null, 14, null, 14, null);
+
+                        }
                     }
                 }
             }
