@@ -635,6 +635,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             //End Siavash
+            drawHand = true;
             if (drawHand)
             {
                 if (myFrame.torsoPosition != null)
@@ -900,6 +901,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 gValidator = new ThreeDAuth.GestureValidator(path, 50);
                 gValidator.beginPath();
             }
+        }
+
+        private void button2_Click(object sender, RoutedEventArgs e)
+        {
+            faceTrackingViewer.setSensor(this.sensor);
+            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+
+        }
+
+        void GiveUser(User current)
+        {
+            Console.WriteLine("The name is " + current.name);
         }
 
     }

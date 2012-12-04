@@ -7,6 +7,7 @@ namespace ThreeDAuth
 {
     delegate void GiveGestureValidatorReference(GestureValidator validator);
     delegate void GiveGestureLearnerReference(GestureLearner learner);
+    delegate void GiveFaceClassifierReference(FaceClassifier classifier);
 
     // singleton that holds references to current objects such as:
     // current gesture validator
@@ -17,6 +18,7 @@ namespace ThreeDAuth
 
         private GestureValidator _CurrentGestureValidator;
         private GestureLearner _CurrentGestureLearner;
+        private FaceClassifier _CurrentFaceClassifier;
 
         public GestureValidator CurrentGestureValidator
         {
@@ -50,6 +52,22 @@ namespace ThreeDAuth
             }
         }
 
+        public FaceClassifier CurrentFaceClassifier
+        {
+            get
+            {
+                return _CurrentFaceClassifier;
+            }
+            set
+            {
+                _CurrentFaceClassifier = value;
+                if (_onFaceClassifierChanged != null)
+                {
+                    _onFaceClassifierChanged(value);
+                }
+            }
+        }
+
         // S prefix is for the static reference
         public static GestureValidator SCurrentGestureValidator
         {
@@ -76,6 +94,19 @@ namespace ThreeDAuth
             }
         }
 
+        // S prefix is for the static reference
+        public static FaceClassifier SCurrentFaceClassifier
+        {
+            get
+            {
+                return CurrentObjectBag.GetInstance().CurrentFaceClassifier;
+            }
+            set
+            {
+                CurrentObjectBag.GetInstance().CurrentFaceClassifier = value;
+            }
+        }
+
         private CurrentObjectBag() { }
 
         public static CurrentObjectBag GetInstance()
@@ -91,6 +122,7 @@ namespace ThreeDAuth
 
         private event GiveGestureValidatorReference _onGestureValidatorChanged;
         private event GiveGestureLearnerReference _onGestureLearnerChanged;
+        private event GiveFaceClassifierReference _onFaceClassifierChanged;
 
         public event GiveGestureValidatorReference onGestureValidatorChanged
         {
@@ -116,6 +148,18 @@ namespace ThreeDAuth
             }
         }
 
+        public event GiveFaceClassifierReference onFaceClassifierChanged
+        {
+            add
+            {
+                _onFaceClassifierChanged += value;
+            }
+            remove
+            {
+                _onFaceClassifierChanged -= value;
+            }
+        }
+
         public static event GiveGestureValidatorReference SOnGestureValidatorChanged
         {
             add
@@ -137,6 +181,18 @@ namespace ThreeDAuth
             remove
             {
                 CurrentObjectBag.GetInstance().onGestureLearnerChanged -= value;
+            }
+        }
+
+        public static event GiveFaceClassifierReference SOnFaceClassifierChanged
+        {
+            add
+            {
+                CurrentObjectBag.GetInstance().onFaceClassifierChanged += value;
+            }
+            remove
+            {
+                CurrentObjectBag.GetInstance().onFaceClassifierChanged -= value;
             }
         }
     }

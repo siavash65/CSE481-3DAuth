@@ -89,6 +89,7 @@
     <Compile Include="PointDistributor.cs" />
     <Compile Include="ReferenceFrame.cs" />
     <Compile Include="TargetBox.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="Util.cs" />
     <Page Include="FaceTrackingViewer.xaml">
       <SubType>Designer</SubType>

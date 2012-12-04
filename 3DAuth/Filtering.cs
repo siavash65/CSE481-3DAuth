@@ -189,8 +189,8 @@ namespace ThreeDAuth
                 double yPosPhi = newYPosGaussian.GetPhiValue(point.y);
                 double depthPosPhi = newDepthPosGaussian.GetPhiValue(point.depth);
 
-                Console.WriteLine("Standard Deviations: " + xPosPhi + " | " + yPosPhi + " | " + depthPosPhi + " | " +
-                                                            xVelPhi + " | " + yVelPhi + " | " + depthVelPhi);
+                //Console.WriteLine("phi: " + xPosPhi + " | " + yPosPhi + " | " + depthPosPhi + " | " +
+                //                                            xVelPhi + " | " + yVelPhi + " | " + depthVelPhi);
 
 
                 if ( (xVelPhi > PHI_CUTOFF && xVelPhi < (1 - PHI_CUTOFF)) &&
@@ -209,11 +209,11 @@ namespace ThreeDAuth
                 }
                 else
                 {
-                    Console.WriteLine("Rejected a point!!!!!!!!!!!!!!!!!!!!!!");
+                    //Console.WriteLine("Rejected a point!!!!!!!!!!!!!!!!!!!!!!");
                     rejectedPoints.Enqueue(new Tuple<DepthPoint, long>(point, now));
                     while (now - rejectedPoints.First().Item2 > ERROR_TIME_CUTOFF_TICKS)
                     {
-                        Console.WriteLine("dumping rejected points");
+                        //Console.WriteLine("dumping rejected points");
                         rejectedPoints.Dequeue();
                     }
                     if (rejectedPoints.Count > ERROR_POINT_LIMIT)
@@ -222,7 +222,7 @@ namespace ThreeDAuth
                         rejectedPoints.Clear();
                         previousPoints.Clear();
                         previousPoints.Enqueue(new Tuple<DepthPoint, long>(point, now));
-                        Console.WriteLine("***************** STARTING OVER ************************");
+                        //Console.WriteLine("***************** STARTING OVER ************************");
                         return true;
                     }
                     else

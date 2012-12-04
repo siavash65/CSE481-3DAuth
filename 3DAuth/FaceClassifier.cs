@@ -6,10 +6,14 @@ using System.Xml;
 
 namespace ThreeDAuth
 {
+    delegate void GiveUser(User u);
+
     class FaceClassifier
     {
         private XmlDocument data;
         private const double MAX_DIFF = 6;
+
+        private event GiveUser _onUserRecieved;
         
         public FaceClassifier()
         {
@@ -21,10 +25,31 @@ namespace ThreeDAuth
             }
             catch (Exception)
             {
-                Console.WriteLine("fuck");
+                Console.WriteLine("file not found");
             }
             
         }
+
+        private void Notify(User u)
+        {
+            // could be an issue if no one is listening, but there should be a listener by the time this is called
+            if (_onUserRecieved != null)
+                _onUserRecieved(u);
+        }
+
+        public event GiveUser OnUserReceived
+        {
+            add
+            {
+                _onUserRecieved += value;
+            }
+            remove
+            {
+                _onUserRecieved -= value;
+            }
+        }
+
+
 
         public String verifyUser(float[] vals)
         {
@@ -51,11 +76,13 @@ namespace ThreeDAuth
                 if (total <= MAX_DIFF)
                 {
                     Console.WriteLine(user["name"].InnerText);
+                    User current = new User(user["name"].InnerText, "", null);
+                    Notify(current);
                     return null;
                 }
             }
 
-
+            /*
             XmlElement newUser = data.CreateElement("user");
             XmlElement newUserName = data.CreateElement("name");
             XmlElement faceParams = data.CreateElement("face-params");
@@ -81,8 +108,11 @@ namespace ThreeDAuth
             newUser.AppendChild(faceParams);
 
             data.AppendChild(newUser);
-
+            */
             Console.WriteLine("New User");
+            User cur = new User("Noobie", "", null);
+            Notify(cur);
+
             return null;
         }
 

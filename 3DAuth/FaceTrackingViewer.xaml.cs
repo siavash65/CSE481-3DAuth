@@ -49,6 +49,7 @@ namespace ThreeDAuth
         public FaceTrackingViewer()
         {
             classifier = new FaceClassifier();
+            CurrentObjectBag.SCurrentFaceClassifier = classifier;
             
             //this.sensor = kinect;
             this.InitializeComponent();

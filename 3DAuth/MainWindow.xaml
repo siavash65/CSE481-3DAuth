@@ -57,33 +57,18 @@
         
         <DockPanel Grid.Row="0" Margin="0 0 20 20" >
             <!--<Image DockPanel.Dock="Left" Source="Images\Logo.png" Stretch="None" Margin="0 10 0 5"/>-->
-            <Button x:Name="New_Account" DockPanel.Dock="Left" Content="Create A New User Account" Margin="0,10,0,5" Width="159" Height="24" Click="New_Account_Click">
+            <Button x:Name="New_Account"  Content="New User" Margin="0,10,0,5" Width="109" Height="24" Click="New_Account_Click">
                 <Button.CacheMode>
                     <BitmapCache/>
                 </Button.CacheMode>
             </Button>
-            <Button x:Name="Graph" DockPanel.Dock="Left" Content="Graph" Margin="10,10,0,5" Width="75" Height="24" Click="graphPage">
-                <Button.CacheMode>
-                    <BitmapCache/>
-                </Button.CacheMode>
-            </Button>
-            <Button x:Name="Start" DockPanel.Dock="Left" Content="Start" Margin="10,10,0,5" Width="50" Height="24" Click="Start_Click">
-                <Button.CacheMode>
-                    <BitmapCache/>
-                </Button.CacheMode>
-            </Button>
-            <Button x:Name="Stop" DockPanel.Dock="Left" Content="Stop" Margin="10,10,0,5" Width="50" Height="24" Click="Stop_Click">
-                <Button.CacheMode>
-                    <BitmapCache/>
-                </Button.CacheMode>
-            </Button>
-            <TextBlock DockPanel.Dock="Right" Margin="0 0 20 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
-            <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
-            <Button Content="Validate" Height="24" Name="button1" Width="50" Click="Validate_Click">
+            <Button Content="Log In" Height="24" Name="button2" Margin="30,10,0,5" Width="109" Click="button2_Click" HorizontalAlignment="Stretch">
                 <Button.CacheMode>
                     <BitmapCache />
                 </Button.CacheMode>
             </Button>
+            <TextBlock DockPanel.Dock="Right" Margin="0 0 20 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
+            <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
         </DockPanel>
         <Viewbox Grid.Row="1" Stretch="Fill" HorizontalAlignment="Center">
             <me:FaceTrackingViewer x:Name="faceTrackingViewer" />
