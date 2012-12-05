@@ -342,15 +342,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int yIdx = this.pixelIndex / depthFrame.Width;
                     /*ThreeDAuth.PointCluster*/
                     myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
-                    //Console.WriteLine("Flood filled point count: " + cluster.points.Count);
+                    //Console.WriteLine("Flood filled point count: " + myPointCluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
 
                     // send centroid to filter and draw if valid
-                    using (DrawingContext dc = this.liveFeedbackGroup.Open())
+                    if (myPointCluster.points.Count > 50)
                     {
-                        drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid));
+                        using (DrawingContext dc = this.liveFeedbackGroup.Open())
+                        {
+                            drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid));
+                        }
                     }
-
                     //showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
                     //pDistributor.GivePoint(centroid);
 
@@ -647,7 +649,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                     // rectangle over them to give the user feedback
 
-                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .9);
+                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
                     //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
                     //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
@@ -887,31 +889,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.scanmassage.Visibility = System.Windows.Visibility.Visible;
             faceTrackingViewer.setSensor(this.sensor);
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
-            /*
-            string fileName = "";
-            OpenFileDialog browseFile = new OpenFileDialog();
-            browseFile.Title = "Select Your Image";
-            browseFile.InitialDirectory = @"Libraries\Pictures";
-            browseFile.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
-            browseFile.FilterIndex = 2;
-            browseFile.RestoreDirectory = true;
-            browseFile.ShowDialog();
-            try
-            {
-                fileName = browseFile.FileName;
-                userImage = new BitmapImage(new Uri(fileName));
-                this.myImageBox.Visibility = Visibility.Visible;
-                //this.myImageBox.Source = userImage;
-                
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-
-            }
-             */
-
-
         }
 
         private void login_Click(object sender, RoutedEventArgs e)
@@ -943,6 +920,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 else
                 {
+
                     this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
                     faceTrackingViewer.stopTracking();
@@ -956,9 +934,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 if (current.name.Length > 0)
                 {
-                    //faceTrackingViewer.Dispose();
                     faceTrackingViewer.stopTracking();
-
                     Console.WriteLine("The name is " + current.name);
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
                     this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
@@ -989,7 +965,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
 
-
         private void accountButton_Click(object sender, RoutedEventArgs e)
         {
             this.currentUser = new User("", "", null);
@@ -1017,7 +992,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 fileName = browseFile.FileName;
                 userImage = new BitmapImage(new Uri(fileName));
                 this.myImageBox.Visibility = Visibility.Visible;
-                this.registrationForm.Visibility = System.Windows.Visibility.Collapsed;
+                //this.registrationForm.Visibility = System.Windows.Visibility.Collapsed;
+                this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+                this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+                this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
+                this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+                this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
+                this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
                 this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
              

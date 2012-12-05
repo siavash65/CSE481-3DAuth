@@ -70,15 +70,18 @@
         <Image x:Name="myImageBox" Stretch="Fill" HorizontalAlignment="Left" Margin="0,99,0,20" Grid.Row="1" VerticalAlignment="Center" Opacity="0.8" Visibility="Visible" Source="C:\Users\Public\Pictures\Sample Pictures\Desert.jpg" Height="427" />
         
         <StackPanel Name="registrationForm" Grid.Row="1" Height="304" HorizontalAlignment="Left" Margin="12,18,0,0"  VerticalAlignment="Top" Width="846" Visibility="Visible">
-            <StackPanel  Height="75" Name="InitialPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible">
+            <StackPanel  Height="75" Name="InitialPanel" Width="847" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible">
                 <Button x:Name="New_Account"  Content="New User" Margin="0,10,0,5" Width="207" Height="48" Click="New_Account_Click" Background="#FFC9D800" Foreground="#FF00A8DB" FontWeight="Bold" />
                 <Button Content="Log In" Height="48" Name="login" Margin="30,10,0,5" Width="207" Click="login_Click" HorizontalAlignment="Stretch" Foreground="#FF00A8DB" Background="#FFC9D800" FontWeight="Bold" />
                 <TextBlock Name="welcomeMassage" Margin="0,10,0,5" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold"  Text="" HorizontalAlignment="Left" Height="34" />
                 <Button Background="#FFC9D800" Content="Rescan" Foreground="#FF00A8DB" Height="48" Name="rescan" Width="207" Margin="30,10,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Hidden" Click="rescan_Click" FontWeight="Bold" />
             </StackPanel>
+            <StackPanel Height="43" Name="gestureTracker" Width="650" HorizontalAlignment="Left" Visibility="Hidden">
+                <TextBlock Height="34" Name="gestureMassage"  FontSize="20" Foreground="#FF00A8DB" FontWeight="Bold" />
+            </StackPanel>
             <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait untill we scan your face" Visibility="Hidden" />
             <TextBlock  Text="We have successfully scanned your face. Please choose a username for your new account" Height="48" Name="RegistrationMassage" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold" Visibility="Hidden" />
-            <StackPanel  Height="54" Name="userNamestackPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden">
+            <StackPanel  Height="61" Name="userNamestackPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden" VerticalAlignment="Top">
                 <TextBlock Height="29" Name="userNameTextbox" Width="118" Foreground="#FF00A8DB" Text="UserName:" FontSize="20" FontWeight="Bold" />
                 <TextBox Name="Username" Height="48" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="20" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />
                 <Button Content="Create Account" Height="48" Name="AccountButton" Width="207" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="accountButton_Click" IsEnabled="False" />
