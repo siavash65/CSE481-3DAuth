@@ -76,7 +76,7 @@ namespace ThreeDAuth
                 if (total <= MAX_DIFF)
                 {
                     Console.WriteLine(user["name"].InnerText);
-                    User current = new User(user["name"].InnerText, "", null);
+                    User current = new User(user["name"].InnerText, user["user-image"].InnerText, null);
                     Notify(current);
                     return null;
                 }
@@ -110,7 +110,7 @@ namespace ThreeDAuth
             data.AppendChild(newUser);
             */
             Console.WriteLine("New User");
-            User cur = new User("Noobie", "", null);
+            User cur = new User("", "", null);
             Notify(cur);
 
             return null;

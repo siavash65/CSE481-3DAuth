@@ -46,6 +46,7 @@ namespace ThreeDAuth
 
         private Skeleton[] skeletonData;
 
+
         public FaceTrackingViewer()
         {
             classifier = new FaceClassifier();
@@ -172,6 +173,7 @@ namespace ThreeDAuth
                 // Update the list of trackers and the trackers with the current frame information
                 foreach (Skeleton skeleton in this.skeletonData)
                 {
+                    
                     if (skeleton.TrackingState == SkeletonTrackingState.Tracked
                         || skeleton.TrackingState == SkeletonTrackingState.PositionOnly)
                     {

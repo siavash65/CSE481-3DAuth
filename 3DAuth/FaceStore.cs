@@ -97,6 +97,7 @@ namespace ThreeDAuth
             }
             else
             {
+                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
                 Console.WriteLine(count);
                 count++;
 

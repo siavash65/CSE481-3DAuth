@@ -30,7 +30,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Width of output drawing
         /// </summary>
         private const float RenderWidth = 640.0f;
-
+        
         /// <summary>
         /// Height of our output drawing
         /// </summary>
@@ -117,6 +117,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DepthImagePixel closestPoint;
         private int counter = 0;
         private System.Drawing.Bitmap bmap;
+        private User currentUser;
+        public static int faceScanCounter = 0;
+        private Boolean isUserNew = false;
 
         //End by Siavash
 
@@ -259,16 +262,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 // Turn on the skeleton stream to receive skeleton frames
                 this.sensor.SkeletonStream.Enable();
-
-                //Start Siavash
+                // Turn on the depth image stream to receive skeleton frames
                 this.sensor.DepthStream.Enable();
 
-                this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
 
                 //End Siavash
                 
                 // Add an event handler to be called whenever there is new color frame data
-               this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+               //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                //this.sensor.AllFramesReady += this.KinectSensorOnAllFramesReady;
                
                 //faceTrackingViewer.setSensor(this.sensor); 
@@ -286,6 +288,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             if (null == this.sensor)
             {
+                System.Console.WriteLine("The Kinect sensor is not ready");
                 //this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
         }
@@ -833,33 +836,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         */
-        private void New_Account_Click(object sender, RoutedEventArgs e)
-        {
-
-            string fileName = "";
-            OpenFileDialog browseFile = new OpenFileDialog();
-            browseFile.Title = "Select Your Image";
-            browseFile.InitialDirectory = @"Libraries\Pictures";
-            browseFile.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
-            browseFile.FilterIndex = 2;
-            browseFile.RestoreDirectory = true;
-            browseFile.ShowDialog();
-            try
-            {
-                fileName = browseFile.FileName;
-                userImage = new BitmapImage(new Uri(fileName));
-                this.myImageBox.Visibility = Visibility.Visible;
-                //this.myImageBox.Source = userImage;
-                
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-
-            }
-
-           
-        }
+       
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -903,8 +880,44 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        private void button2_Click(object sender, RoutedEventArgs e)
+        private void New_Account_Click(object sender, RoutedEventArgs e)
         {
+            this.isUserNew = true;
+            this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
+            faceTrackingViewer.setSensor(this.sensor);
+            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+            /*
+            string fileName = "";
+            OpenFileDialog browseFile = new OpenFileDialog();
+            browseFile.Title = "Select Your Image";
+            browseFile.InitialDirectory = @"Libraries\Pictures";
+            browseFile.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
+            browseFile.FilterIndex = 2;
+            browseFile.RestoreDirectory = true;
+            browseFile.ShowDialog();
+            try
+            {
+                fileName = browseFile.FileName;
+                userImage = new BitmapImage(new Uri(fileName));
+                this.myImageBox.Visibility = Visibility.Visible;
+                //this.myImageBox.Source = userImage;
+                
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            }
+             */
+
+
+        }
+
+        private void login_Click(object sender, RoutedEventArgs e)
+        {
+            this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
             faceTrackingViewer.setSensor(this.sensor);
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
 
@@ -912,8 +925,130 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         void GiveUser(User current)
         {
-            Console.WriteLine("The name is " + current.name);
+
+            if (this.isUserNew)
+            {
+                if (current.name.Length > 0)
+                {
+                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.login.Visibility = System.Windows.Visibility.Collapsed;
+                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Text = "We have found your scan if thats incorecct click on rescan!";
+                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.rescan.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
+                    faceTrackingViewer.Dispose();
+                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
+                }
+
+            }
+
+            else
+            {
+                if (current.name.Length > 0)
+                {
+                    faceTrackingViewer.Dispose();
+
+                    Console.WriteLine("The name is " + current.name);
+                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                    this.login.Visibility = System.Windows.Visibility.Collapsed;
+                    this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Text = "Hello " + current.name + " If this is not you, click on rescan! ";
+                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    userImage = new BitmapImage(new Uri(current.imgPath));
+                    this.myImageBox.Visibility = Visibility.Visible;
+                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                }
+                else
+                {
+                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.login.Visibility = System.Windows.Visibility.Collapsed;
+                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+                    this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Text = "We could not find you click on rescan!";
+                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    
+                }
+
+            }
         }
+
+
+
+        private void accountButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.currentUser = new User("", "", null);
+            this.currentUser.name = this.Username.Text;
+            this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void Username_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            this.AccountButton.IsEnabled= true;
+        }
+
+        private void browse_Click(object sender, RoutedEventArgs e)
+        {
+            string fileName = "";
+            OpenFileDialog browseFile = new OpenFileDialog();
+            browseFile.Title = "Select Your Image";
+            browseFile.InitialDirectory = @"Libraries\Pictures";
+            browseFile.Filter = "All files (*.*)|*.*|All files (*.*)|*.*";
+            browseFile.FilterIndex = 2;
+            browseFile.RestoreDirectory = true;
+            browseFile.ShowDialog();
+            try
+            {
+                fileName = browseFile.FileName;
+                userImage = new BitmapImage(new Uri(fileName));
+                this.myImageBox.Visibility = Visibility.Visible;
+                this.registrationForm.Visibility = System.Windows.Visibility.Collapsed;
+                this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+             
+               
+                
+
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error opening file", "File Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            }
+        }
+
+        private void rescan_Click(object sender, RoutedEventArgs e)
+        {
+            this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+            this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.myImageBox.Visibility = System.Windows.Visibility.Collapsed; ;
+            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
+            faceTrackingViewer.setSensor(this.sensor);
+            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+        }
+
+ 
+
+    
+
+    
+
+   
+     
+        
 
     }
 }
