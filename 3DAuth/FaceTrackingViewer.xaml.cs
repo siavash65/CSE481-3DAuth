@@ -69,6 +69,19 @@ namespace ThreeDAuth
 
         }
 
+        public void stopTracking()
+        {
+            this.sensor.AllFramesReady -= this.OnAllFramesReady;
+            this.ResetFaceTracking();
+            Console.WriteLine("Tracking Stopped  ---------------------------------------------------------------------------------");
+        }
+
+        public void startTracking()
+        {
+            sensor.AllFramesReady += this.OnAllFramesReady;
+            Console.WriteLine("Tracking Re-Started  ---------------------------------------------------------------------------------");
+        }
+
         ~FaceTrackingViewer()
         {
             this.Dispose(false);
@@ -102,6 +115,7 @@ namespace ThreeDAuth
                 this.disposed = true;
             }
         }
+
 
         protected override void OnRender(DrawingContext drawingContext)
         {

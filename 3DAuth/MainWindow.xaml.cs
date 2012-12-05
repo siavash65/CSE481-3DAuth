@@ -925,6 +925,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         void GiveUser(User current)
         {
+            faceTrackingViewer.stopTracking();
 
             if (this.isUserNew)
             {
@@ -944,7 +945,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
-                    faceTrackingViewer.Dispose();
+                    faceTrackingViewer.stopTracking();
                     this.RegistrationMassage.Visibility = System.Windows.Visibility.Visible;
                     this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
                 }
@@ -955,7 +956,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 if (current.name.Length > 0)
                 {
-                    faceTrackingViewer.Dispose();
+                    //faceTrackingViewer.Dispose();
+                    faceTrackingViewer.stopTracking();
 
                     Console.WriteLine("The name is " + current.name);
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
@@ -1036,7 +1038,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed; ;
             this.scanmassage.Visibility = System.Windows.Visibility.Visible;
-            faceTrackingViewer.setSensor(this.sensor);
+            faceTrackingViewer.startTracking();
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
         }
 

@@ -51,9 +51,10 @@ namespace ThreeDAuth
 
 
 
-        public String verifyUser(float[] vals)
+        public void verifyUser(float[] vals)
         {
-
+            SortedDictionary<String, double> matches = new SortedDictionary<String, double>();
+            
             XmlNodeList users = data.GetElementsByTagName("user");
 
             foreach (XmlNode user in users)
@@ -72,21 +73,72 @@ namespace ThreeDAuth
                     total += score;
                     //Console.WriteLine(score);
                 }
+                
+                try {
+                    matches.Add(user["name"].InnerText, total);
+                } catch (Exception e) {
 
-                if (total <= MAX_DIFF)
-                {
-                    Console.WriteLine(user["name"].InnerText);
-                    User current = new User(user["name"].InnerText, user["user-image"].InnerText, null);
-                    Notify(current);
-                    return null;
                 }
             }
 
-            /*
-            XmlElement newUser = data.CreateElement("user");
-            XmlElement newUserName = data.CreateElement("name");
-            XmlElement faceParams = data.CreateElement("face-params");
 
+            String bestMatchName = "New User";
+            double bestMatchVal = 100;
+
+            foreach (KeyValuePair<String, double> kvp in matches)
+            {
+                if (kvp.Value < bestMatchVal)
+                {
+                    bestMatchVal = kvp.Value;
+                    bestMatchName = kvp.Key;
+                }
+            }
+
+
+            if (bestMatchVal <= MAX_DIFF)
+            {
+                Console.WriteLine(bestMatchName);
+                foreach (XmlNode user in users)
+                {
+                    if (user["name"].InnerText == bestMatchName)
+                    {
+                        List<Point> tempPts = new List<Point>();
+                        XmlNode points = user["points"];
+                        for (int i = 0; i < points.ChildNodes.Count; i++)
+                        {
+                            XmlNode point = points.ChildNodes[i];
+                            float x = (float)Convert.ToDouble(point["x"].InnerText);
+                            float y = (float)Convert.ToDouble(point["y"].InnerText);
+                            Point tmp = new Point2d(x, y);
+                            tempPts.Add(tmp);
+                        }
+
+                        User current = new User(user["name"].InnerText, user["user-image"].InnerText, tempPts);
+                        Console.WriteLine(user["name"].InnerText);
+                        Notify(current);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                
+                Console.WriteLine("New User");
+                User cur = new User("", "", null);
+                Notify(cur);
+            }
+
+        }
+
+
+        public void addUser(User u)
+        {
+            
+            //XmlElement newUser = data.CreateElement("user");
+           // XmlElement newUserName = data.CreateElement("name");
+            //XmlElement faceParams = data.CreateElement("face-params");
+
+             /*
             for (int j = 0; j < vals.Length; j++)
             {
                 XmlElement param = data.CreateElement("param");
@@ -109,12 +161,9 @@ namespace ThreeDAuth
 
             data.AppendChild(newUser);
             */
-            Console.WriteLine("New User");
-            User cur = new User("", "", null);
-            Notify(cur);
-
-            return null;
         }
+
+
 
         private float getZScore(float observed, float mean, float stdev)
         {
