@@ -67,7 +67,7 @@
             <StatusBarItem Padding="0 0 0 10"></StatusBarItem>
         </StatusBar>
         <Image x:Name="Image" HorizontalAlignment="Right" Stretch="Fill" Margin="10,10,10,40" Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" />
-        <Image x:Name="myImageBox" Stretch="Fill" HorizontalAlignment="Left" Margin="0,99,0,20" Grid.Row="1" VerticalAlignment="Center" Opacity="0.8" Visibility="Visible" Source="C:\Users\Public\Pictures\Sample Pictures\Desert.jpg" Height="427" />
+        <Image x:Name="myImageBox" Stretch="Fill" HorizontalAlignment="Left" Margin="0,99,0,20" Grid.Row="1" VerticalAlignment="Center" Opacity="0.8" Visibility="Visible" Source="C:\Users\Siavash\Pictures\snow.jpg" Height="427" />
         
         <StackPanel Name="registrationForm" Grid.Row="1" Height="304" HorizontalAlignment="Left" Margin="12,18,0,0"  VerticalAlignment="Top" Width="846" Visibility="Visible">
             <StackPanel  Height="75" Name="InitialPanel" Width="847" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible">
@@ -79,7 +79,10 @@
             <StackPanel Height="43" Name="gestureTracker" Width="650" HorizontalAlignment="Left" Visibility="Hidden">
                 <TextBlock Height="34" Name="gestureMassage"  FontSize="20" Foreground="#FF00A8DB" FontWeight="Bold" />
             </StackPanel>
-            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait untill we scan your face" Visibility="Hidden" />
+            <StackPanel Height="43" Name="scanpanel" Width="836" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden">
+                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait untill we scan your face" />
+                <ProgressBar Name="progressBar" Width="107" Height="23" Margin="20,5,373,15" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </StackPanel>
             <TextBlock  Text="We have successfully scanned your face. Please choose a username for your new account" Height="48" Name="RegistrationMassage" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold" Visibility="Hidden" />
             <StackPanel  Height="61" Name="userNamestackPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden" VerticalAlignment="Top">
                 <TextBlock Height="29" Name="userNameTextbox" Width="118" Foreground="#FF00A8DB" Text="UserName:" FontSize="20" FontWeight="Bold" />

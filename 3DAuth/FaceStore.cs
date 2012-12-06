@@ -11,6 +11,7 @@ namespace ThreeDAuth
 
     delegate void GiveCount(int count, int total);
 
+   
     public enum FeatureLength
     {
         OuterEyes = 0,
@@ -23,6 +24,7 @@ namespace ThreeDAuth
 
     class FaceStore
     {
+         
         int count;
 
         //private event GiveCount _OnCountReceived;
@@ -163,6 +165,7 @@ namespace ThreeDAuth
             else
             {
                 Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
+                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
                 Console.WriteLine(count);
                 count++;
 

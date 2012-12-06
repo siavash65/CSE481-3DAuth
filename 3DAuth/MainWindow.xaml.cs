@@ -115,12 +115,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private int maxDepth;
         private int minDepth;
         private DepthImagePixel closestPoint;
-        private int counter = 0;
         private System.Drawing.Bitmap bmap;
         private User currentUser;
         public static int faceScanCounter = 0;
         private Boolean isUserNew = false;
-
+        public static int faceScanCount = 0;
         //End by Siavash
 
         /// <summary>
@@ -302,6 +301,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void OnAllFramesReady(object sender, AllFramesReadyEventArgs allFramesReadyEventArgs)
         {
 
+            this.progressBar.Value = faceScanCount * 2;
         }
 
         private int closestPointCounter = 0;
@@ -999,7 +999,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             CurrentObjectBag.SLearningNewUser = false;
 
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
-            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
+            this.scanpanel.Visibility = System.Windows.Visibility.Visible;
+            //this.scanmassage.Visibility = System.Windows.Visibility.Visible;
             faceTrackingViewer.setSensor(this.sensor);
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
 
@@ -1013,6 +1014,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 if (current.name.Length > 0)
                 {
+                    faceTrackingViewer.stopTracking();
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
                     this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
                     this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
@@ -1025,7 +1027,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 else
                 {
-
+                    faceTrackingViewer.stopTracking();
                     this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
                     faceTrackingViewer.stopTracking();
@@ -1058,7 +1060,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 else
                 {
-                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
+                    this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
                     this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
                     this.login.Visibility = System.Windows.Visibility.Collapsed;
@@ -1129,10 +1131,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void rescan_Click(object sender, RoutedEventArgs e)
         {
+            faceScanCount = 0;
             this.rescan.Visibility = System.Windows.Visibility.Collapsed;
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed; ;
-            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
+            this.scanpanel.Visibility = System.Windows.Visibility.Visible;
             faceTrackingViewer.startTracking();
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
         }
