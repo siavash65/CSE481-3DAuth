@@ -105,6 +105,7 @@ namespace ThreeDAuth
 
         public void updateData(EnumIndexableCollection<FeaturePoint, Vector3DF> pts)
         {
+            Console.WriteLine(count);
             if (count > NUM_SAMPLES)
             {
                 //Environment.Exit(0);
@@ -166,7 +167,7 @@ namespace ThreeDAuth
             {
                 Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
                 Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
-                Console.WriteLine(count);
+                
                 count++;
 
                 for (int i = 0; i < features.Count; i++)
