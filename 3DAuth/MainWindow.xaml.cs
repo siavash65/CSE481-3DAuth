@@ -277,7 +277,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 
                 // Add an event handler to be called whenever there is new color frame data
                //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
-               //this.sensor.AllFramesReady += this.KinectSensorOnAllFramesReady;
+                this.sensor.AllFramesReady += this.OnAllFramesReady;
                
                 //faceTrackingViewer.setSensor(this.sensor); 
 
@@ -297,6 +297,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 System.Console.WriteLine("The Kinect sensor is not ready");
                 //this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
+        }
+
+        private void OnAllFramesReady(object sender, AllFramesReadyEventArgs allFramesReadyEventArgs)
+        {
+
         }
 
         private int closestPointCounter = 0;
@@ -980,6 +985,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
+            CurrentObjectBag.SLearningNewUser = true;
+            
             this.isUserNew = true;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.scanmassage.Visibility = System.Windows.Visibility.Visible;
@@ -989,6 +996,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void login_Click(object sender, RoutedEventArgs e)
         {
+            CurrentObjectBag.SLearningNewUser = false;
+
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.scanmassage.Visibility = System.Windows.Visibility.Visible;
             faceTrackingViewer.setSensor(this.sensor);
