@@ -51,33 +51,33 @@
 	<face-params>
 		<param>
 			<id>1</id>
-			<mean>0.1106126</mean>
+			<mean>0.1145625</mean>
 			<stdev>0.001367176</stdev>
 		</param>
 		<param>
 			<id>2</id>
-			<mean>0.031239743</mean>
-			<stdev>9.52705E-05</stdev>
+			<mean>0.0316875</mean>
+			<stdev>0</stdev>
 		</param>
 		<param>
 			<id>3</id>
-			<mean>0.230017267</mean>
-			<stdev>0.00288936</stdev>
+			<mean>0.240321867</mean>
+			<stdev>0.001244524</stdev>
 		</param>
 		<param>
 			<id>4</id>
-			<mean>0.07704066</mean>
-			<stdev>0.000966652</stdev>
+			<mean>0.084150253</mean>
+			<stdev>0.003053619</stdev>
 		</param>
 		<param>
 			<id>5</id>
-			<mean>0.03244699</mean>
-			<stdev>0.002070145</stdev>
+			<mean>0.04301299</mean>
+			<stdev>0.006107221</stdev>
 		</param>
 		<param>
 			<id>6</id>
-			<mean>0.041175827</mean>
-			<stdev>0.000440385</stdev>
+			<mean>0.04241252</mean>
+			<stdev>0</stdev>
 		</param>
 	</face-params>
 	<points>

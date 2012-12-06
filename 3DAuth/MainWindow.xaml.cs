@@ -153,6 +153,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private ThreeDAuth.PositionMotionFilter positionMotionFilter;
 
+
+        private System.Diagnostics.Stopwatch outOfPlaneTimer;
+        private const long OUT_OF_PLANE_CUTOFF = 5000; // ms
+
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -165,6 +170,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //var faceTrackingViewerBinding = new Binding("Kinect") { Source = sensor };
 
             positionMotionFilter = new ThreeDAuth.PositionMotionFilter();
+            outOfPlaneTimer = new System.Diagnostics.Stopwatch();
         }
 
         /// <summary>
@@ -224,7 +230,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             pDistributor = ThreeDAuth.PointDistributor.GetInstance();
             
             // create a new gesture learner
-            gLearner = new ThreeDAuth.DiscreteGestureLearner(2000, 5);
+            gLearner = new ThreeDAuth.DiscreteGestureLearner(2000, 20);
 
             Image.Source = this.imageSource;
 
@@ -660,7 +666,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     //pDistributor.GivePoint(arrived);
                     //Console.WriteLine("Depth: " + hand.depth);
                     ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
-                    pDistributor.GivePoint(hand);
+                    pDistributor.GivePoint(planePoint);
 
                     //if (arrived.inPlane)
                     if (planePoint.inPlane)
@@ -697,13 +703,103 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         System.Collections.Generic.Queue<ThreeDAuth.Point2d> currentPoints = gLearner.getGesturePath();
                         foreach (ThreeDAuth.Point2d point in currentPoints)
                         {
-                            drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.X, point.Y, 30, 30), null, 14, null, 14, null);
+                            drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.x, point.y, 30, 30), null, 14, null, 14, null);
 
                         }
+                    }
+
+                    // If we're learning a gesture and we've been out of the plane for 5 seconds, stop learning
+                    if (gLearner.isRecording && !planePoint.inPlane)
+                    {
+                        if (!outOfPlaneTimer.IsRunning)
+                        {
+                            outOfPlaneTimer.Start();
+                        }
+                        if (outOfPlaneTimer.ElapsedMilliseconds > OUT_OF_PLANE_CUTOFF)
+                        {
+                            gLearner.stopRecording();
+                            this.myImageBox.Visibility = System.Windows.Visibility.Collapsed;
+                            List<ThreeDAuth.Point2d> password = new List<ThreeDAuth.Point2d>(gLearner.getGesturePath());
+                            this.currentUser.password = password;
+                            SaveUser(currentUser);
+                        }
+                    }
+                    else if (gLearner.isRecording)
+                    {
+                        outOfPlaneTimer.Reset();
                     }
                 }
             }
         }
+
+        private void SaveUser()
+        {
+            SaveUser(currentUser);
+        }
+
+        private void SaveUser(User user)
+        {
+            String filename = "users.xml";
+            System.Xml.XmlDocument userFile = new System.Xml.XmlDocument();
+            try
+            {
+                userFile.Load(filename);
+                System.Xml.XmlNodeList users = userFile.GetElementsByTagName("user");
+
+                bool existingUser = false;
+                System.Xml.XmlNode node = null;
+                foreach (System.Xml.XmlNode userNode in users)
+                {
+                    if (userNode["name"].InnerText.Equals(user.name))
+                    {
+                        existingUser = true;
+                        node = userNode;
+                    }
+                }
+                if (!existingUser)
+                {
+                    node = userFile.CreateNode(System.Xml.XmlNodeType.Element, "user", null);
+
+                    System.Xml.XmlNode nameNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "name", null);
+                    nameNode.InnerText = user.name;
+
+                    System.Xml.XmlNode imageNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "user-image", null);
+                    imageNode.InnerText = user.imgPath;
+
+                    System.Xml.XmlNode faceParamsNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "face-params", null);
+                    // Need to get all the face params in here
+                    FaceClassifier classifier = CurrentObjectBag.SCurrentFaceClassifier;
+
+                    System.Xml.XmlNode passwordNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "points", null);
+                    foreach (ThreeDAuth.Point2d point in user.password)
+                    {
+                        System.Xml.XmlNode pointNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "point", null);
+                        System.Xml.XmlNode xCoord = userFile.CreateNode(System.Xml.XmlNodeType.Element, "x", null);
+                        System.Xml.XmlNode yCoord = userFile.CreateNode(System.Xml.XmlNodeType.Element, "y", null);
+                        xCoord.InnerText = "" + point.x;
+                        yCoord.InnerText = "" + point.y;
+                        pointNode.AppendChild(xCoord);
+                        pointNode.AppendChild(yCoord);
+
+                        passwordNode.AppendChild(pointNode);
+                    }
+
+                    node.AppendChild(nameNode);
+                    node.AppendChild(imageNode);
+                    node.AppendChild(faceParamsNode);
+                    node.AppendChild(passwordNode);
+                    userFile.DocumentElement.AppendChild(node);
+                } else {
+                    // Do things or something
+                }
+                userFile.Save(filename);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("file not found");
+            }
+        }
+
 
         /// <summary>
         /// Draws a skeleton's bones and joints
@@ -946,6 +1042,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.myImageBox.Visibility = Visibility.Visible;
                     this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                     this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
+                    Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
+                    gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
                 }
                 else
                 {
@@ -977,6 +1076,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.AccountButton.IsEnabled= true;
         }
 
+
         private void browse_Click(object sender, RoutedEventArgs e)
         {
             string fileName = "";
@@ -991,6 +1091,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 fileName = browseFile.FileName;
                 userImage = new BitmapImage(new Uri(fileName));
+                currentUser.imgPath = fileName;
                 this.myImageBox.Visibility = Visibility.Visible;
                 //this.registrationForm.Visibility = System.Windows.Visibility.Collapsed;
                 this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
@@ -999,10 +1100,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
                 this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
                 this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
+                gLearner.startRecording();
                 this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
              
-               
                 
 
             }

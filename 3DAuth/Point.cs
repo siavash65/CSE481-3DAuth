@@ -5,7 +5,11 @@ using System.Text;
 
 namespace ThreeDAuth
 {
-    interface Point { }
+    interface Point 
+    {
+        //public double X;
+        //public double Y;
+    }
 
     class Point3d : Point
     {
@@ -48,35 +52,36 @@ namespace ThreeDAuth
 
     class Point2d : Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double x { get; set; }
+        public double y { get; set; }
 
         protected Point2d() : this(0, 0) { }
 
         public Point2d(double X, double Y)
         {
-            this.X = X;
-            this.Y = Y;
+            this.x = X;
+            this.y = Y;
         }
 
         public Point2d copy()
         {
-            return new Point2d(X, Y);
+            return new Point2d(x, y);
         }
 
         public static Point2d operator +(Point2d firstPoint, Point2d secondPoint)
         {
             Point2d sumPoint = new Point2d();
-            sumPoint.X = firstPoint.X + secondPoint.X;
-            sumPoint.Y = firstPoint.Y + secondPoint.Y;
+            sumPoint.x = firstPoint.x + secondPoint.x;
+            sumPoint.y = firstPoint.y + secondPoint.y;
             return sumPoint;
         }
 
         public override string ToString()
         {
-            return "(" + X + ", " + Y + ")";
+            return "(" + x + ", " + y + ")";
         }
     }
+
 
     class PlanePoint : Point2d
     {
@@ -84,19 +89,19 @@ namespace ThreeDAuth
 
         public PlanePoint(double X, double Y, bool inPlane)
         {
-            this.X = X;
-            this.Y = Y;
+            this.x = X;
+            this.y = Y;
             this.inPlane = inPlane;
         }
 
         public Point2d getPoint2d()
         {
-            return new Point2d(X, Y);
+            return new Point2d(x, y);
         }
 
         public override string ToString()
         {
-            return "(" + X + ", " + Y + ", " + inPlane + ")";
+            return "(" + x + ", " + y + ", " + inPlane + ")";
         }
     }
 
@@ -106,12 +111,12 @@ namespace ThreeDAuth
         public Point2d p2 { get; set; }
         double X
         {
-            get { return Math.Abs(p2.X - p1.X); }
+            get { return Math.Abs(p2.x - p1.x); }
         }
 
         double Y
         {
-            get { return Math.Abs(p2.Y - p1.Y); }
+            get { return Math.Abs(p2.y - p1.y); }
         }
 
         public Vec2d() { }
@@ -138,15 +143,15 @@ namespace ThreeDAuth
     {
         Point3d p1 { get; set; }
         Point3d p2 { get; set; }
-        public double X
+        public double x
         {
             get { return Math.Abs(p2.X - p1.X); }
         }
-        public double Y
+        public double y
         {
             get { return Math.Abs(p2.Y - p1.Y); }
         }
-        public double Z
+        public double z
         {
             get { return Math.Abs(p2.Z - p1.Z); }
         }

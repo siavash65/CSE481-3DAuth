@@ -9,10 +9,11 @@ namespace ThreeDAuth
 
     class Util
     {
+        
         public static double euclideanDistance(Point2d p1, Point2d p2)
         {
-            return Math.Sqrt((p1.X - p2.X) * (p1.X - p2.X) +
-                                (p1.Y - p2.Y) * (p1.Y - p2.Y));
+            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +
+                                (p1.y - p2.y) * (p1.y - p2.y));
         }
 
         public static double euclideanDistance(PlanePoint p1, PlanePoint p2)
@@ -25,6 +26,12 @@ namespace ThreeDAuth
             return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +
                                 (p1.y - p2.y) * (p1.y - p2.y));
         }
+
+        /*public static double euclideanDistance(Point p1, Point p2)
+        {
+            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +
+                                (p1.y - p2.y) * (p1.y - p2.y));
+        }*/
 
         private static int PIXEL_WIDTH_EPSILON = 100;
         private static int PIXEL_HEIGHT_EPSILON = 100;

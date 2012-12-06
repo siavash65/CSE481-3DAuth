@@ -20,6 +20,8 @@ namespace ThreeDAuth
         private GestureLearner _CurrentGestureLearner;
         private FaceClassifier _CurrentFaceClassifier;
 
+        public bool LearningNewUser { get; set; }
+
         public GestureValidator CurrentGestureValidator
         {
             get
@@ -68,6 +70,7 @@ namespace ThreeDAuth
             }
         }
 
+
         // S prefix is for the static reference
         public static GestureValidator SCurrentGestureValidator
         {
@@ -104,6 +107,19 @@ namespace ThreeDAuth
             set
             {
                 CurrentObjectBag.GetInstance().CurrentFaceClassifier = value;
+            }
+        }
+
+        // S prefix is for the static reference
+        public static bool SLearningNewUser
+        {
+            get
+            {
+                return CurrentObjectBag.GetInstance().LearningNewUser;
+            }
+            set
+            {
+                CurrentObjectBag.GetInstance().LearningNewUser = value;
             }
         }
 

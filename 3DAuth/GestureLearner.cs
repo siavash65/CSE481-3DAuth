@@ -8,6 +8,7 @@ namespace ThreeDAuth
     abstract class GestureLearner
     {
         protected System.Diagnostics.Stopwatch stopwatch;
+        protected System.Diagnostics.Stopwatch outOfPlaneTimer;
         protected Queue<Point2d> learnedGesturePath;
 
         protected bool _isRecording = false;
@@ -86,6 +87,7 @@ namespace ThreeDAuth
         public DiscreteGestureLearner(long holdTime, double motionEpsilon, int minNumberOfPoints = 5)
         {
             stopwatch = new System.Diagnostics.Stopwatch();
+            outOfPlaneTimer = new System.Diagnostics.Stopwatch();
             pointBuffer = new Queue<TimePointTuple>();
             this.minNumberOfPoints = minNumberOfPoints;
             this.holdTime = holdTime;
@@ -132,6 +134,13 @@ namespace ThreeDAuth
                             // Not a target point and person has moved too much, so dump the queue
                             pointBuffer.Clear();
                         }
+                    }
+                }
+                else
+                {
+                    if (!outOfPlaneTimer.IsRunning)
+                    {
+                        outOfPlaneTimer.Start();
                     }
                 }
             }

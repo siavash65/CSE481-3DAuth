@@ -80,13 +80,13 @@ namespace ThreeDAuth
 
 
                 StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
-                writer.WriteLine("Anton");
+                writer.WriteLine("Siavash");
 
 
                 for (int i = 0; i < totals.Length; i++)
                 {
                     totals[i] /= NUM_SAMPLES;
-                    writer.Write(totals[i] + ",");
+                    writer.WriteLine(totals[i]);
                     //writer.WriteLine(totals[i]);
                 }
                 writer.Write("Siavash");

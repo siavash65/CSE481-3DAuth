@@ -87,6 +87,7 @@ namespace ThreeDAuth
 
             foreach (KeyValuePair<String, double> kvp in matches)
             {
+                Console.WriteLine(kvp.Key + "----------------" + kvp.Value);
                 if (kvp.Value < bestMatchVal)
                 {
                     bestMatchVal = kvp.Value;
@@ -102,14 +103,14 @@ namespace ThreeDAuth
                 {
                     if (user["name"].InnerText == bestMatchName)
                     {
-                        List<Point> tempPts = new List<Point>();
+                        List<Point2d> tempPts = new List<Point2d>();
                         XmlNode points = user["points"];
                         for (int i = 0; i < points.ChildNodes.Count; i++)
                         {
                             XmlNode point = points.ChildNodes[i];
                             float x = (float)Convert.ToDouble(point["x"].InnerText);
                             float y = (float)Convert.ToDouble(point["y"].InnerText);
-                            Point tmp = new Point2d(x, y);
+                            Point2d tmp = new Point2d(x, y);
                             tempPts.Add(tmp);
                         }
 

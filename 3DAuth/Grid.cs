@@ -20,10 +20,10 @@ namespace ThreeDAuth
 
         public bool containsPoint(Point2d point)
         {
-            return (point.X >= lowerLeftCorner.X &&
-                    point.X < upperRightCorner.X &&
-                    point.Y >= lowerLeftCorner.Y &&
-                    point.Y < upperRightCorner.Y);
+            return (point.x >= lowerLeftCorner.x &&
+                    point.x < upperRightCorner.x &&
+                    point.y >= lowerLeftCorner.y &&
+                    point.y < upperRightCorner.y);
         }
 
         public bool containsPoint(Point3d point)
@@ -33,8 +33,8 @@ namespace ThreeDAuth
 
         public Point2d getCenter()
         {
-            return new Point2d((lowerLeftCorner.X + upperRightCorner.X) / 2,
-                                (lowerLeftCorner.Y + upperRightCorner.Y) / 2);
+            return new Point2d((lowerLeftCorner.x + upperRightCorner.x) / 2,
+                                (lowerLeftCorner.y + upperRightCorner.y) / 2);
         }
     }
 
@@ -166,8 +166,8 @@ namespace ThreeDAuth
 
         private double euclideanDistance(Point2d p1, Point2d p2)
         {
-            return Math.Sqrt((p1.X - p2.X) * (p1.X - p2.X) +
-                              (p1.Y - p2.Y) * (p1.Y - p2.Y));
+            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +
+                              (p1.y - p2.y) * (p1.y - p2.y));
         }
 
         public bool passedAuthentication()
