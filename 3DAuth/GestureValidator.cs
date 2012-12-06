@@ -15,6 +15,7 @@ namespace ThreeDAuth
     // Particle filter
 
     delegate void UpdateTargetDistance(double distance, long timeMS);
+    delegate void CompletedValidation(bool successful);
 
     // Given a sequence of points (in pixel-space) to hit, validates a continuously updating stream of positions
     class GestureValidator
@@ -26,6 +27,8 @@ namespace ThreeDAuth
         private double epsilon;
         private bool failedAuthentication;
         private System.Diagnostics.Stopwatch timer;
+
+        private long lastReset;
 
         private bool _startedPath; // Don't fail them before they start (it's rude)
 
@@ -51,6 +54,20 @@ namespace ThreeDAuth
             }
         }
 
+        private event CompletedValidation _onCompletedValidation;
+
+        public event CompletedValidation OnCompletedValidation
+        {
+            add
+            {
+                _onCompletedValidation += value;
+            }
+            remove
+            {
+                _onCompletedValidation -= value;
+            }
+        }
+
         public GestureValidator(Queue<Point2d> targetPoints, double epsilonBoundary)
         {
             this.targetPoints = targetPoints;
@@ -60,6 +77,7 @@ namespace ThreeDAuth
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
             CurrentObjectBag.SCurrentGestureValidator = this;
             timer = new System.Diagnostics.Stopwatch();
+            lastReset = 0;
             beginPath();
 
             // Give the current object back a reference to us
@@ -78,6 +96,12 @@ namespace ThreeDAuth
             failedAuthentication = false;
             _startedPath = false;
             timer.Start();
+        }
+
+        public void restart()
+        {
+            lastReset = System.DateTime.UtcNow.Ticks;
+            beginPath();
         }
 
         public void GivePoint(Point point)
@@ -109,6 +133,13 @@ namespace ThreeDAuth
                                     // Made a move away from the target point, so failed authentication
                                     failedAuthentication = true;
                                     Console.WriteLine("Failure :( ");
+                                    // Give them some time interval to reset it before marking it as a failure
+
+                                    System.Timers.Timer failureTimer = new System.Timers.Timer();
+                                    failureTimer.Elapsed += new System.Timers.ElapsedEventHandler(failureTimer_Elapsed);
+                                    failureTimer.Interval = 3000;
+                                    failureTimer.AutoReset = false;
+                                    failureTimer.Enabled = true;
                                 }
                                 else
                                 {
@@ -126,6 +157,7 @@ namespace ThreeDAuth
                                             // Validated successfully
                                             timer.Stop();
                                             Console.WriteLine("*** Successfully Validated ***");
+                                            ValidationComplete();
                                         }
                                     }
                                     else
@@ -139,6 +171,15 @@ namespace ThreeDAuth
                         }
                     }
                 }
+            }
+        }
+
+        private void failureTimer_Elapsed(object souce, System.Timers.ElapsedEventArgs e)
+        {
+            long now = System.DateTime.UtcNow.Ticks;
+            if (now - lastReset > 3000 * (10000)) // 3 seconds => 3000 ms * 10,000 ticks / ms
+            {
+                ValidationComplete();
             }
         }
 
@@ -162,6 +203,14 @@ namespace ThreeDAuth
             if (_onDistanceUpdated != null)
             {
                 _onDistanceUpdated(GetDistanceToCurrentTarget(), GetTotalElapsedMS());
+            }
+        }
+
+        private void ValidationComplete()
+        {
+            if (_onCompletedValidation != null)
+            {
+                _onCompletedValidation(successfulAuthentication());
             }
         }
     }
