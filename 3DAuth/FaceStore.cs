@@ -8,6 +8,9 @@ using Microsoft.Kinect.Toolkit.FaceTracking;
 
 namespace ThreeDAuth
 {
+
+    delegate void GiveCount(int count, int total);
+
     public enum FeatureLength
     {
         OuterEyes = 0,
@@ -22,13 +25,21 @@ namespace ThreeDAuth
     {
         int count;
 
+        //private event GiveCount _OnCountReceived;
+
         List<FeaturePair> features;
         float[] totals;
         int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34 };
 
+        List<List<float>> learnList;
+
         private const int NUM_SAMPLES = 50;
 
+        private const int NUM_LEARNING_SCANS = 3;
+        private int learnCount;
+
         FaceClassifier classifier;
+
 
         public float getDist(Vector3DF point1, Vector3DF point2)
         {
@@ -47,9 +58,34 @@ namespace ThreeDAuth
             classifier = fc;
 
             features = new List<FeaturePair>();
+            learnList = new List<List<float>>();
+
+            learnCount = 0;
+
             initFeatures();
 
         }
+
+        /*
+        private void Notify(int count, int total)
+        {
+            // could be an issue if no one is listening, but there should be a listener by the time this is called
+            if (_OnCountReceived != null)
+                _OnCountReceived(count, total);
+        }
+
+        public event GiveCount OnCountReceived
+        {
+            add
+            {
+                _OnCountReceived += value;
+            }
+            remove
+            {
+                _OnCountReceived -= value;
+            }
+        }
+        */
 
         private void initFeatures()
         {
@@ -66,34 +102,63 @@ namespace ThreeDAuth
         }
 
         public void updateData(EnumIndexableCollection<FeaturePoint, Vector3DF> pts)
-        {   
+        {
             if (count > NUM_SAMPLES)
             {
                 //Environment.Exit(0);
-                
+
                 return;
             }
             else if (count == NUM_SAMPLES)
             {
-
+                //Notify(count, NUM_SAMPLES);
                 String s = DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
 
 
-                StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
-                writer.WriteLine("Siavash");
+                //StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
+               // writer.WriteLine("Siavash");
 
 
                 for (int i = 0; i < totals.Length; i++)
                 {
                     totals[i] /= NUM_SAMPLES;
-                    writer.WriteLine(totals[i]);
+                   // writer.WriteLine(totals[i]);
                     //writer.WriteLine(totals[i]);
                 }
-                writer.Write("Siavash");
-                writer.Close();
+               // writer.Write("Siavash");
+               // writer.Close();
 
-                count++;
-                classifier.verifyUser(totals);
+                if (CurrentObjectBag.SLearningNewUser)
+                {
+                    // new user, so do additional scans
+                    List<float> tempList = new List<float>();
+                    for (int i = 0; i < totals.Length; i++)
+                    {
+                        tempList.Add(totals[i]);
+                        totals[i] = 0;
+                    }
+                    learnList.Add(tempList);
+
+                    if (learnCount < NUM_LEARNING_SCANS)
+                    {
+                        count = 0;
+                        learnCount++;
+                    }
+                    else
+                    {
+                        count++;
+                        classifier.addUser(learnList);
+                    }
+
+                }
+                else
+                {
+                    // existing user, so done sanding and validate it
+                    //Notify(count, NUM_SAMPLES);
+                    count++;
+                    classifier.verifyUser(totals);
+                }
+
             }
             else
             {

@@ -132,36 +132,43 @@ namespace ThreeDAuth
         }
 
 
-        public void addUser(User u)
+        public void addUser(List<List<float>> data)
         {
-            
-            //XmlElement newUser = data.CreateElement("user");
-           // XmlElement newUserName = data.CreateElement("name");
-            //XmlElement faceParams = data.CreateElement("face-params");
-
-             /*
-            for (int j = 0; j < vals.Length; j++)
+            List<float>[] sorted = new List<float>[6];
+            for (int h = 0; h < sorted.Length; h++)
             {
-                XmlElement param = data.CreateElement("param");
-                XmlElement id = data.CreateElement("id");
-                XmlElement mean = data.CreateElement("mean");
-                XmlElement sdv = data.CreateElement("stdev");
-
-                id.Value = (j + 1).ToString();
-                mean.Value = (vals[j]).ToString();
-                sdv.Value = "0";
-                param.AppendChild(id);
-                param.AppendChild(mean);
-                param.AppendChild(sdv);
-
-                faceParams.AppendChild(param);
+                sorted[h] = new List<float>();
             }
 
-            newUser.AppendChild(newUserName);
-            newUser.AppendChild(faceParams);
 
-            data.AppendChild(newUser);
-            */
+            for (int i = 0; i < data.Count; i++)
+            {
+                List<float> tmp = data.ElementAt(i);
+
+                for (int j = 0; j < tmp.Count; j++)
+                {
+                    sorted[j].Add(tmp.ElementAt(j));
+                }
+            }
+
+            List<Point2d> tempPts = new List<Point2d>();
+
+            // calculate mean and standard deviation
+            for (int k = 0; k < sorted.Length; k++)
+            {
+                List<float> tmp = sorted[k];
+
+                float average = tmp.Average();
+                float sumOfSquaresOfDifferences = tmp.Select(val => (val - average) * (val - average)).Sum();
+                double sd = Math.Sqrt(sumOfSquaresOfDifferences / tmp.Count);
+
+                Point2d tempPoint = new Point2d(average, sd);
+                tempPts.Add(tempPoint);
+            }
+
+            User cur = new User("", "", tempPts);
+            Notify(cur);
+
         }
 
 
