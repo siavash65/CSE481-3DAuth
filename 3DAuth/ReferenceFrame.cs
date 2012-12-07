@@ -12,6 +12,7 @@ namespace ThreeDAuth
     {
         private static double[] armLengths = null;
         public double armLength { get; protected set; }
+        public int armLengthPixels { get; protected set; }
         private static DepthPoint[] torsoPositions = null;
         public DepthPoint torsoPosition { get; protected set; }
         private static int armCounter = 0;
@@ -65,6 +66,50 @@ namespace ThreeDAuth
             double rightArm = Math.Sqrt(rightArmX * rightArmX + rightArmY * rightArmY + rightArmZ * rightArmZ);
 
             this.armLength = (leftArm + rightArm) / 2;
+
+            /*
+             * The length of both arms changes depending on the location of the person due to noise in data 
+             * and also inaccuracy of depth cammera at too far and too close postions.
+             * so we collect at least 50 data points of the four joint we need and calculate the avregae
+             * 
+             */
+            /*
+            if (armCounter < MINDATAPOINTSREQ)
+            {
+                armLengths[armCounter] = (leftArm + rightArm) / 2;
+                armCounter++;
+            }
+            else
+            {
+                for (int i = 0; i < armCounter; i++)
+                {
+                    this.armLength += armLengths[i];
+                }
+                //this.armLength /= (armCounter);
+                this.armLength = (leftArm + rightArm) / 2;
+            }*/
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="leftWristJoint"></param>
+        /// <param name="leftShoulderJoint"></param>
+        /// <param name="rightWristJoint"></param>
+        /// <param name="rightShoulderJoint"></param>
+        public void computeArmLengthPixels(DepthPoint leftWristPoint, DepthPoint leftShoulderPoint, DepthPoint rightWristPoint, DepthPoint rightShoulderPoint)
+        {
+
+            int leftArmX = leftWristPoint.x - leftShoulderPoint.y;
+            int leftArmY = leftWristPoint.y - leftShoulderPoint.y;
+            //int leftArmZ = leftWristPoint.Position.Z - leftShoulderPoint.Position.Z;
+            int rightArmX = rightWristPoint.x - rightShoulderPoint.x;
+            int rightArmY = rightWristPoint.y - rightShoulderPoint.y;
+            //int rightArmZ = rightWristPoint.Position.Z - rightShoulderPoint.Position.Z;
+            double leftArm = Math.Sqrt(leftArmX * leftArmX + leftArmY * leftArmY /*+ leftArmZ * leftArmZ*/);
+            double rightArm = Math.Sqrt(rightArmX * rightArmX + rightArmY * rightArmY /*+ rightArmZ * rightArmZ*/);
+
+            this.armLengthPixels = (int) ((leftArm + rightArm) / 2.0);
 
             /*
              * The length of both arms changes depending on the location of the person due to noise in data 

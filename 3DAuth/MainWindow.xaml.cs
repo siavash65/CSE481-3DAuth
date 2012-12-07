@@ -105,6 +105,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private BitmapImage userImage;
 
+
         private ThreeDAuth.ReferenceFrame myFrame;
 
         private Joint rightWrist;
@@ -156,6 +157,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private System.Diagnostics.Stopwatch outOfPlaneTimer;
         private const long OUT_OF_PLANE_CUTOFF = 5000; // ms
 
+        private static MainWindow instance; // make it a singleton to allow us to use skeleton projections from the targetBox class
+
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -170,6 +173,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             positionMotionFilter = new ThreeDAuth.PositionMotionFilter();
             outOfPlaneTimer = new System.Diagnostics.Stopwatch();
+            MainWindow.instance = this;
         }
 
         /// <summary>
@@ -356,12 +360,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     //Console.WriteLine("Flood filled point count: " + myPointCluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
 
+
+                    // TODO: we shouldn't filter here, it'll cause us to drop frames, making the whole business choppier
                     // send centroid to filter and draw if valid
                     if (myPointCluster.points.Count > 50)
                     {
                         using (DrawingContext dc = this.liveFeedbackGroup.Open())
                         {
-                            drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid));
+                            drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid), depthFrame);
                         }
                     }
                     //showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
@@ -584,7 +590,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
                                 Joint hipCenter = skel.Joints[JointType.HipCenter];
                                 Joint spine = skel.Joints[JointType.Spine];
+
+                                ThreeDAuth.DepthPoint leftWristDepthPoint = this.SkeletonPointToScreen(leftWristTemp.Position);
+                                ThreeDAuth.DepthPoint leftShoulderDepthPoint = this.SkeletonPointToScreen(leftShoulder.Position);
+                                ThreeDAuth.DepthPoint rightWristDepthPoint = this.SkeletonPointToScreen(rightWristTemp.Position);
+                                ThreeDAuth.DepthPoint rightShoulderDepthPoint = this.SkeletonPointToScreen(rightShoulder.Position);
+                                myFrame.computeArmLengthPixels(leftWristDepthPoint, leftShoulderDepthPoint, rightWristDepthPoint, rightShoulderDepthPoint);
                                 myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
+
                                 ThreeDAuth.DepthPoint shoulderDepthPoint = this.SkeletonPointToScreen(shoulderCenter.Position);
                                 ThreeDAuth.DepthPoint spineDepthPoint = this.SkeletonPointToScreen(spine.Position);
                                 ThreeDAuth.DepthPoint hipCenterDepthPoint = this.SkeletonPointToScreen(hipCenter.Position);
@@ -642,7 +655,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand, bool drawHand)
+        private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand, bool drawHand, DepthImageFrame depthFrame)
         {
             //Start Siavash
             if (userImage != null)
@@ -659,8 +672,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // Anton's code
                     // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                     // rectangle over them to give the user feedback
-
-                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, myFrame.armLength * .8);
+                    double planeDepth = myFrame.armLength * .8;
+                    int planeDepthPixels = (int) ((planeDepth / myFrame.armLength) * myFrame.armLengthPixels);
+                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, planeDepth);
                     //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
                     //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
@@ -670,7 +684,24 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     //pDistributor.GivePoint(arrived);
                     //Console.WriteLine("Depth: " + hand.depth);
-                    ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
+
+                    short planeDepthmm = (short) (planeDepth * 1000); // convert m to mm
+                    Tuple<int, int> handTuple = new Tuple<int,int>(hand.x, hand.y);
+                    handTuple = ProjectPoint(handTuple, 
+                                             myFrame.torsoPosition, 
+                                             myFrame.armLengthPixels, 
+                                             planeDepthPixels, 
+                                             .9, 
+                                             depthFrame.Width, 
+                                             depthFrame.Height);
+                    if (handTuple == null)
+                    {
+                        // encountered a problem and won't be able to project this point, so drop this frame
+                        return;
+                    }
+
+                    ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(handTuple.Item1, handTuple.Item2, myPlane.crossesPlane(hand));
+                    //ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
                     pDistributor.GivePoint(planePoint);
 
                     //if (arrived.inPlane)
@@ -881,6 +912,92 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
              * */
             return new ThreeDAuth.DepthPoint(depthPoint.X, depthPoint.Y, (long)depthPoint.Depth);
         }
+
+
+        private Tuple<int, int> ProjectPoint(Tuple<int, int> basePoint,
+                                            DepthPoint torsoPosition,
+                                            int armLengthPixels,
+                                            int planeDepthFromTorsoPixels,
+                                            double alpha,
+                                            int windowWidth,
+                                            int windowHeight)
+        {
+            //armLength *= 1000; // Convert meters to mm
+            // Get pixel length of the arm
+
+            // We wish to find how many millimeters away from the corner of the target box our torso center is
+
+            // If we're at torsoPosition and the plane is planeDepthFromTorso away from us,
+            // then we construct a right triangle where one side is the vector
+            // of our torso to the plane,
+            // the other side is the vector from the center of the plane to the corner of the plane
+            // and the hypotenuse is our required arm
+
+            // Vector of torso to plane has length planeDepthFromTorso
+            // Vector of our required arm length is alpha * armLength
+            // By the pythagorean theorem, (alpha * armLength)^2 = (planeDepthFromTorso)^2 + (distance to corner)^2
+            // so distance to corner = + sqrt( (alpha * armLength)^2 - (planeDepthFromTorso)^2 )
+
+            double tempValue = Math.Pow(alpha * armLengthPixels, 2) - Math.Pow(planeDepthFromTorsoPixels, 2);
+            // If this tempValue is less than 0 then holding the arm straight out infront of you 
+            // (with the given alpha) will not cross the plane and we have bigger problems
+            if (tempValue < 0)
+            {
+                // Sanity check
+                return null;
+            }
+
+
+            double distanceToCornermm = Math.Sqrt(tempValue);
+
+            // Now find the x and y offset required to get to the corner
+            // if we consider our torso position as at the center of the box (they should be standing there)
+            // then we consider the angle the vector to the upper right corner forms with the horizontal plane 
+            // to be a value theta
+
+            // our x offset to the corner will be cos(theta) * distanceToCornermm
+            // (cos(angle) = adj / hyp, so adj = cos(angle) * hyp)
+
+            // our y offset to the corner will be sin(theta) * distanceToCornermm
+            // (sin(angle) = adj / hyp, so adj = sin(angle) * hyp)
+
+            // By similar triangles (rectangles), tan(theta) = windowHeight / windowWidth, both of which we know
+            // so theta = arctan(windowHeight / windowWidth);
+
+            double theta = Math.Atan((double)windowHeight / (double)windowWidth);
+            double xOffset = Math.Cos(theta) * distanceToCornermm;
+            double yOffset = Math.Sin(theta) * distanceToCornermm;
+
+            Microsoft.Kinect.SkeletonPoint cornerSkeletonPoint = new Microsoft.Kinect.SkeletonPoint();
+            cornerSkeletonPoint.X = (float)(torsoPosition.x + xOffset);
+            cornerSkeletonPoint.Y = (float)(torsoPosition.y + yOffset);
+            //DepthPoint lowerRightCornerDepthPoint = this.SkeletonPointToScreen(cornerSkeletonPoint);
+
+            // This cornerPoint should represent the bottom right corner more or less
+            // So its x value should be our pre-projected target box width,
+            // and its y value should be our pre-projected target box height
+
+            double xScale = (double) (torsoPosition.x + xOffset) / (double)windowWidth;
+            double yScale = (double) (torsoPosition.y + yOffset) / (double)windowHeight;
+
+            /*
+            double xScale = (double)lowerRightCornerDepthPoint.x / (double)windowWidth;
+            double yScale = (double)lowerRightCornerDepthPoint.y / (double)windowHeight;
+            */
+
+            int xProj = (int)Math.Floor(xScale * basePoint.Item1);
+            int yProj = (int)Math.Floor(yScale * basePoint.Item2);
+
+            //Sanity check
+            if (xProj > windowWidth) xProj = windowWidth - 1;
+            if (yProj > windowHeight) yProj = windowHeight - 1;
+
+            Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" + 
+                                "     Arm length: " + armLengthPixels);
+
+            return new Tuple<int, int>(xProj, yProj);
+        }
+
 
         /// <summary>
         /// Draws a bone line between two joints
