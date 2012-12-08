@@ -688,8 +688,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     short planeDepthmm = (short) (planeDepth * 1000); // convert m to mm
                     Tuple<int, int> handTuple = new Tuple<int,int>(hand.x, hand.y);
                     handTuple = ProjectPoint(handTuple, 
-                                             myFrame.torsoPosition, 
-                                             myFrame.armLengthPixels, 
+                                             myFrame.AvgTorsoPosition, 
+                                             myFrame.AvgArmLengthPixels, 
                                              planeDepthPixels, 
                                              .9, 
                                              depthFrame.Width, 
@@ -704,16 +704,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     //ThreeDAuth.PlanePoint planePoint = new ThreeDAuth.PlanePoint(hand.x, hand.y, myPlane.crossesPlane(hand));
                     pDistributor.GivePoint(planePoint);
 
+                    //drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+
                     //if (arrived.inPlane)
                     if (planePoint.inPlane)
                     {
                         //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
-                        drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                        //drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                        drawingContext.DrawRoundedRectangle(Brushes.Blue, null, new Rect(planePoint.x, planePoint.y, 30, 30), null, 14, null, 14, null);
                     }
                     else
                     {
                         //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(right.x, right.y, 30, 30), null, 14, null, 14, null);
-                        drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                        //drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                        drawingContext.DrawRoundedRectangle(Brushes.Red, null, new Rect(planePoint.x, planePoint.y, 30, 30), null, 14, null, 14, null);
                     }
 
 
@@ -977,8 +981,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             // So its x value should be our pre-projected target box width,
             // and its y value should be our pre-projected target box height
 
-            double xScale = (double) (torsoPosition.x + xOffset) / (double)windowWidth;
-            double yScale = (double) (torsoPosition.y + yOffset) / (double)windowHeight;
+            double xScale = (double)windowWidth / (double) (torsoPosition.x + xOffset);
+            double yScale = (double)windowHeight / (double) (torsoPosition.y + yOffset);
 
             /*
             double xScale = (double)lowerRightCornerDepthPoint.x / (double)windowWidth;
