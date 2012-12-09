@@ -1201,7 +1201,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.currentUser.faceParams = current.faceParams;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
-                    this.currentUser.faceParams = current.faceParams;
+                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                    Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
+                    gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
+                    gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
+           
                 }
 
             }
