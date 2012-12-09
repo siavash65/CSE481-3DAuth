@@ -155,7 +155,7 @@ namespace ThreeDAuth
             {
                 
                 Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
-                
+                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter = learnCount;
                 count++;
 
                 for (int i = 0; i < features.Count; i++)

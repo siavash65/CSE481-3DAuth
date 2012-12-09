@@ -121,6 +121,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         public static int faceScanCounter = 0;
         private Boolean isUserNew = false;
         public static int faceScanCount = 0;
+        private Boolean isfaceTrackerOn = false;
         //End by Siavash
 
         /// <summary>
@@ -1167,18 +1168,23 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.isUserNew = false;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
+            this.AccountButton.Content = "Log in";
+          
 
         }
 
         void GiveUser(User current)
         {
+            
             faceTrackingViewer.stopTracking();
-
+            this.isfaceTrackerOn = false;
             if (this.isUserNew)
             {
                 if (current.name.Length > 0)
                 {
+                    
                     faceTrackingViewer.stopTracking();
+                    this.isfaceTrackerOn = false;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     if (string.Compare(this.currentUser.name, current.name, true) == 0)
                     {
@@ -1189,7 +1195,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 else
                 {
+                    
                     faceTrackingViewer.stopTracking();
+                    this.isfaceTrackerOn = false;
                     this.currentUser.faceParams = current.faceParams;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
@@ -1205,6 +1213,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     if (String.Compare(current.name, this.currentUser.name, true) == 0)
                     {
                         faceTrackingViewer.stopTracking();
+                        this.isfaceTrackerOn = false;
                         Console.WriteLine("The name is " + current.name);
                         this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                         this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
@@ -1228,6 +1237,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
 
                         faceTrackingViewer.stopTracking();
+                        this.isfaceTrackerOn = false;
                         Console.WriteLine("The name is " + current.name);
                         this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                         this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
@@ -1241,6 +1251,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 else
                 {
                     faceTrackingViewer.stopTracking();
+                    this.isfaceTrackerOn = false;
                     Console.WriteLine("The name is " + current.name);
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
@@ -1275,6 +1286,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.progressBar3.Visibility = System.Windows.Visibility.Collapsed;
             }
 
+            this.isfaceTrackerOn = true;
             faceTrackingViewer.setSensor(this.sensor);
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
             
@@ -1302,7 +1314,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 userImage = new BitmapImage(new Uri(fileName));
                 currentUser.imgPath = fileName;
                 this.myImageBox.Visibility = Visibility.Visible;
-                //this.registrationForm.Visibility = System.Windows.Visibility.Collapsed;
+                this.myImageBox.Source = handSource;
                 this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
                 this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
                 this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
@@ -1330,8 +1342,40 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed; ;
             this.scanpanel.Visibility = System.Windows.Visibility.Visible;
+            this.isfaceTrackerOn = true;
             faceTrackingViewer.startTracking();
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+        }
+
+        private void home_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.isfaceTrackerOn)
+            {
+                faceTrackingViewer.stopTracking();
+            } 
+            this.sensor.DepthFrameReady += null;
+            this.sensor.SkeletonFrameReady += null;
+            gValidator.OnCompletedValidation += null;
+            this.currentUser = null;
+            this.myImageBox.Source = null;
+            this.Username.Text = "";
+            faceScanCount = 0;
+            faceScanCounter = 0;
+            this.progressBar1.Value = 0;
+            this.progressBar2.Value = 0;
+            this.progressBar3.Value = 0;
+            this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+            this.New_Account.Visibility = System.Windows.Visibility.Visible;
+            this.login.Visibility = System.Windows.Visibility.Visible;
+
+            this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+            this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
+            this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
+       
         }
 
  
