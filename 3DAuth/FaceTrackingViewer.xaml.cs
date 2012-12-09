@@ -30,7 +30,7 @@ namespace ThreeDAuth
 
         private FaceClassifier classifier;
 
-        private const uint MaxMissedFrames = 100;
+        private const uint MaxMissedFrames = 50;
 
         private readonly Dictionary<int, SkeletonFaceTracker> trackedSkeletons = new Dictionary<int, SkeletonFaceTracker>();
 
@@ -255,6 +255,9 @@ namespace ThreeDAuth
             foreach (var tracker in this.trackedSkeletons)
             {
                 uint missedFrames = (uint)currentFrameNumber - (uint)tracker.Value.LastTrackedFrame;
+
+               // tracker.Value.
+
                 if (missedFrames > MaxMissedFrames)
                 {
                     // There have been too many frames since we last saw this skeleton
@@ -290,7 +293,7 @@ namespace ThreeDAuth
 
             private FaceTracker faceTracker;
 
-            private FaceStore store;
+            public FaceStore store;
 
             private bool lastFaceTrackSucceeded;
 
