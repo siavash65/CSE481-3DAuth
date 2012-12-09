@@ -132,6 +132,8 @@ namespace ThreeDAuth
                     {
                         count = 0;
                         learnCount++;
+                        Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
+
                     }
                     else
                     {
@@ -151,7 +153,7 @@ namespace ThreeDAuth
             }
             else
             {
-                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
+                
                 Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
                 
                 count++;

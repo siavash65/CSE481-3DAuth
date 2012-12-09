@@ -79,11 +79,13 @@
             <StackPanel Height="43" Name="gestureTracker" Width="650" HorizontalAlignment="Left" Visibility="Hidden">
                 <TextBlock Height="34" Name="gestureMassage"  FontSize="20" Foreground="#FF00A8DB" FontWeight="Bold" />
             </StackPanel>
-            <StackPanel Height="43" Name="scanpanel" Width="836" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden">
+            <StackPanel Height="43" Name="scanpanel" Width="844" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden">
                 <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait untill we scan your face" />
-                <ProgressBar Name="progressBar" Width="107" Height="23" Margin="20,5,373,15" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <ProgressBar Name="progressBar1" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFC71C1C" />
+                <ProgressBar Name="progressBar2" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFC71C1C" />
+                <ProgressBar Name="progressBar3" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFC71C1C" />
             </StackPanel>
-            <TextBlock  Text="We have successfully scanned your face. Please choose a username for your new account" Height="48" Name="RegistrationMassage" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold" Visibility="Hidden" />
+            <TextBlock  Text="Please choose a username for your new account" Height="48" Name="RegistrationMassage" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold" Visibility="Hidden" />
             <StackPanel  Height="61" Name="userNamestackPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Hidden" VerticalAlignment="Top">
                 <TextBlock Height="29" Name="userNameTextbox" Width="118" Foreground="#FF00A8DB" Text="UserName:" FontSize="20" FontWeight="Bold" />
                 <TextBox Name="Username" Height="48" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="20" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />

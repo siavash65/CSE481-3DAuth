@@ -304,8 +304,30 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void OnAllFramesReady(object sender, AllFramesReadyEventArgs allFramesReadyEventArgs)
         {
-
-            this.progressBar.Value = faceScanCount * 2;
+            if (faceScanCounter == 0)
+            {
+                this.progressBar1.Value = faceScanCount * 2;
+                if (this.progressBar1.Value == 100)
+                {
+                    this.progressBar1.Foreground = Brushes.Green;
+                }
+            }
+            if (faceScanCounter == 1)
+            {
+                this.progressBar2.Value = faceScanCount * 2;
+                if (this.progressBar2.Value == 100)
+                {
+                    this.progressBar2.Foreground = Brushes.Green;
+                }
+            }
+            if (faceScanCounter == 2)
+            {
+                this.progressBar3.Value = faceScanCount * 2;
+                if (this.progressBar3.Value == 100)
+                {
+                    this.progressBar3.Foreground = Brushes.Green;
+                }
+            }
         }
 
         private int closestPointCounter = 0;
@@ -1133,20 +1155,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             this.isUserNew = true;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
-            this.scanmassage.Visibility = System.Windows.Visibility.Visible;
-            faceTrackingViewer.setSensor(this.sensor);
-            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+            this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
         }
 
         private void login_Click(object sender, RoutedEventArgs e)
         {
             CurrentObjectBag.SLearningNewUser = false;
 
+            this.currentUser = new User("", "", null, null);
+
+            this.isUserNew = false;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
-            this.scanpanel.Visibility = System.Windows.Visibility.Visible;
-            //this.scanmassage.Visibility = System.Windows.Visibility.Visible;
-            faceTrackingViewer.setSensor(this.sensor);
-            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+            this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
 
         }
 
@@ -1159,25 +1179,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (current.name.Length > 0)
                 {
                     faceTrackingViewer.stopTracking();
-                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
-                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
-                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
-                    this.login.Visibility = System.Windows.Visibility.Collapsed;
-                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
-                    this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
-                    this.welcomeMassage.Text = "We have found your scan if thats incorecct click on rescan!";
-                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                    this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+                    if (string.Compare(this.currentUser.name, current.name, true) == 0)
+                    {
+                        this.welcomeMassage.Text = "We have found your scan if thats incorecct click on rescan!";
+                        this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                        this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    }
                 }
                 else
                 {
                     faceTrackingViewer.stopTracking();
-                    this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
-                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
-                    //faceTrackingViewer.stopTracking();
-                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Visible;
-                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
-
+                    this.currentUser.faceParams = current.faceParams;
+                    this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+                    this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
                     this.currentUser.faceParams = current.faceParams;
                 }
 
@@ -1185,36 +1200,55 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             else
             {
-                if (current.name.Length > 0)
+                if (current.name.Length > 0) 
                 {
-                    faceTrackingViewer.stopTracking();
-                    Console.WriteLine("The name is " + current.name);
-                    this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
-                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
-                    this.login.Visibility = System.Windows.Visibility.Collapsed;
-                    this.rescan.Visibility = System.Windows.Visibility.Visible;
-                    this.welcomeMassage.Text = "Hello " + current.name + " If this is not you, click on rescan! ";
-                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                    userImage = new BitmapImage(new Uri(current.imgPath));
-                    this.myImageBox.Visibility = Visibility.Visible;
-                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                    if (String.Compare(current.name, this.currentUser.name, true) == 0)
+                    {
+                        faceTrackingViewer.stopTracking();
+                        Console.WriteLine("The name is " + current.name);
+                        this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+                        this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+                        this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                        this.login.Visibility = System.Windows.Visibility.Collapsed;
+                        this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+                        this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                        this.welcomeMassage.Text = "Hello " + current.name + "! " + "We have successfully scaned your face. Start drawing your pattern when the circle is blue";
+                        //this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
+                        //this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
+                        userImage = new BitmapImage(new Uri(current.imgPath));
+                        this.myImageBox.Visibility = Visibility.Visible;
+                        this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                        this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                        Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
+                        gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
+                        gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
 
-                    Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
-                    gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
-                    gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
+                    }
+                    else
+                    {
+
+                        faceTrackingViewer.stopTracking();
+                        Console.WriteLine("The name is " + current.name);
+                        this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+                        this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+                        this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                        this.login.Visibility = System.Windows.Visibility.Collapsed;
+                        this.rescan.Visibility = System.Windows.Visibility.Visible;
+                        this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                        this.welcomeMassage.Text = "Hello " + this.currentUser.name + "! " + "We did not find the right match. Please rescan";
+                    }
                 }
                 else
                 {
+                    faceTrackingViewer.stopTracking();
+                    Console.WriteLine("The name is " + current.name);
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
-                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
-                    this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
-                    this.login.Visibility = System.Windows.Visibility.Collapsed;
-                    this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
-                    this.welcomeMassage.Text = "We could not find you click on rescan!";
-                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                    this.login.Visibility = System.Windows.Visibility.Collapsed;
                     this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Text = "Hello " + current.name + "! " + "We did not find you. Please rescan";
                     
                 }
 
@@ -1227,9 +1261,23 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void accountButton_Click(object sender, RoutedEventArgs e)
         {
-            //this.currentUser = new User("", "", null, null);
+            this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.currentUser.name = this.Username.Text;
-            this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
+            if (this.isUserNew)
+            {
+                this.scanpanel.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                this.progressBar1.Width = 170;
+                this.scanpanel.Visibility = System.Windows.Visibility.Visible;
+                this.progressBar2.Visibility = System.Windows.Visibility.Collapsed;
+                this.progressBar3.Visibility = System.Windows.Visibility.Collapsed;
+            }
+
+            faceTrackingViewer.setSensor(this.sensor);
+            CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
+            
         }
 
         private void Username_TextChanged(object sender, TextChangedEventArgs e)
