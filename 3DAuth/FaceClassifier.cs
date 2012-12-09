@@ -114,7 +114,7 @@ namespace ThreeDAuth
                             tempPts.Add(tmp);
                         }
 
-                        User current = new User(user["name"].InnerText, user["user-image"].InnerText, tempPts);
+                        User current = new User(user["name"].InnerText, user["user-image"].InnerText, tempPts, null);
                         Console.WriteLine(user["name"].InnerText);
                         Notify(current);
                         return;
@@ -125,7 +125,7 @@ namespace ThreeDAuth
             {
                 
                 Console.WriteLine("New User");
-                User cur = new User("", "", null);
+                User cur = new User("", "", null, null);
                 Notify(cur);
             }
 
@@ -166,7 +166,7 @@ namespace ThreeDAuth
                 tempPts.Add(tempPoint);
             }
 
-            User cur = new User("", "", tempPts);
+            User cur = new User("", "", null, tempPts);
             Notify(cur);
 
         }

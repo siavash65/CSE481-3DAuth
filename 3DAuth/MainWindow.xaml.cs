@@ -761,6 +761,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed;
                             List<ThreeDAuth.Point2d> password = new List<ThreeDAuth.Point2d>(gLearner.getGesturePath());
                             this.currentUser.password = password;
+                            this.gestureMassage.Text = "Success. Your account has been created. Welcome to 3DAuth!";
                             SaveUser(currentUser);
                         }
                     }
@@ -809,6 +810,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     System.Xml.XmlNode faceParamsNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "face-params", null);
                     // Need to get all the face params in here
                     FaceClassifier classifier = CurrentObjectBag.SCurrentFaceClassifier;
+
+                    // add by Anton - write face params to XML
+                    int tempIdCounter = 1;
+                    foreach (ThreeDAuth.Point2d point in user.faceParams)
+                    {
+                        System.Xml.XmlNode paramNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "param", null);
+                        System.Xml.XmlNode id = userFile.CreateNode(System.Xml.XmlNodeType.Element, "id", null);
+                        System.Xml.XmlNode mean = userFile.CreateNode(System.Xml.XmlNodeType.Element, "mean", null);
+                        System.Xml.XmlNode sdev = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stdev", null);
+                        mean.InnerText = "" + point.x;
+                        sdev.InnerText = "" + point.y;
+                        id.InnerText = "" + tempIdCounter;
+                        tempIdCounter++;
+                        paramNode.AppendChild(id);
+                        paramNode.AppendChild(mean);
+                        paramNode.AppendChild(sdev);
+
+                        faceParamsNode.AppendChild(paramNode);
+                    }
+
 
                     System.Xml.XmlNode passwordNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "points", null);
                     foreach (ThreeDAuth.Point2d point in user.password)
@@ -1107,7 +1128,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
             CurrentObjectBag.SLearningNewUser = true;
-            
+
+            this.currentUser = new User("", "", null, null);
+
             this.isUserNew = true;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.scanmassage.Visibility = System.Windows.Visibility.Visible;
@@ -1151,9 +1174,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     faceTrackingViewer.stopTracking();
                     this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.scanmassage.Visibility = System.Windows.Visibility.Collapsed;
-                    faceTrackingViewer.stopTracking();
+                    //faceTrackingViewer.stopTracking();
                     this.RegistrationMassage.Visibility = System.Windows.Visibility.Visible;
                     this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
+
+                    this.currentUser.faceParams = current.faceParams;
                 }
 
             }
@@ -1202,7 +1227,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void accountButton_Click(object sender, RoutedEventArgs e)
         {
-            this.currentUser = new User("", "", null);
+            //this.currentUser = new User("", "", null, null);
             this.currentUser.name = this.Username.Text;
             this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
         }

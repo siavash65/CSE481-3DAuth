@@ -11,17 +11,6 @@ namespace ThreeDAuth
 
     delegate void GiveCount(int count, int total);
 
-   
-    public enum FeatureLength
-    {
-        OuterEyes = 0,
-        InnerEyes = 1,
-        DownCenter = 2,
-        CheekWidth = 3,
-        MouthWidth = 4
-    }
-
-
     class FaceStore
     {
          
@@ -109,7 +98,6 @@ namespace ThreeDAuth
             if (count > NUM_SAMPLES)
             {
                 //Environment.Exit(0);
-
                 return;
             }
             else if (count == NUM_SAMPLES)
@@ -117,19 +105,17 @@ namespace ThreeDAuth
                 //Notify(count, NUM_SAMPLES);
                 String s = DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
 
-
                 //StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
-               // writer.WriteLine("Siavash");
-
+                //writer.WriteLine("Siavash");
 
                 for (int i = 0; i < totals.Length; i++)
                 {
                     totals[i] /= NUM_SAMPLES;
-                   // writer.WriteLine(totals[i]);
+                    // writer.WriteLine(totals[i]);
                     //writer.WriteLine(totals[i]);
                 }
-               // writer.Write("Siavash");
-               // writer.Close();
+                // writer.Write("Siavash");
+                // writer.Close();
 
                 if (CurrentObjectBag.SLearningNewUser)
                 {
@@ -142,7 +128,7 @@ namespace ThreeDAuth
                     }
                     learnList.Add(tempList);
 
-                    if (learnCount < NUM_LEARNING_SCANS)
+                    if (learnCount < NUM_LEARNING_SCANS - 1)
                     {
                         count = 0;
                         learnCount++;
