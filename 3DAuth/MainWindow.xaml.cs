@@ -20,6 +20,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Runtime.InteropServices;
     using System.Drawing.Imaging;
     using ThreeDAuth;
+    using System.Xml;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -30,7 +31,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Width of output drawing
         /// </summary>
         private const float RenderWidth = 640.0f;
-        
+
         /// <summary>
         /// Height of our output drawing
         /// </summary>
@@ -108,6 +109,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private ThreeDAuth.ReferenceFrame myFrame;
 
+
+        private XmlDocument data;
         private Joint rightWrist;
         private Joint leftWrist;
         private short[] imadeData;
@@ -232,7 +235,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.imageSource = new DrawingImage(this.drawingGroup);
 
             pDistributor = ThreeDAuth.PointDistributor.GetInstance();
-            
+
             // create a new gesture learner
             gLearner = new ThreeDAuth.DiscreteGestureLearner(2000, 20);
 
@@ -278,11 +281,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
 
                 //End Siavash
-                
+
                 // Add an event handler to be called whenever there is new color frame data
-               //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                 this.sensor.AllFramesReady += this.OnAllFramesReady;
-               
+
                 //faceTrackingViewer.setSensor(this.sensor); 
 
                 // Start the sensor!
@@ -319,7 +322,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (this.progressBar2.Value == 100)
                 {
                     faceScanCount = 0;
-                    
+
                 }
             }
             if (faceScanCounter == 2)
@@ -328,7 +331,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (this.progressBar3.Value == 100)
                 {
                     faceScanCount = 0;
-                    
+
                 }
             }
         }
@@ -367,7 +370,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         findTheClosestPoint(depthFrame.PixelDataLength, depthFrame.Width, depthFrame.Height);
                     }
                     closestPointCounter++;
-                   
+
 
 
                     // Flood fill from this point then send a point to the distributor
@@ -412,56 +415,56 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="depthFrame"></param>
         /// <param name="p1"></param>
         /// <param name="p2"></param>
-        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2,ThreeDAuth.DepthPoint hand)
+        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2, ThreeDAuth.DepthPoint hand)
         {
-                bmap = new System.Drawing.Bitmap(depthFrame.Width, depthFrame.Height, System.Drawing.Imaging.PixelFormat.Format16bppRgb555);
-                System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
-                    , depthFrame.Height), ImageLockMode.WriteOnly, bmap.PixelFormat);
-                IntPtr ptr = bmapdata.Scan0;
-                //Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
-                bmap.UnlockBits(bmapdata);
-                /*System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
-                this.myImageBox.Source =
-                System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    bmap.GetHbitmap(),
-                    IntPtr.Zero,
-                    System.Windows.Int32Rect.Empty,
-                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));*/
+            bmap = new System.Drawing.Bitmap(depthFrame.Width, depthFrame.Height, System.Drawing.Imaging.PixelFormat.Format16bppRgb555);
+            System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
+                , depthFrame.Height), ImageLockMode.WriteOnly, bmap.PixelFormat);
+            IntPtr ptr = bmapdata.Scan0;
+            //Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
+            bmap.UnlockBits(bmapdata);
+            /*System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
+            this.myImageBox.Source =
+            System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                bmap.GetHbitmap(),
+                IntPtr.Zero,
+                System.Windows.Int32Rect.Empty,
+                BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));*/
 
-                ThreeDAuth.BoundingRectangle rect = ThreeDAuth.BoundingRectangle.CreateBoundingRectangle(myPointCluster);
-                using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
+            ThreeDAuth.BoundingRectangle rect = ThreeDAuth.BoundingRectangle.CreateBoundingRectangle(myPointCluster);
+            using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
+            {
+                lfdc.DrawImage(System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                bmap.GetHbitmap(),
+                IntPtr.Zero,
+                System.Windows.Int32Rect.Empty,
+                BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height)),
+                new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                if (userImage != null)
                 {
-                    lfdc.DrawImage(System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    bmap.GetHbitmap(),
-                    IntPtr.Zero,
-                    System.Windows.Int32Rect.Empty,
-                    BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height)),
-                    new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
-                    if (userImage != null)
-                    {
-                        lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-                    }
-                    
-                    //Console.WriteLine(myPointCluster.points.Count);
-                    /*
-                    foreach (ThreeDAuth.DepthPoint point in myPointCluster.points)
-                    {
-                        lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
-                    }
-                    
-                    int xPos = badPoint % depthFrame.Width;
-                    int yPos = badPoint / depthFrame.Width;
-                    lfdc.DrawRoundedRectangle(Brushes.Green, null, new Rect(xPos - 15, yPos - 15, 30, 30), null, 14, null, 14, null);
-                    if (rightWrist.TrackingState == JointTrackingState.Tracked)
-                    {
-                        ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
-                        lfdc.DrawRoundedRectangle(Brushes.Gold, null, new Rect(right.x - 15, right.y - 15, 30, 30), null, 14, null, 14, null);
-                    } 
-                     */ 
-                    //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
-                    ThreeDAuth.PointDistributor.SGivePoint(hand);
+                    lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
                 }
+
+                //Console.WriteLine(myPointCluster.points.Count);
+                /*
+                foreach (ThreeDAuth.DepthPoint point in myPointCluster.points)
+                {
+                    lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
+                }
+                    
+                int xPos = badPoint % depthFrame.Width;
+                int yPos = badPoint / depthFrame.Width;
+                lfdc.DrawRoundedRectangle(Brushes.Green, null, new Rect(xPos - 15, yPos - 15, 30, 30), null, 14, null, 14, null);
+                if (rightWrist.TrackingState == JointTrackingState.Tracked)
+                {
+                    ThreeDAuth.DepthPoint right = this.SkeletonPointToScreen(rightWrist.Position);
+                    lfdc.DrawRoundedRectangle(Brushes.Gold, null, new Rect(right.x - 15, right.y - 15, 30, 30), null, 14, null, 14, null);
+                } 
+                 */
+                //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
+                ThreeDAuth.PointDistributor.SGivePoint(hand);
+            }
 
         }
 
@@ -480,7 +483,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             int i = 0;
             int closestBadPoint = -1;
             int closestBadPointDepth = 10000000;
-            for (i = 0; i < pixelDataLenght;)
+            for (i = 0; i < pixelDataLenght; )
             {
                 if (this.imagePixelData[i].IsKnownDepth == true)
                 {
@@ -490,7 +493,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         int leftIdx = i > 0 ? i - 1 : i;
                         int rightIdx = i < pixelDataLenght + 1 ? i + 1 : i;
                         int upIdx = i > windowWidth ? i - windowWidth : i;
-                        int downIdx= i < windowHeight * windowWidth - windowWidth ? i + windowWidth : i;
+                        int downIdx = i < windowHeight * windowWidth - windowWidth ? i + windowWidth : i;
                         int goodCount = 0;
                         if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
                         if (Math.Abs(this.imagePixelData[leftIdx].Depth - currentDepth) < NEIGHBOR_CUTOFF) goodCount++;
@@ -510,12 +513,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 closestBadPointDepth = currentDepth;
                             }
                         }
-                    }   
+                    }
                 }
                 i = i + 2;
             }
             badPoint = closestBadPoint;
-           
+
         }
 
         /// <summary>
@@ -547,7 +550,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-       
+
 
             Skeleton[] skeletons = new Skeleton[0];
 
@@ -575,73 +578,73 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
                 }
             */
-                if (skeletons.Length != 0)
+            if (skeletons.Length != 0)
+            {
+                foreach (Skeleton skel in skeletons)
                 {
-                    foreach (Skeleton skel in skeletons)
+
+                    /***
+                     * This parts makes sure that the skeleton is being tracked and after it can track all the 
+                     * four joints that we need(left and right shoulder, left and right wrist) we send the information of
+                     * these joints to compute the length of the arm.
+                     * 
+                     */
+
+                    if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
                     {
 
-                        /***
-                         * This parts makes sure that the skeleton is being tracked and after it can track all the 
-                         * four joints that we need(left and right shoulder, left and right wrist) we send the information of
-                         * these joints to compute the length of the arm.
-                         * 
-                         */
-
-                        if (skel.TrackingState.Equals(SkeletonTrackingState.Tracked))
+                        if (!skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.NotTracked))
                         {
-
-                            if (!skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.NotTracked))
-                            {
-                                leftWrist = skel.Joints[JointType.WristLeft];
-                            }
-
-                            if (!skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.NotTracked))
-                            {
-                                rightWrist = skel.Joints[JointType.WristRight];
-                            }
-
-                            if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.ShoulderCenter].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.Spine].TrackingState.Equals(JointTrackingState.Tracked)
-                                && skel.Joints[JointType.HipCenter].TrackingState.Equals(JointTrackingState.Tracked))
-                            {
-                                Joint leftShoulder = skel.Joints[JointType.ShoulderLeft];
-                                Joint leftWristTemp = skel.Joints[JointType.WristLeft];
-                                Joint rightShoulder = skel.Joints[JointType.ShoulderRight];
-                                Joint rightWristTemp = skel.Joints[JointType.WristRight];
-                                Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
-                                Joint hipCenter = skel.Joints[JointType.HipCenter];
-                                Joint spine = skel.Joints[JointType.Spine];
-
-                                ThreeDAuth.DepthPoint leftWristDepthPoint = this.SkeletonPointToScreen(leftWristTemp.Position);
-                                ThreeDAuth.DepthPoint leftShoulderDepthPoint = this.SkeletonPointToScreen(leftShoulder.Position);
-                                ThreeDAuth.DepthPoint rightWristDepthPoint = this.SkeletonPointToScreen(rightWristTemp.Position);
-                                ThreeDAuth.DepthPoint rightShoulderDepthPoint = this.SkeletonPointToScreen(rightShoulder.Position);
-                                myFrame.computeArmLengthPixels(leftWristDepthPoint, leftShoulderDepthPoint, rightWristDepthPoint, rightShoulderDepthPoint);
-                                myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
-
-                                ThreeDAuth.DepthPoint shoulderDepthPoint = this.SkeletonPointToScreen(shoulderCenter.Position);
-                                ThreeDAuth.DepthPoint spineDepthPoint = this.SkeletonPointToScreen(spine.Position);
-                                ThreeDAuth.DepthPoint hipCenterDepthPoint = this.SkeletonPointToScreen(hipCenter.Position);
-                                myFrame.computerTorsoDepth(shoulderDepthPoint, spineDepthPoint, hipCenterDepthPoint);
-                            }
+                            leftWrist = skel.Joints[JointType.WristLeft];
                         }
 
-                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        if (!skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.NotTracked))
                         {
-                            //this.drawHands(lfdc);
+                            rightWrist = skel.Joints[JointType.WristRight];
                         }
-                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+
+                        if (skel.Joints[JointType.ShoulderLeft].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.ShoulderRight].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.WristLeft].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.WristRight].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.ShoulderCenter].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.Spine].TrackingState.Equals(JointTrackingState.Tracked)
+                            && skel.Joints[JointType.HipCenter].TrackingState.Equals(JointTrackingState.Tracked))
                         {
-                            //this.drawHands(lfdc);
+                            Joint leftShoulder = skel.Joints[JointType.ShoulderLeft];
+                            Joint leftWristTemp = skel.Joints[JointType.WristLeft];
+                            Joint rightShoulder = skel.Joints[JointType.ShoulderRight];
+                            Joint rightWristTemp = skel.Joints[JointType.WristRight];
+                            Joint shoulderCenter = skel.Joints[JointType.ShoulderCenter];
+                            Joint hipCenter = skel.Joints[JointType.HipCenter];
+                            Joint spine = skel.Joints[JointType.Spine];
+
+                            ThreeDAuth.DepthPoint leftWristDepthPoint = this.SkeletonPointToScreen(leftWristTemp.Position);
+                            ThreeDAuth.DepthPoint leftShoulderDepthPoint = this.SkeletonPointToScreen(leftShoulder.Position);
+                            ThreeDAuth.DepthPoint rightWristDepthPoint = this.SkeletonPointToScreen(rightWristTemp.Position);
+                            ThreeDAuth.DepthPoint rightShoulderDepthPoint = this.SkeletonPointToScreen(rightShoulder.Position);
+                            myFrame.computeArmLengthPixels(leftWristDepthPoint, leftShoulderDepthPoint, rightWristDepthPoint, rightShoulderDepthPoint);
+                            myFrame.computeArmLength(leftWristTemp, leftShoulder, rightWristTemp, rightShoulder);
+
+                            ThreeDAuth.DepthPoint shoulderDepthPoint = this.SkeletonPointToScreen(shoulderCenter.Position);
+                            ThreeDAuth.DepthPoint spineDepthPoint = this.SkeletonPointToScreen(spine.Position);
+                            ThreeDAuth.DepthPoint hipCenterDepthPoint = this.SkeletonPointToScreen(hipCenter.Position);
+                            myFrame.computerTorsoDepth(shoulderDepthPoint, spineDepthPoint, hipCenterDepthPoint);
                         }
                     }
-                    // prevent drawing outside of our render area
-                    this.liveFeedbackGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                    if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                    {
+                        //this.drawHands(lfdc);
+                    }
+                    else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+                    {
+                        //this.drawHands(lfdc);
+                    }
                 }
+                // prevent drawing outside of our render area
+                this.liveFeedbackGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            }
             //}
 
             //End by Siavash
@@ -698,7 +701,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                     // rectangle over them to give the user feedback
                     double planeDepth = myFrame.armLength * .8;
-                    int planeDepthPixels = (int) ((planeDepth / myFrame.armLength) * myFrame.armLengthPixels);
+                    int planeDepthPixels = (int)((planeDepth / myFrame.armLength) * myFrame.armLengthPixels);
                     ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, planeDepth);
                     //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
                     //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
@@ -710,14 +713,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     //pDistributor.GivePoint(arrived);
                     //Console.WriteLine("Depth: " + hand.depth);
 
-                    short planeDepthmm = (short) (planeDepth * 1000); // convert m to mm
-                    Tuple<int, int> handTuple = new Tuple<int,int>(hand.x, hand.y);
-                    handTuple = ProjectPoint(handTuple, 
-                                             myFrame.AvgTorsoPosition, 
-                                             myFrame.AvgArmLengthPixels, 
-                                             planeDepthPixels, 
-                                             .9, 
-                                             depthFrame.Width, 
+                    short planeDepthmm = (short)(planeDepth * 1000); // convert m to mm
+                    Tuple<int, int> handTuple = new Tuple<int, int>(hand.x, hand.y);
+                    handTuple = ProjectPoint(handTuple,
+                                             myFrame.AvgTorsoPosition,
+                                             myFrame.AvgArmLengthPixels,
+                                             planeDepthPixels,
+                                             .9,
+                                             depthFrame.Width,
                                              depthFrame.Height);
                     if (handTuple == null)
                     {
@@ -877,7 +880,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     node.AppendChild(faceParamsNode);
                     node.AppendChild(passwordNode);
                     userFile.DocumentElement.AppendChild(node);
-                } else {
+                }
+                else
+                {
                     // Do things or something
                 }
                 userFile.Save(filename);
@@ -975,7 +980,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             int windowHeight)
         {
 
-           // return basePoint;
+            // return basePoint;
 
             //armLength *= 1000; // Convert meters to mm
             // Get pixel length of the arm
@@ -1031,8 +1036,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             // So its x value should be our pre-projected target box width,
             // and its y value should be our pre-projected target box height
 
-            double xScale = (double)windowWidth / (double) (torsoPosition.x + xOffset);
-            double yScale = (double)windowHeight / (double) (torsoPosition.y + yOffset);
+            double xScale = (double)windowWidth / (double)(torsoPosition.x + xOffset);
+            double yScale = (double)windowHeight / (double)(torsoPosition.y + yOffset);
 
 
             Tuple<int, int> shiftedPoint = new Tuple<int, int>(basePoint.Item1 - torsoPosition.x, basePoint.Item2 - torsoPosition.y);
@@ -1049,7 +1054,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (xProj > windowWidth) xProj = windowWidth - 1;
             if (yProj > windowHeight) yProj = windowHeight - 1;
 
-            Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" + 
+            Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" +
                                 "     Arm length: " + armLengthPixels);
 
             return new Tuple<int, int>(xProj, yProj);
@@ -1113,7 +1118,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         */
-       
+
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -1178,20 +1183,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.userNamestackPanel.Visibility = System.Windows.Visibility.Visible;
             this.AccountButton.Content = "Log in";
-          
+
 
         }
 
         void GiveUser(User current)
         {
-            
+
             faceTrackingViewer.stopTracking();
             this.isfaceTrackerOn = false;
             if (this.isUserNew)
             {
                 if (current.name.Length > 0)
                 {
-                    
+
                     faceTrackingViewer.stopTracking();
                     this.isfaceTrackerOn = false;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
@@ -1210,14 +1215,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.currentUser.faceParams = current.faceParams;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
-                   
+
                 }
 
             }
 
             else
             {
-                if (current.name.Length > 0) 
+                if (current.name.Length > 0)
                 {
                     if (String.Compare(current.name, this.currentUser.name, true) == 0)
                     {
@@ -1254,6 +1259,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
                         this.login.Visibility = System.Windows.Visibility.Collapsed;
                         this.rescan.Visibility = System.Windows.Visibility.Visible;
+                        this.byPass.Visibility = System.Windows.Visibility.Visible;
                         this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
                         this.welcomeMassage.Text = "Hello " + this.currentUser.name + "! " + "We did not find the right match. Please rescan";
                     }
@@ -1270,7 +1276,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.rescan.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Text = "Hello " + this.Username.Text + "! " + "We did not find you. Please rescan";
-                    
+
                 }
 
             }
@@ -1299,12 +1305,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.isfaceTrackerOn = true;
             faceTrackingViewer.setSensor(this.sensor);
             CurrentObjectBag.SCurrentFaceClassifier.OnUserReceived += new GiveUser(GiveUser);
-            
+
         }
 
         private void Username_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.AccountButton.IsEnabled= true;
+            this.AccountButton.IsEnabled = true;
         }
 
 
@@ -1334,9 +1340,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                 gLearner.startRecording();
-               
-             
-                
+
+
+
 
             }
             catch (Exception)
@@ -1363,7 +1369,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (this.isfaceTrackerOn)
             {
                 faceTrackingViewer.stopTracking();
-            } 
+            }
 
             //this.sensor.DepthFrameReady += null;
 
@@ -1372,7 +1378,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 gValidator.OnCompletedValidation += null;
             }
-            
+
             this.currentUser = null;
             this.myImageBox.Source = null;
             this.Username.Text = "";
@@ -1391,13 +1397,72 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.progressBar2.Visibility = System.Windows.Visibility.Visible;
             this.progressBar3.Visibility = System.Windows.Visibility.Visible;
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.byPass.Visibility = System.Windows.Visibility.Collapsed;
             this.rescan.Visibility = System.Windows.Visibility.Collapsed;
             this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
             this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
             this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
             this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
-       
+
+        }
+
+
+        private void byPass_Click(object sender, RoutedEventArgs e)
+        {
+            if (data == null)
+            {
+                data = new XmlDocument();
+            }
+            this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+            this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+
+            try
+            {
+                data.Load("users.xml");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("file not found");
+            }
+
+            SortedDictionary<String, double> matches = new SortedDictionary<String, double>();
+
+            XmlNodeList users = data.GetElementsByTagName("user");
+
+            foreach (XmlNode user in users)
+            {
+                if (String.Compare(user["name"].InnerText, this.currentUser.name, true) == 0)
+                {
+
+                    this.currentUser.imgPath = user["user-image"].InnerText;
+
+                    List<Point2d> tempPts = new List<Point2d>();
+                    XmlNode points = user["points"];
+                    for (int i = 0; i < points.ChildNodes.Count; i++)
+                    {
+                        XmlNode point = points.ChildNodes[i];
+                        double x = Convert.ToDouble(point["x"].InnerText);
+                        double y = Convert.ToDouble(point["y"].InnerText);
+                        Point2d tmp = new Point2d(x, y);
+                        tempPts.Add(tmp);
+                    }
+
+                    this.currentUser.password = tempPts;
+
+                    this.byPass.Visibility = System.Windows.Visibility.Collapsed;
+                    this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                    this.welcomeMassage.Text = "Hello " + this.currentUser.name + "! " + "Start drawing your pattern when the circle is blue.";
+                    userImage = new BitmapImage(new Uri(this.currentUser.imgPath));
+                    myImageBox.Source = handSource;
+                    this.myImageBox.Visibility = Visibility.Visible;
+                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                    Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(this.currentUser.password);
+                    gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
+                    gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
+                }
+            }
         }
     }
 }
