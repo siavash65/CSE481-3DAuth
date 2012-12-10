@@ -11,7 +11,7 @@ namespace ThreeDAuth
     class FaceClassifier
     {
         private XmlDocument data;
-        private const double MAX_DIFF = 7.5;
+        private const double MAX_DIFF = 10;
 
         private event GiveUser _onUserRecieved;
         
@@ -19,8 +19,6 @@ namespace ThreeDAuth
         {
             data = new XmlDocument();
 
-
-            
         }
 
         private void Notify(User u)
