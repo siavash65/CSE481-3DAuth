@@ -158,7 +158,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 
         private System.Diagnostics.Stopwatch outOfPlaneTimer;
-        private const long OUT_OF_PLANE_CUTOFF = 2000; // ms
+        private System.Diagnostics.Stopwatch resetButtonTimer;
+        private System.Diagnostics.Stopwatch doneButtonTimer;
+
+        private const long BUTTON_HOLD_CUTOFF = 2000; // ms
 
         private static MainWindow instance; // make it a singleton to allow us to use skeleton projections from the targetBox class
 
@@ -176,6 +179,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             positionMotionFilter = new ThreeDAuth.PositionMotionFilter();
             outOfPlaneTimer = new System.Diagnostics.Stopwatch();
+            resetButtonTimer = new System.Diagnostics.Stopwatch();
+            doneButtonTimer = new System.Diagnostics.Stopwatch();
             MainWindow.instance = this;
         }
 
@@ -703,12 +708,84 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
+        private void DrawWedge(DrawingContext drawingContext, int centerX, int centerY, SweepDirection sweepDirection, double percentage)
+        {
+            GeometryDrawing geometryDrawing = new GeometryDrawing();
+            StreamGeometry streamGeo = new StreamGeometry();
+            
+            double sweepRadians = (Math.PI / 2.0) * percentage;
+
+            // Determine start point
+            double startX = centerX;
+            double startY = centerY;
+
+            // Determine end point
+            double endX = Math.Cos(sweepRadians) * 50.0;
+            double endY = Math.Sin(sweepRadians) * 50.0;
+
+            if (sweepDirection == SweepDirection.Clockwise)
+            {
+                endX = centerX - endX;
+            }
+
+            using (StreamGeometryContext sgc = streamGeo.Open())
+            {
+                sgc.BeginFigure(new System.Windows.Point(startX, startY), true, true);
+                sgc.ArcTo(new System.Windows.Point(endX, endY), new Size(50.0, 50.0), sweepRadians, false, sweepDirection, false, true); 
+            }
+            geometryDrawing.Geometry = streamGeo;
+            drawingContext.DrawGeometry(Brushes.Red, null, geometryDrawing.Geometry);
+        }
+
         private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand, bool drawHand, DepthImageFrame depthFrame)
         {
             //Start Siavash
+
+            double resetButtonTimePercentage = 0.0;
+            double doneButtonTimePercentage = 0.0;
             if (userImage != null)
             {
                 drawingContext.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                // Draw the reset button regardless
+                //Pen buttonPen = new Pen(Brushes.Black, 0.1);
+                //Brush resetButtonBrush = new SolidColorBrush(Color.FromRgb());
+                //drawingContext
+                if (resetButtonTimer.IsRunning)
+                {
+                    resetButtonTimePercentage = (double) resetButtonTimer.ElapsedMilliseconds / (double) BUTTON_HOLD_CUTOFF;
+                }
+                if (resetButtonTimePercentage > 1.0) resetButtonTimePercentage = 1.0;
+                drawingContext.DrawEllipse(Brushes.White, null, new System.Windows.Point(0, 0), 50, 50);
+                DrawWedge(drawingContext, 0, 0, SweepDirection.Counterclockwise, resetButtonTimePercentage); 
+                drawingContext.DrawText(
+                    new FormattedText("Reset", 
+                                      System.Globalization.CultureInfo.CurrentCulture, 
+                                      FlowDirection.LeftToRight, 
+                                      new Typeface("Arial"), 
+                                      14.0, 
+                                      Brushes.Black), 
+                    new System.Windows.Point(3, 12.5));
+
+                // Draw the done button if we're learning
+                if (gLearner.isRecording)
+                {
+                    if (doneButtonTimer.IsRunning)
+                    {
+                        doneButtonTimePercentage = (double)doneButtonTimer.ElapsedMilliseconds / (double)BUTTON_HOLD_CUTOFF;
+                    }
+                    if (doneButtonTimePercentage > 1.0) doneButtonTimePercentage = 1.0;
+                    drawingContext.DrawEllipse(Brushes.White, null, new System.Windows.Point(depthFrame.Width, 0), 50, 50);
+                    DrawWedge(drawingContext, depthFrame.Width, 0, SweepDirection.Clockwise, doneButtonTimePercentage);
+                    drawingContext.DrawText(
+                        new FormattedText("Done",
+                                          System.Globalization.CultureInfo.CurrentCulture,
+                                          FlowDirection.LeftToRight,
+                                          new Typeface("Arial"),
+                                          14.0,
+                                          Brushes.Black),
+                        new System.Windows.Point(depthFrame.Width - 35.0, 12.5));
+                }
             }
 
             //End Siavash
@@ -722,7 +799,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                     // rectangle over them to give the user feedback
                     double planeDepth = myFrame.armLength * .8;
-                    int planeDepthPixels = (int)((planeDepth / myFrame.armLength) * myFrame.armLengthPixels);
+                    int planeDepthPixels = (int)((planeDepth / myFrame.armLength) * myFrame.AvgArmLengthPixels);
                     //ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, planeDepth);
                     ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.AvgTorsoPosition, planeDepth);
                     //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
@@ -755,6 +832,49 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     pDistributor.GivePoint(planePoint);
 
                     //drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+
+                    // Check if the point is in the buttons
+
+                    // reset button
+                    bool inButton = false;
+                    if (Math.Sqrt((planePoint.x * planePoint.x) + (planePoint.y * planePoint.y)) < 50.0)
+                    {
+                        // in reset button
+                        inButton = true;
+                        if (!resetButtonTimer.IsRunning)
+                        {
+                            resetButtonTimer.Start();
+                        }
+                    }
+                    else
+                    {
+                        if (resetButtonTimer.IsRunning)
+                        {
+                            resetButtonTimer.Reset();
+                        }
+                    }
+
+                    // done button
+                    if (gLearner.isRecording)
+                    {
+                        if (Math.Sqrt(((planePoint.x - depthFrame.Width) * (planePoint.x - depthFrame.Width)) + 
+                                      (planePoint.y * planePoint.y)) < 50.0)
+                        {
+                            // in done button
+                            inButton = true;
+                            if (!doneButtonTimer.IsRunning)
+                            {
+                                doneButtonTimer.Start();
+                            }
+                        }
+                        else
+                        {
+                            if (doneButtonTimer.IsRunning)
+                            {
+                                doneButtonTimer.Reset();
+                            }
+                        }
+                    }
 
                     drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
 
@@ -800,6 +920,32 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         }
                     }
 
+                    if (gLearner != null && gLearner.isRecording && inButton && doneButtonTimePercentage >= 1.0)
+                    {
+                        // Done recording
+                        gLearner.stopRecording();
+                        this.myImageBox.Visibility = System.Windows.Visibility.Collapsed;
+                        List<ThreeDAuth.Point2d> password = new List<ThreeDAuth.Point2d>(gLearner.getGesturePath());
+                        this.currentUser.password = password;
+                        this.gestureMassage.Text = "Success. Your account has been created. Welcome to 3DAuth!";
+                        SaveUser(currentUser);
+                    }
+
+                    if (inButton && resetButtonTimePercentage >= 1.0)
+                    {
+                        if (gLearner != null && gLearner.isRecording)
+                        {
+                            // Reset the learner
+                            gLearner.restart();
+                        }
+                        else if (gValidator != null)
+                        {
+                            // Reset the validator
+                            gValidator.restart();
+                        }
+                    }
+
+                    /*
                     // If we're learning a gesture and we've been out of the plane for 5 seconds, stop learning
                     if (gLearner.isRecording && !planePoint.inPlane)
                     {
@@ -807,7 +953,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             outOfPlaneTimer.Start();
                         }
-                        if (outOfPlaneTimer.ElapsedMilliseconds > OUT_OF_PLANE_CUTOFF)
+                        if (outOfPlaneTimer.ElapsedMilliseconds > BUTTON_HOLD_CUTOFF)
                         {
                             gLearner.stopRecording();
                             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed;
@@ -821,6 +967,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
                         outOfPlaneTimer.Reset();
                     }
+                     * */
                 }
             }
         }
@@ -1105,9 +1252,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             yProj = yProj + torsoPosition.y;
 
 
-            //Sanity check
+            //bound checking
             if (xProj > windowWidth) xProj = windowWidth - 1;
             if (yProj > windowHeight) yProj = windowHeight - 1;
+            if (xProj <= 0) xProj = 1;
+            if (yProj <= 0) yProj = 1;
 
             //Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" +
                                 //"     Arm length: " + armLengthPixels);
@@ -1432,9 +1581,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                 gLearner.startRecording();
-
-
-
 
             }
             catch (Exception)

@@ -98,6 +98,14 @@ namespace ThreeDAuth
             CurrentObjectBag.SCurrentGestureLearner = this;
         }
 
+        public void restart()
+        {
+            stopwatch.Reset();
+            learnedGesturePath.Clear();
+            pointBuffer.Clear();
+            startRecording();
+        }
+
         override public void GivePoint(Point point)
         {
             if (point is PlanePoint)

@@ -21,6 +21,32 @@ namespace ThreeDAuth
         OutOfMemoryException the nois in ThemeDictionaryExtension raw data*/
         private const int MINDATAPOINTSREQ = 20;
 
+
+        private Queue<DepthPoint> leftWristPoints;
+        private Queue<DepthPoint> rightWristPoints;
+        private Queue<DepthPoint> leftShoulderPoints;
+        private Queue<DepthPoint> rightShoulderPoints;
+
+        private Queue<DepthPoint> shoulderCenterPoints;
+        private Queue<DepthPoint> spinePoints;
+        private Queue<DepthPoint> hipCenterPoints;
+
+        private Queue<DepthPoint> shoulderCenterPointsSupplemental;
+        private Queue<DepthPoint> spinePointsSupplemental;
+        private Queue<DepthPoint> hipCenterPointsSupplemental;
+
+        private int totalArmPoints;
+        private int totalTorsoPoints;
+
+        private const int MIN_POINTS_BEFORE_READING = 10;
+
+        private const int MAX_POINTS_IN_READING = 50;
+
+        private const double Z_SCORE_SUM_BOUND = 3.0;
+
+        private const double TORSO_LEARNING_ALPHA = 0.1; // torso learning alpha for after we have MAX_POINTS_IN_READING
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -51,6 +77,10 @@ namespace ThreeDAuth
             shoulderCenterPoints = new Queue<DepthPoint>();
             spinePoints = new Queue<DepthPoint>();
             hipCenterPoints = new Queue<DepthPoint>();
+
+            shoulderCenterPointsSupplemental = new Queue<DepthPoint>();
+            spinePointsSupplemental = new Queue<DepthPoint>();
+            hipCenterPointsSupplemental = new Queue<DepthPoint>();
         }
 
 
@@ -99,22 +129,6 @@ namespace ThreeDAuth
             }*/
         }
 
-        private Queue<DepthPoint> leftWristPoints;
-        private Queue<DepthPoint> rightWristPoints;
-        private Queue<DepthPoint> leftShoulderPoints;
-        private Queue<DepthPoint> rightShoulderPoints;
-
-        private Queue<DepthPoint> shoulderCenterPoints;
-        private Queue<DepthPoint> spinePoints;
-        private Queue<DepthPoint> hipCenterPoints;
-
-        private int totalArmPoints;
-        private int totalTorsoPoints;
-
-        private const int MIN_POINTS_BEFORE_READING = 10;
-
-        private const int MAX_POINTS_IN_READING = 50;
-
         public int AvgArmLengthPixels
         {
             get
@@ -136,10 +150,16 @@ namespace ThreeDAuth
                 return (int) (sumArmLengths / (double) leftWristPoints.Count);
             }
         }
+
+        private DepthPoint _avgTorsoPosition;
         public DepthPoint AvgTorsoPosition
         {
             get
             {
+                if (_avgTorsoPosition != null)
+                {
+                    return _avgTorsoPosition;
+                }
                 double shoulderCenterSumX = 0;
                 double shoulderCenterSumY = 0;
                 double shoulderCenterSumZ = 0;
@@ -152,38 +172,175 @@ namespace ThreeDAuth
                 double spineSumY = 0;
                 double spineSumZ = 0;
 
-                for (int i = 0; i < shoulderCenterPoints.Count; i++)
+                List<double> shoulderCenterX = new List<double>();
+                List<double> shoulderCenterY = new List<double>();
+                List<double> shoulderCenterZ = new List<double>();
+
+                List<double> hipCenterX = new List<double>();
+                List<double> hipCenterY = new List<double>();
+                List<double> hipCenterZ = new List<double>();
+
+                List<double> spineX = new List<double>();
+                List<double> spineY = new List<double>();
+                List<double> spineZ = new List<double>();
+
+                if (shoulderCenterPoints.Count > 30)
                 {
-                    shoulderCenterSumX += shoulderCenterPoints.ElementAt(i).x;
-                    shoulderCenterSumY += shoulderCenterPoints.ElementAt(i).y;
-                    shoulderCenterSumZ += shoulderCenterPoints.ElementAt(i).depth;
+                    for (int i = 0; i < shoulderCenterPoints.Count; i++)
+                    {
+                        shoulderCenterX.Add(shoulderCenterPoints.ElementAt(i).x);
+                        shoulderCenterY.Add(shoulderCenterPoints.ElementAt(i).y);
+                        shoulderCenterZ.Add(shoulderCenterPoints.ElementAt(i).depth);
 
-                    hipCenterSumX += hipCenterPoints.ElementAt(i).x;
-                    hipCenterSumY += hipCenterPoints.ElementAt(i).y;
-                    hipCenterSumZ += hipCenterPoints.ElementAt(i).depth;
+                        hipCenterX.Add(hipCenterPoints.ElementAt(i).x);
+                        hipCenterY.Add(hipCenterPoints.ElementAt(i).y);
+                        hipCenterZ.Add(hipCenterPoints.ElementAt(i).depth);
 
-                    spineSumX += spinePoints.ElementAt(i).x;
-                    spineSumY += spinePoints.ElementAt(i).y;
-                    spineSumZ += spinePoints.ElementAt(i).depth;
+                        spineX.Add(spinePoints.ElementAt(i).x);
+                        spineY.Add(spinePoints.ElementAt(i).y);
+                        spineZ.Add(spinePoints.ElementAt(i).depth);
+                    }
+                    shoulderCenterX.Sort();
+                    shoulderCenterY.Sort();
+                    shoulderCenterZ.Sort();
+
+                    hipCenterX.Sort();
+                    hipCenterY.Sort();
+                    hipCenterZ.Sort();
+
+                    spineX.Sort();
+                    spineY.Sort();
+                    spineZ.Sort();
+
+                    int numToRemove = shoulderCenterPoints.Count / 4;
+                    for (int i = 0; i < numToRemove; i++)
+                    {
+                        shoulderCenterX.RemoveAt(0);
+                        shoulderCenterY.RemoveAt(0);
+                        shoulderCenterZ.RemoveAt(0);
+
+                        hipCenterX.RemoveAt(0);
+                        hipCenterY.RemoveAt(0);
+                        hipCenterZ.RemoveAt(0);
+
+                        spineX.RemoveAt(0);
+                        spineY.RemoveAt(0);
+                        spineZ.RemoveAt(0);
+
+
+                        shoulderCenterX.RemoveAt(shoulderCenterX.Count - 1);
+                        shoulderCenterY.RemoveAt(shoulderCenterY.Count - 1);
+                        shoulderCenterZ.RemoveAt(shoulderCenterZ.Count - 1);
+
+                        hipCenterX.RemoveAt(hipCenterX.Count - 1);
+                        hipCenterY.RemoveAt(hipCenterZ.Count - 1);
+                        hipCenterZ.RemoveAt(hipCenterZ.Count - 1);
+
+                        spineX.RemoveAt(spineX.Count - 1);
+                        spineY.RemoveAt(spineY.Count - 1);
+                        spineZ.RemoveAt(spineZ.Count - 1);
+                    }
+
+                    shoulderCenterSumX = shoulderCenterX.Sum();
+                    shoulderCenterSumY = shoulderCenterY.Sum();
+                    shoulderCenterSumZ = shoulderCenterZ.Sum();
+
+                    hipCenterSumX = hipCenterX.Sum();
+                    hipCenterSumY = hipCenterY.Sum();
+                    hipCenterSumZ = hipCenterZ.Sum();
+
+                    spineSumX = spineX.Sum();
+                    spineSumY = spineX.Sum();
+                    spineSumZ = spineX.Sum();
+
+                    /*
+                    for (int i = 0; i < shoulderCenterX.Count; i++)
+                    {
+                        shoulderCenterSumX += shoulderCenterX.ElementAt(i).x;
+                        shoulderCenterSumY += shoulderCenterY.ElementAt(i).y;
+                        shoulderCenterSumZ += shoulderCenterZ.ElementAt(i).depth;
+
+                        hipCenterSumX += hipCenterPoints.ElementAt(i).x;
+                        hipCenterSumY += hipCenterPoints.ElementAt(i).y;
+                        hipCenterSumZ += hipCenterPoints.ElementAt(i).depth;
+
+                        spineSumX += spinePoints.ElementAt(i).x;
+                        spineSumY += spinePoints.ElementAt(i).y;
+                        spineSumZ += spinePoints.ElementAt(i).depth;
+                    }
+                     * */
+                    /*
+                    double avgShoulderX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgShoulderY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgShoulderZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+
+                    double avgSpineX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgSpineY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgSpineZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+
+                    double avgHipX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgHipY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgHipZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+                    */
+                    double avgShoulderX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                    double avgShoulderY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                    double avgShoulderZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                    double avgSpineX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                    double avgSpineY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                    double avgSpineZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                    double avgHipX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                    double avgHipY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                    double avgHipZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                    double avgTorsoX = (avgShoulderX + avgSpineX + avgHipX) / 3.0;
+                    double avgTorsoY = (avgShoulderY + avgSpineY + avgHipY) / 3.0;
+                    double avgTorsoZ = (avgShoulderZ + avgSpineZ + avgHipZ) / 3.0;
+
+                    DepthPoint torsoAvg = new DepthPoint((int)avgTorsoX, (int)avgTorsoY, (long)avgTorsoZ);
+
+                    if (shoulderCenterPoints.Count == MAX_POINTS_IN_READING)
+                    {
+                        _avgTorsoPosition = torsoAvg;
+                    }
+                    return torsoAvg;
                 }
+                else
+                {
+                    for (int i = 0; i < shoulderCenterPoints.Count; i++)
+                    {
+                        shoulderCenterSumX += shoulderCenterPoints.ElementAt(i).x;
+                        shoulderCenterSumY += shoulderCenterPoints.ElementAt(i).y;
+                        shoulderCenterSumZ += shoulderCenterPoints.ElementAt(i).depth;
 
-                double avgShoulderX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
-                double avgShoulderY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
-                double avgShoulderZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+                        hipCenterSumX += hipCenterPoints.ElementAt(i).x;
+                        hipCenterSumY += hipCenterPoints.ElementAt(i).y;
+                        hipCenterSumZ += hipCenterPoints.ElementAt(i).depth;
 
-                double avgSpineX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
-                double avgSpineY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
-                double avgSpineZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+                        spineSumX += spinePoints.ElementAt(i).x;
+                        spineSumY += spinePoints.ElementAt(i).y;
+                        spineSumZ += spinePoints.ElementAt(i).depth;
+                    }
 
-                double avgHipX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
-                double avgHipY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
-                double avgHipZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+                    double avgShoulderX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgShoulderY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgShoulderZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
 
-                double avgTorsoX = (avgShoulderX + avgSpineX + avgHipX) / 3.0;
-                double avgTorsoY = (avgShoulderY + avgSpineY + avgHipY) / 3.0;
-                double avgTorsoZ = (avgShoulderZ + avgSpineZ + avgHipZ) / 3.0;
+                    double avgSpineX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgSpineY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgSpineZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
 
-                return new DepthPoint((int)avgTorsoX, (int)avgTorsoY, (long)avgTorsoZ);
+                    double avgHipX = shoulderCenterSumX / (double)shoulderCenterPoints.Count;
+                    double avgHipY = shoulderCenterSumY / (double)shoulderCenterPoints.Count;
+                    double avgHipZ = shoulderCenterSumZ / (double)shoulderCenterPoints.Count;
+
+                    double avgTorsoX = (avgShoulderX + avgSpineX + avgHipX) / 3.0;
+                    double avgTorsoY = (avgShoulderY + avgSpineY + avgHipY) / 3.0;
+                    double avgTorsoZ = (avgShoulderZ + avgSpineZ + avgHipZ) / 3.0;
+
+                    return new DepthPoint((int)avgTorsoX, (int)avgTorsoY, (long)avgTorsoZ);
+                }
             }
         }
 
@@ -249,6 +406,15 @@ namespace ThreeDAuth
         internal void computerTorsoDepth(DepthPoint shoulderCenter, DepthPoint spine, DepthPoint hipCenter)
         {
             totalTorsoPoints++;
+            
+            /*
+            if (shoulderCenterPoints.Count == MAX_POINTS_IN_READING)
+            {
+                shoulderCenterPointsSupplemental.Enqueue(shoulderCenter);
+                hipCenterPointsSupplemental.Enqueue(hipCenter);
+                spinePointsSupplemental.Enqueue(spine);
+            }
+            */
 
             while (shoulderCenterPoints.Count > MAX_POINTS_IN_READING)
             {
@@ -257,17 +423,203 @@ namespace ThreeDAuth
                 spinePoints.Dequeue();
             }
 
-            if (totalTorsoPoints > MIN_POINTS_BEFORE_READING)
+            while (shoulderCenterPointsSupplemental.Count > MAX_POINTS_IN_READING)
+            {
+                shoulderCenterPointsSupplemental.Dequeue();
+                hipCenterPointsSupplemental.Dequeue();
+                spinePointsSupplemental.Dequeue();
+            }
+
+
+            if (totalTorsoPoints > MIN_POINTS_BEFORE_READING && shoulderCenterPoints.Count < MAX_POINTS_IN_READING)
             {
                 shoulderCenterPoints.Enqueue(shoulderCenter);
                 hipCenterPoints.Enqueue(hipCenter);
                 spinePoints.Enqueue(spine);
             }
+            else
+            {
+                shoulderCenterPointsSupplemental.Enqueue(shoulderCenter);
+                hipCenterPointsSupplemental.Enqueue(hipCenter);
+                spinePointsSupplemental.Enqueue(spine);
+            }
+
+            // Alpha average between the supplemental points and our stored average torso pos
+
+            if (shoulderCenterPointsSupplemental.Count > 30 && _avgTorsoPosition != null)
+            {
+                List<double> shoulderCenterX = new List<double>();
+                List<double> shoulderCenterY = new List<double>();
+                List<double> shoulderCenterZ = new List<double>();
+
+                List<double> hipCenterX = new List<double>();
+                List<double> hipCenterY = new List<double>();
+                List<double> hipCenterZ = new List<double>();
+
+                List<double> spineX = new List<double>();
+                List<double> spineY = new List<double>();
+                List<double> spineZ = new List<double>();
+
+                for (int i = 0; i < shoulderCenterPoints.Count; i++)
+                {
+                    shoulderCenterX.Add(shoulderCenterPoints.ElementAt(i).x);
+                    shoulderCenterY.Add(shoulderCenterPoints.ElementAt(i).y);
+                    shoulderCenterZ.Add(shoulderCenterPoints.ElementAt(i).depth);
+
+                    hipCenterX.Add(hipCenterPoints.ElementAt(i).x);
+                    hipCenterY.Add(hipCenterPoints.ElementAt(i).y);
+                    hipCenterZ.Add(hipCenterPoints.ElementAt(i).depth);
+
+                    spineX.Add(spinePoints.ElementAt(i).x);
+                    spineY.Add(spinePoints.ElementAt(i).y);
+                    spineZ.Add(spinePoints.ElementAt(i).depth);
+                }
+                shoulderCenterX.Sort();
+                shoulderCenterY.Sort();
+                shoulderCenterZ.Sort();
+
+                hipCenterX.Sort();
+                hipCenterY.Sort();
+                hipCenterZ.Sort();
+
+                spineX.Sort();
+                spineY.Sort();
+                spineZ.Sort();
+
+                int numToRemove = shoulderCenterPoints.Count / 4;
+                for (int i = 0; i < numToRemove; i++)
+                {
+                    shoulderCenterX.RemoveAt(0);
+                    shoulderCenterY.RemoveAt(0);
+                    shoulderCenterZ.RemoveAt(0);
+
+                    hipCenterX.RemoveAt(0);
+                    hipCenterY.RemoveAt(0);
+                    hipCenterZ.RemoveAt(0);
+
+                    spineX.RemoveAt(0);
+                    spineY.RemoveAt(0);
+                    spineZ.RemoveAt(0);
 
 
-            long shoulderCenterZ = shoulderCenter.depth;
-            long spineZ = spine.depth;
-            long hipCenterZ = hipCenter.depth;
+                    shoulderCenterX.RemoveAt(shoulderCenterX.Count - 1);
+                    shoulderCenterY.RemoveAt(shoulderCenterY.Count - 1);
+                    shoulderCenterZ.RemoveAt(shoulderCenterZ.Count - 1);
+
+                    hipCenterX.RemoveAt(hipCenterX.Count - 1);
+                    hipCenterY.RemoveAt(hipCenterZ.Count - 1);
+                    hipCenterZ.RemoveAt(hipCenterZ.Count - 1);
+
+                    spineX.RemoveAt(spineX.Count - 1);
+                    spineY.RemoveAt(spineY.Count - 1);
+                    spineZ.RemoveAt(spineZ.Count - 1);
+                }
+
+                double shoulderCenterSumX = shoulderCenterX.Sum();
+                double shoulderCenterSumY = shoulderCenterY.Sum();
+                double shoulderCenterSumZ = shoulderCenterZ.Sum();
+
+                double hipCenterSumX = hipCenterX.Sum();
+                double hipCenterSumY = hipCenterY.Sum();
+                double hipCenterSumZ = hipCenterZ.Sum();
+
+                double spineSumX = spineX.Sum();
+                double spineSumY = spineX.Sum();
+                double spineSumZ = spineX.Sum();
+
+                double avgShoulderX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                double avgShoulderY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                double avgShoulderZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                double avgSpineX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                double avgSpineY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                double avgSpineZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                double avgHipX = shoulderCenterSumX / (double)shoulderCenterX.Count;
+                double avgHipY = shoulderCenterSumY / (double)shoulderCenterX.Count;
+                double avgHipZ = shoulderCenterSumZ / (double)shoulderCenterX.Count;
+
+                double avgTorsoX = (avgShoulderX + avgSpineX + avgHipX) / 3.0;
+                double avgTorsoY = (avgShoulderY + avgSpineY + avgHipY) / 3.0;
+                double avgTorsoZ = (avgShoulderZ + avgSpineZ + avgHipZ) / 3.0;
+
+                _avgTorsoPosition = new DepthPoint((int) (_avgTorsoPosition.x * (1 - TORSO_LEARNING_ALPHA) + avgTorsoX * TORSO_LEARNING_ALPHA),
+                                                   (int) (_avgTorsoPosition.y * (1 - TORSO_LEARNING_ALPHA) + avgTorsoY * TORSO_LEARNING_ALPHA),
+                                                   (long) (_avgTorsoPosition.depth * (1 - TORSO_LEARNING_ALPHA) + avgTorsoZ * TORSO_LEARNING_ALPHA));
+            }
+
+            
+            if (shoulderCenterPointsSupplemental.Count == MAX_POINTS_IN_READING)
+            {
+                // Determine if we should switch to the supplemental queue because the user has moved
+                double torsoSumX = 0.0;
+                double torsoSumY = 0.0;
+                double torsoSumZ = 0.0;
+
+                double torsoSDX = 0.0;
+                double torsoSDY = 0.0;
+                double torsoSDZ = 0.0;
+
+                for (int i = 0; i < shoulderCenterPointsSupplemental.Count; i++)
+                {
+                    torsoSumX += (shoulderCenterPointsSupplemental.ElementAt(i).x +
+                        hipCenterPointsSupplemental.ElementAt(i).x +
+                        spinePointsSupplemental.ElementAt(i).x) / 3.0;
+                    torsoSumY += (shoulderCenterPointsSupplemental.ElementAt(i).y +
+                        hipCenterPointsSupplemental.ElementAt(i).y +
+                        spinePointsSupplemental.ElementAt(i).y) / 3.0;
+                    torsoSumZ += (shoulderCenterPointsSupplemental.ElementAt(i).depth +
+                        hipCenterPointsSupplemental.ElementAt(i).depth +
+                        spinePointsSupplemental.ElementAt(i).depth) / 3.0;
+                }
+                double avgTorsoX = torsoSumX / shoulderCenterPointsSupplemental.Count;
+                double avgTorsoY = torsoSumY / shoulderCenterPointsSupplemental.Count;
+                double avgTorsoZ = torsoSumZ / shoulderCenterPointsSupplemental.Count;
+                for (int i = 0; i < shoulderCenterPointsSupplemental.Count; i++)
+                {
+                    torsoSDX += Math.Pow(((shoulderCenterPointsSupplemental.ElementAt(i).x +
+                        hipCenterPointsSupplemental.ElementAt(i).x +
+                        spinePointsSupplemental.ElementAt(i).x) / 3.0) - avgTorsoX, 2);
+                    torsoSDY += Math.Pow(((shoulderCenterPointsSupplemental.ElementAt(i).y +
+                        hipCenterPointsSupplemental.ElementAt(i).y +
+                        spinePointsSupplemental.ElementAt(i).y) / 3.0) - avgTorsoY, 2);
+                    torsoSDZ += Math.Pow(((shoulderCenterPointsSupplemental.ElementAt(i).depth +
+                        hipCenterPointsSupplemental.ElementAt(i).depth +
+                        spinePointsSupplemental.ElementAt(i).depth) / 3.0) - avgTorsoZ, 2);
+                }
+                torsoSDX /= (shoulderCenterPointsSupplemental.Count - 1);
+                torsoSDY /= (shoulderCenterPointsSupplemental.Count - 1);
+                torsoSDZ /= (shoulderCenterPointsSupplemental.Count - 1);
+                DepthPoint current = AvgTorsoPosition;
+                double xZScore = Math.Abs((current.x - avgTorsoX) / torsoSDX);
+                double yZScore = Math.Abs((current.y - avgTorsoY) / torsoSDY);
+                double zZScore = Math.Abs((current.depth - avgTorsoZ) / torsoSDZ);
+                if (xZScore + yZScore + zZScore > Z_SCORE_SUM_BOUND)
+                {
+                    //Console.WriteLine("Adjusting torso center, z score: " + (xZScore + yZScore + zZScore));
+
+                    shoulderCenterPoints = shoulderCenterPointsSupplemental;
+                    spinePoints = spinePointsSupplemental;
+                    hipCenterPoints = hipCenterPointsSupplemental;
+
+                    shoulderCenterPointsSupplemental.Clear();
+                    spinePointsSupplemental.Clear();
+                    hipCenterPointsSupplemental.Clear();
+                }
+                else
+                {
+                    while (shoulderCenterPointsSupplemental.Count > MAX_POINTS_IN_READING)
+                    {
+                        shoulderCenterPointsSupplemental.Dequeue();
+                        spinePointsSupplemental.Dequeue();
+                        hipCenterPointsSupplemental.Dequeue();
+                    }
+                }
+            }
+
+            //long shoulderCenterZ = shoulderCenter.depth;
+            //long spineZ = spine.depth;
+            //long hipCenterZ = hipCenter.depth;
 
             this.torsoPosition = new DepthPoint((shoulderCenter.x + spine.x + hipCenter.x) / 3,
                                                 (shoulderCenter.y + spine.y + hipCenter.y) / 3,
