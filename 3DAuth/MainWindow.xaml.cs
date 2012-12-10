@@ -731,6 +731,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     //drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
 
+                    drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+
                     //if (arrived.inPlane)
                     if (planePoint.inPlane)
                     {
@@ -972,7 +974,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             int windowWidth,
                                             int windowHeight)
         {
-            return basePoint;
+
+           // return basePoint;
+
             //armLength *= 1000; // Convert meters to mm
             // Get pixel length of the arm
 
@@ -997,7 +1001,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 // Sanity check
                 return null;
             }
-
 
             double distanceToCornermm = Math.Sqrt(tempValue);
 
@@ -1031,13 +1034,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             double xScale = (double)windowWidth / (double) (torsoPosition.x + xOffset);
             double yScale = (double)windowHeight / (double) (torsoPosition.y + yOffset);
 
-            /*
-            double xScale = (double)lowerRightCornerDepthPoint.x / (double)windowWidth;
-            double yScale = (double)lowerRightCornerDepthPoint.y / (double)windowHeight;
-            */
 
-            int xProj = (int)Math.Floor(xScale * basePoint.Item1);
-            int yProj = (int)Math.Floor(yScale * basePoint.Item2);
+            Tuple<int, int> shiftedPoint = new Tuple<int, int>(basePoint.Item1 - torsoPosition.x, basePoint.Item2 - torsoPosition.y);
+
+            int xProj = (int)Math.Floor(xScale * shiftedPoint.Item1);
+            int yProj = (int)Math.Floor(yScale * shiftedPoint.Item2);
+
+            // unshift the point
+            xProj = xProj + torsoPosition.x;
+            yProj = yProj + torsoPosition.y;
+
 
             //Sanity check
             if (xProj > windowWidth) xProj = windowWidth - 1;
@@ -1224,7 +1230,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         this.login.Visibility = System.Windows.Visibility.Collapsed;
                         this.rescan.Visibility = System.Windows.Visibility.Collapsed;
                         this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+
                         this.welcomeMassage.Text = "Hello " + current.name + "! " + "Start drawing your pattern when the circle is blue.";
+
                         userImage = new BitmapImage(new Uri(current.imgPath));
                         myImageBox.Source = handSource;
                         this.myImageBox.Visibility = Visibility.Visible;
@@ -1356,7 +1364,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 faceTrackingViewer.stopTracking();
             } 
-            this.sensor.DepthFrameReady += null;
+
+            //this.sensor.DepthFrameReady += null;
+
             this.sensor.SkeletonFrameReady += null;
             if (gValidator != null)
             {

@@ -135,7 +135,7 @@ namespace ThreeDAuth
 
         public void addUser(List<List<double>> data)
         {
-            List<double>[] sorted = new List<double>[6];
+            List<double>[] sorted = new List<double>[7];
             for (int h = 0; h < sorted.Length; h++)
             {
                 sorted[h] = new List<double>();
@@ -161,7 +161,7 @@ namespace ThreeDAuth
 
                 double average = tmp.Average();
                 double sumOfSquaresOfDifferences = tmp.Select(val => (val - average) * (val - average)).Sum();
-                double sd = Math.Sqrt(sumOfSquaresOfDifferences / (tmp.Count - 1));
+                double sd = Math.Sqrt(sumOfSquaresOfDifferences / tmp.Count);
 
                 if (sd == 0)
                 {

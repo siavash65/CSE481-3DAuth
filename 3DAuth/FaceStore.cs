@@ -20,7 +20,7 @@ namespace ThreeDAuth
 
         List<FeaturePair> features;
         double[] totals;
-        int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34 };
+        int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34, 15, 48 };
 
         List<List<double>> learnList;
 
