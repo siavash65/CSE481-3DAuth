@@ -92,7 +92,7 @@
             <StackPanel  Height="61" Name="userNamestackPanel" Width="726" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Collapsed" VerticalAlignment="Top">
                 <TextBlock Height="29" Name="userNameTextbox" Width="118" Foreground="#FF00A8DB" Text="UserName:" FontSize="20" FontWeight="Bold" />
                 <TextBox Name="Username" Height="48" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="26" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />
-                <Button Content="Create Account" Height="48" Name="AccountButton" Width="207" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="accountButton_Click" IsEnabled="False" IsDefault="True" />
+                <Button Content="Scan" Height="48" Name="AccountButton" Width="207" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="accountButton_Click" IsEnabled="False" IsDefault="True" />
             </StackPanel>
             <StackPanel Height="54" Name="ImagePanel" Orientation="Horizontal" Width="728" HorizontalAlignment="Left" Margin="0,50,0,0" Visibility="Collapsed">
                 <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="39" Name="textBlock1" Text="Select an image for your account" Width="358" VerticalAlignment="Bottom" />

@@ -120,7 +120,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DepthImagePixel closestPoint;
         private System.Drawing.Bitmap bmap;
         private User currentUser;
-        public static int faceScanCounter = 0;
+        public static int faceScanCounter = -1;
         private Boolean isUserNew = false;
         public static int faceScanCount = 0;
         private Boolean isfaceTrackerOn = false;
@@ -309,30 +309,45 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             if (faceScanCounter == 0)
             {
-                this.progressBar1.Value = faceScanCount * 2;
                 if (this.progressBar1.Value == 100)
                 {
                     faceScanCount = 0;
                 }
+                else
+                {
+                    this.progressBar1.Value = faceScanCount * 2;
+                }
+
+
             }
             if (faceScanCounter == 1)
             {
-                this.progressBar2.Value = faceScanCount * 2;
                 if (this.progressBar2.Value == 100)
                 {
                     faceScanCount = 0;
 
                 }
+                else
+                {
+
+                    this.progressBar2.Value = faceScanCount * 2;
+                }
+
             }
             if (faceScanCounter == 2)
             {
-                this.progressBar3.Value = faceScanCount * 2;
                 if (this.progressBar3.Value == 100)
                 {
                     faceScanCount = 0;
 
                 }
+                else
+                {
+                    this.progressBar3.Value = faceScanCount * 2;
+                }
+
             }
+           
         }
 
         private int closestPointCounter = 0;
@@ -543,11 +558,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        // Anton
-        private void KinectSensorOnAllFramesReady(object sender, AllFramesReadyEventArgs allFramesReadyEventArgs)
-        {
-            //Console.WriteLine("All frames ready");
-        }
+    
 
 
 
@@ -1341,7 +1352,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.myImageBox.Source = null;
             this.Username.Text = "";
             faceScanCount = 0;
-            faceScanCounter = 0;
+            faceScanCounter = -1;
             this.progressBar1.Value = 0;
             this.progressBar2.Value = 0;
             this.progressBar3.Value = 0;
@@ -1468,7 +1479,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.myImageBox.Source = null;
             this.Username.Text = "";
             faceScanCount = 0;
-            faceScanCounter = 0;
+            faceScanCounter = -1;
             this.progressBar1.Value = 0;
             this.progressBar2.Value = 0;
             this.progressBar3.Value = 0;
