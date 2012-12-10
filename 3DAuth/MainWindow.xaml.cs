@@ -158,7 +158,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 
         private System.Diagnostics.Stopwatch outOfPlaneTimer;
-        private const long OUT_OF_PLANE_CUTOFF = 5000; // ms
+        private const long OUT_OF_PLANE_CUTOFF = 2000; // ms
 
         private static MainWindow instance; // make it a singleton to allow us to use skeleton projections from the targetBox class
 
@@ -814,6 +814,39 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
+        private enum StoredDataType
+        {
+            REFERENCE,
+            USERNAME,
+            PASSWORD
+        }
+
+        private void CopyClick(User user, int itemIdx, StoredDataType type)
+        {
+            String textToCopy = "";
+            if (user.StoredData.Length > itemIdx)
+            {
+                if (type == StoredDataType.REFERENCE)
+                {
+                    textToCopy = user.StoredData[itemIdx].Reference;
+                }
+                else if (type == StoredDataType.USERNAME)
+                {
+                    textToCopy = user.StoredData[itemIdx].Username;
+                }
+                else if (type == StoredDataType.PASSWORD)
+                {
+                    textToCopy = user.StoredData[itemIdx].Password;
+                }
+            }
+            System.Windows.Clipboard.SetText(textToCopy);
+        }
+
+        private void CopyClick(int itemIdx, StoredDataType type)
+        {
+            CopyClick(currentUser, itemIdx, type);
+        }
+
         private void SaveUser()
         {
             SaveUser(currentUser);
@@ -1065,8 +1098,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (xProj > windowWidth) xProj = windowWidth - 1;
             if (yProj > windowHeight) yProj = windowHeight - 1;
 
-            Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" +
-                                "     Arm length: " + armLengthPixels);
+            //Console.WriteLine("(" + basePoint.Item1 + ", " + basePoint.Item2 + ") -> (" + xProj + ", " + yProj + ")" +
+                                //"     Arm length: " + armLengthPixels);
 
             return new Tuple<int, int>(xProj, yProj);
         }
@@ -1285,6 +1318,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
                     this.login.Visibility = System.Windows.Visibility.Collapsed;
                     this.rescan.Visibility = System.Windows.Visibility.Visible;
+                    this.byPass.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Text = "Hello " + this.Username.Text + "! " + "We did not find you. Please rescan";
 
@@ -1295,6 +1329,42 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void gValidator_OnCompletedValidation(bool successful)
         {
+            if (this.isfaceTrackerOn)
+            {
+                faceTrackingViewer.stopTracking();
+            }
+
+            this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+            this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+
+            this.currentUser = null;
+            this.myImageBox.Source = null;
+            this.Username.Text = "";
+            faceScanCount = 0;
+            faceScanCounter = 0;
+            this.progressBar1.Value = 0;
+            this.progressBar2.Value = 0;
+            this.progressBar3.Value = 0;
+            this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+            this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+            this.login.Visibility = System.Windows.Visibility.Collapsed;
+            this.progressBar1.Width = 55;
+            this.progressBar1.Width = 55;
+            this.progressBar1.Width = 55;
+            this.progressBar1.Visibility = System.Windows.Visibility.Collapsed;
+            this.progressBar2.Visibility = System.Windows.Visibility.Collapsed;
+            this.progressBar3.Visibility = System.Windows.Visibility.Collapsed;           
+            this.byPass.Visibility = System.Windows.Visibility.Collapsed;
+            this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+            this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
+            this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
+
+
+            this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+            this.welcomeMassage.Text = "Congratulations " + this.Username.Text + ". Your are currently logged in!"; 
         }
 
         private void accountButton_Click(object sender, RoutedEventArgs e)
@@ -1368,6 +1438,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             faceScanCount = 0;
             this.rescan.Visibility = System.Windows.Visibility.Collapsed;
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
+            this.byPass.Visibility = System.Windows.Visibility.Collapsed;
             this.myImageBox.Visibility = System.Windows.Visibility.Collapsed; ;
             this.scanpanel.Visibility = System.Windows.Visibility.Visible;
             this.isfaceTrackerOn = true;
@@ -1384,10 +1455,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //this.sensor.DepthFrameReady += null;
 
-            this.sensor.SkeletonFrameReady += null;
+            this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+            this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+
+            //this.sensor.SkeletonFrameReady += null;
             if (gValidator != null)
             {
-                gValidator.OnCompletedValidation += null;
+                //gValidator.OnCompletedValidation += null;
             }
 
             this.currentUser = null;
