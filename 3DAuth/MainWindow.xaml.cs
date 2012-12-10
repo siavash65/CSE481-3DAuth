@@ -310,7 +310,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.progressBar1.Value = faceScanCount * 2;
                 if (this.progressBar1.Value == 100)
                 {
-                    this.progressBar1.Foreground = Brushes.Green;
+                    faceScanCount = 0;
                 }
             }
             if (faceScanCounter == 1)
@@ -319,7 +319,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (this.progressBar2.Value == 100)
                 {
                     faceScanCount = 0;
-                    this.progressBar2.Foreground = Brushes.Green;
+                    
                 }
             }
             if (faceScanCounter == 2)
@@ -328,7 +328,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 if (this.progressBar3.Value == 100)
                 {
                     faceScanCount = 0;
-                    this.progressBar3.Foreground = Brushes.Green;
+                    
                 }
             }
         }
@@ -1204,12 +1204,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.currentUser.faceParams = current.faceParams;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
-                    //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                    //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
-                    // Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
-                    // gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
-                    // gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
-           
+                   
                 }
 
             }
@@ -1229,10 +1224,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         this.login.Visibility = System.Windows.Visibility.Collapsed;
                         this.rescan.Visibility = System.Windows.Visibility.Collapsed;
                         this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                        this.welcomeMassage.Text = "Hello " + current.name + "! " + "We have successfully scaned your face. Start drawing your pattern when the circle is blue";
-                        //this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
-                        //this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
+                        this.welcomeMassage.Text = "Hello " + current.name + "! " + "Start drawing your pattern when the circle is blue";
                         userImage = new BitmapImage(new Uri(current.imgPath));
+                        myImageBox.Source = handSource;
                         this.myImageBox.Visibility = Visibility.Visible;
                         this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                         this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
@@ -1267,7 +1261,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.login.Visibility = System.Windows.Visibility.Collapsed;
                     this.rescan.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                    this.welcomeMassage.Text = "Hello" + current.name + "! " + "We did not find you. Please rescan";
+                    this.welcomeMassage.Text = "Hello " + this.Username.Text + "! " + "We did not find you. Please rescan";
                     
                 }
 
@@ -1322,16 +1316,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 userImage = new BitmapImage(new Uri(fileName));
                 currentUser.imgPath = fileName;
                 this.myImageBox.Visibility = Visibility.Visible;
-                this.myImageBox.Source = handSource;
+                this.myImageBox.Source = this.handSource;
                 this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
                 this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
                 this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
                 this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
                 this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
                 this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
-                gLearner.startRecording();
                 this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
                 this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                gLearner.startRecording();
+               
              
                 
 
@@ -1379,7 +1374,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
             this.New_Account.Visibility = System.Windows.Visibility.Visible;
             this.login.Visibility = System.Windows.Visibility.Visible;
-
+            this.progressBar1.Width = 55;
+            this.progressBar1.Width = 55;
+            this.progressBar1.Width = 55;
+            this.progressBar1.Visibility = System.Windows.Visibility.Visible;
+            this.progressBar2.Visibility = System.Windows.Visibility.Visible;
+            this.progressBar3.Visibility = System.Windows.Visibility.Visible;
             this.welcomeMassage.Visibility = System.Windows.Visibility.Collapsed;
             this.rescan.Visibility = System.Windows.Visibility.Collapsed;
             this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
@@ -1389,16 +1389,5 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
        
         }
-
- 
-
-    
-
-    
-
-   
-     
-        
-
     }
 }
