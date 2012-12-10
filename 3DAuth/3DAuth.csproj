@@ -83,6 +83,9 @@
     <Compile Include="Grid.cs" />
     <Compile Include="HandTracker.cs" />
     <Compile Include="HandTracking.cs" />
+    <Compile Include="LoggedInUI.xaml.cs">
+      <DependentUpon>LoggedInUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Plane.cs" />
     <Compile Include="PointCluster.cs" />
     <Compile Include="Point.cs" />
@@ -100,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GraphPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoggedInUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

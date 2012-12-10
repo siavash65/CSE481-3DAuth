@@ -13,12 +13,35 @@ namespace ThreeDAuth
         public List<Point2d> faceParams { get; set; }
         public UserInfoTuple[] StoredData;
 
-        public User(String nm, String iPath, List<Point2d> psw, List<Point2d> scan)
+        public User(String nm, String iPath, List<Point2d> psw, List<Point2d> scan, UserInfoTuple[] storedData)
         {
             name = nm;
             imgPath = iPath;
             password = psw;
             faceParams = scan;
+            StoredData = storedData != null ? storedData : new UserInfoTuple[5];
+        }
+
+        /*
+        public void AddStoredData(String reference, String username, String password)
+        {
+            UserInfoTuple[] newStoredData = new UserInfoTuple[StoredData.Length + 1];
+            newStoredData[0] = new UserInfoTuple(reference, username, password);
+            for (int i = 0; i < StoredData.Length; i++)
+            {
+                newStoredData[i + 1] = StoredData[i];
+            }
+            StoredData = newStoredData;
+
+        }*/
+
+        public void SetStoredData(int idx, String reference, String username, String password)
+        {
+            if (idx < StoredData.Length)
+            {
+                UserInfoTuple newdata = new UserInfoTuple(reference, username, password);
+                StoredData[idx] = newdata;
+            }
         }
     }
 

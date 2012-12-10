@@ -1077,19 +1077,64 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         passwordNode.AppendChild(pointNode);
                     }
 
+                    System.Xml.XmlNode storedDataNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data", null);
+                    foreach (UserInfoTuple userInfo in user.StoredData)
+                    {
+                        System.Xml.XmlNode tupleNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data-tuple", null);
+                        System.Xml.XmlNode refNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "reference", null);
+                        System.Xml.XmlNode unNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "username", null);
+                        System.Xml.XmlNode pwNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "password", null);
+
+                        refNode.InnerText = userInfo.Reference;
+                        unNode.InnerText = userInfo.Username;
+                        pwNode.InnerText = userInfo.Password;
+
+                        tupleNode.AppendChild(refNode);
+                        tupleNode.AppendChild(unNode);
+                        tupleNode.AppendChild(pwNode);
+
+                        storedDataNode.AppendChild(tupleNode);
+                    }
+
                     node.AppendChild(nameNode);
                     node.AppendChild(imageNode);
                     node.AppendChild(faceParamsNode);
                     node.AppendChild(passwordNode);
+                    node.AppendChild(storedDataNode);
                     userFile.DocumentElement.AppendChild(node);
                 }
                 else
                 {
                     // Do things or something
+                    //XmlNode storedData = node["stored-data"];
+                    System.Xml.XmlNode storedDataNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data", null);
+                    foreach (UserInfoTuple userInfo in user.StoredData)
+                    {
+                        if (userInfo != null)
+                        {
+                            System.Xml.XmlNode tupleNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data-tuple", null);
+                            System.Xml.XmlNode refNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "reference", null);
+                            System.Xml.XmlNode unNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "username", null);
+                            System.Xml.XmlNode pwNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "password", null);
+
+                            refNode.InnerText = userInfo.Reference;
+                            unNode.InnerText = userInfo.Username;
+                            pwNode.InnerText = userInfo.Password;
+
+                            tupleNode.AppendChild(refNode);
+                            tupleNode.AppendChild(unNode);
+                            tupleNode.AppendChild(pwNode);
+
+                            storedDataNode.AppendChild(tupleNode);
+                        }
+                    }
+                    //node["stored-data"] = storedDataNode;
+                    node.RemoveChild(node["stored-data"]);
+                    node.AppendChild(storedDataNode);
                 }
                 userFile.Save(filename);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 Console.WriteLine("file not found");
             }
@@ -1370,7 +1415,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             CurrentObjectBag.SLearningNewUser = true;
 
-            this.currentUser = new User("", "", null, null);
+            this.currentUser = new User("", "", null, null, null);
 
             this.isUserNew = true;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
@@ -1381,7 +1426,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             CurrentObjectBag.SLearningNewUser = false;
 
-            this.currentUser = new User("", "", null, null);
+            this.currentUser = new User("", "", null, null, null);
 
             this.isUserNew = false;
             this.InitialPanel.Visibility = System.Windows.Visibility.Collapsed;
@@ -1489,42 +1534,108 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void gValidator_OnCompletedValidation(bool successful)
         {
-            if (this.isfaceTrackerOn)
+            if (successful)
             {
-                faceTrackingViewer.stopTracking();
+                if (this.isfaceTrackerOn)
+                {
+                    faceTrackingViewer.stopTracking();
+                }
+
+                this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+
+                this.currentUser = LoadUser(this.currentUser.name);
+                this.myImageBox.Source = null;
+                this.Username.Text = "";
+                faceScanCount = 0;
+                faceScanCounter = -1;
+                this.progressBar1.Value = 0;
+                this.progressBar2.Value = 0;
+                this.progressBar3.Value = 0;
+                this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
+                this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
+                this.login.Visibility = System.Windows.Visibility.Collapsed;
+                this.progressBar1.Width = 55;
+                this.progressBar1.Width = 55;
+                this.progressBar1.Width = 55;
+                this.progressBar1.Visibility = System.Windows.Visibility.Collapsed;
+                this.progressBar2.Visibility = System.Windows.Visibility.Collapsed;
+                this.progressBar3.Visibility = System.Windows.Visibility.Collapsed;
+                this.byPass.Visibility = System.Windows.Visibility.Collapsed;
+                this.rescan.Visibility = System.Windows.Visibility.Collapsed;
+                this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
+                this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
+                this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
+                this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
+                this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
+
+
+                this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
+                if (currentUser != null)
+                {
+                    this.welcomeMassage.Text = "Congratulations " + currentUser.name + ". You are now logged in!";
+                }
+                else
+                {
+                    this.welcomeMassage.Text = "Congratulations! You are now logged in!";
+                }
+
+                this.NewReferencePanel.Visibility = System.Windows.Visibility.Visible;
+                this.NewUsernamePanel.Visibility = System.Windows.Visibility.Visible;
+                this.NewPasswordPanel.Visibility = System.Windows.Visibility.Visible;
+                this.LoggedInUI.Visibility = System.Windows.Visibility.Visible;
+                //this.NewStoredDataButtonPanel.Visibility = System.Windows.Visibility.Visible;
+                //this.StoredDataGridPanel.Visibility = System.Windows.Visibility.Visible;
+                //this.StoredDataGrid.Visibility = System.Windows.Visibility.Visible;
+            }
+        }
+
+
+        private User LoadUser(String username)
+        {
+            XmlDocument data = new XmlDocument();
+            try
+            {
+                data.Load("users.xml");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("file not found");
             }
 
-            this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
-            this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+            SortedDictionary<String, double> matches = new SortedDictionary<String, double>();
 
-            this.currentUser = null;
-            this.myImageBox.Source = null;
-            this.Username.Text = "";
-            faceScanCount = 0;
-            faceScanCounter = -1;
-            this.progressBar1.Value = 0;
-            this.progressBar2.Value = 0;
-            this.progressBar3.Value = 0;
-            this.InitialPanel.Visibility = System.Windows.Visibility.Visible;
-            this.New_Account.Visibility = System.Windows.Visibility.Collapsed;
-            this.login.Visibility = System.Windows.Visibility.Collapsed;
-            this.progressBar1.Width = 55;
-            this.progressBar1.Width = 55;
-            this.progressBar1.Width = 55;
-            this.progressBar1.Visibility = System.Windows.Visibility.Collapsed;
-            this.progressBar2.Visibility = System.Windows.Visibility.Collapsed;
-            this.progressBar3.Visibility = System.Windows.Visibility.Collapsed;           
-            this.byPass.Visibility = System.Windows.Visibility.Collapsed;
-            this.rescan.Visibility = System.Windows.Visibility.Collapsed;
-            this.gestureTracker.Visibility = System.Windows.Visibility.Collapsed;
-            this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
-            this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
-            this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
-            this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
+            XmlNodeList users = data.GetElementsByTagName("user");
 
 
-            this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-            this.welcomeMassage.Text = "Congratulations " + this.Username.Text + ". Your are currently logged in!"; 
+            foreach (XmlNode user in users)
+            {
+                if (user["name"].InnerText == username)
+                {
+                    List<Point2d> tempPts = new List<Point2d>();
+                    XmlNode points = user["points"];
+                    for (int i = 0; i < points.ChildNodes.Count; i++)
+                    {
+                        XmlNode point = points.ChildNodes[i];
+                        double x = Convert.ToDouble(point["x"].InnerText);
+                        double y = Convert.ToDouble(point["y"].InnerText);
+                        Point2d tmp = new Point2d(x, y);
+                        tempPts.Add(tmp);
+                    }
+                    XmlNode storedDataXml = user["stored-data"];
+                    UserInfoTuple[] storedData = new UserInfoTuple[Util.NUM_STORED_DATA];
+                    for (int i = 0; i < storedDataXml.ChildNodes.Count; i++)
+                    {
+                        XmlNode storedDataTuple = storedDataXml.ChildNodes[i];
+                        string reference = Convert.ToString(storedDataTuple["reference"].InnerText);
+                        string uname = Convert.ToString(storedDataTuple["username"].InnerText);
+                        string password = Convert.ToString(storedDataTuple["password"].InnerText);
+                        storedData[i] = new UserInfoTuple(reference, uname, password);
+                    }
+                    return new User(user["name"].InnerText, user["user-image"].InnerText, tempPts, null, storedData);
+                }
+            }
+            return null;
         }
 
         private void accountButton_Click(object sender, RoutedEventArgs e)
@@ -1647,8 +1758,119 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.ImagePanel.Visibility = System.Windows.Visibility.Collapsed;
 
+            this.NewReferencePanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.NewUsernamePanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.NewPasswordPanel.Visibility = System.Windows.Visibility.Collapsed;
+            this.LoggedInUI.Visibility = System.Windows.Visibility.Collapsed;
+            //this.NewStoredDataButtonPanel.Visibility = System.Windows.Visibility.Collapsed;
+            //this.StoredDataGridPanel.Visibility = System.Windows.Visibility.Collapsed;
+            //this.StoredDataGrid.Visibility = System.Windows.Visibility.Collapsed;
+
         }
 
+        /*
+        private void populateGrid(User user, System.Windows.Controls.Grid grid)
+        {
+            //System.Windows.Controls.Grid grid = new System.Windows.Controls.Grid();
+            grid.Width = 800;
+            grid.Height = 1000;
+            grid.Visibility = System.Windows.Visibility.Visible;
+            grid.HorizontalAlignment = HorizontalAlignment.Left;
+            grid.VerticalAlignment = VerticalAlignment.Top;
+            grid.ShowGridLines = true;
+
+            grid.ColumnDefinitions.Clear();
+            grid.RowDefinitions.Clear();
+
+            ColumnDefinition refCol = new ColumnDefinition();
+            ColumnDefinition usernameCol = new ColumnDefinition();
+            ColumnDefinition passwordCol = new ColumnDefinition();
+
+            refCol.Width = new GridLength(200);
+            usernameCol.Width = new GridLength(200);
+            passwordCol.Width = new GridLength(200);
+
+            grid.ColumnDefinitions.Add(refCol);
+            grid.ColumnDefinitions.Add(usernameCol);
+            grid.ColumnDefinitions.Add(passwordCol);
+
+
+            // rows
+            for (int i = 0; i < user.StoredData.Length + 1; i++)
+            {
+                RowDefinition row = new RowDefinition();
+                row.Height = new GridLength(40);
+                grid.RowDefinitions.Add(row);
+            }
+            TextBlock refText = new TextBlock();
+            refText.Text = "Reference";
+            refText.FontSize = 14;
+            refText.Foreground = new SolidColorBrush(Colors.Black);
+            refText.VerticalAlignment = VerticalAlignment.Top;
+            System.Windows.Controls.Grid.SetRow(refText, 0);
+            System.Windows.Controls.Grid.SetColumn(refText, 0);
+
+            TextBlock usernameText = new TextBlock();
+            refText.Text = "Username";
+            refText.FontSize = 14;
+            refText.Foreground = new SolidColorBrush(Colors.Black);
+            refText.VerticalAlignment = VerticalAlignment.Top;
+            System.Windows.Controls.Grid.SetRow(usernameText, 0);
+            System.Windows.Controls.Grid.SetColumn(usernameText, 1);
+
+            TextBlock passwordText = new TextBlock();
+            refText.Text = "Password";
+            refText.FontSize = 14;
+            refText.Foreground = new SolidColorBrush(Colors.Black);
+            refText.VerticalAlignment = VerticalAlignment.Top;
+            System.Windows.Controls.Grid.SetRow(passwordText, 0);
+            System.Windows.Controls.Grid.SetColumn(passwordText, 2);
+            
+            grid.Children.Add(refText);
+            grid.Children.Add(usernameText);
+            grid.Children.Add(passwordText);
+
+            for (int i = 0; i < user.StoredData.Length; i++)
+            {
+                TextBlock referenceText = new TextBlock();
+                referenceText.Text = user.StoredData[i].Reference;
+                referenceText.FontSize = 12;
+                referenceText.FontWeight = FontWeights.Bold;
+                System.Windows.Controls.Grid.SetRow(referenceText, i + 1);
+                System.Windows.Controls.Grid.SetColumn(referenceText, 0);
+
+                Button usernameButton = new Button();
+                usernameButton.Width = 20;
+                usernameButton.Height = 25;
+                usernameButton.Content = "Copy";
+                usernameButton.Tag = user.StoredData[i].Username;
+                usernameButton.Click += new RoutedEventHandler(copyClick);
+                System.Windows.Controls.Grid.SetRow(usernameButton, i + 1);
+                System.Windows.Controls.Grid.SetColumn(usernameButton, 1);
+                //usernameButton.Click += (s, e) => { CopyClick(i - 1, StoredDataType.USERNAME); };
+
+                Button passwordButton = new Button();
+                passwordButton.Width = 20;
+                passwordButton.Height = 25;
+                passwordButton.Content = "Copy";
+                passwordButton.Tag = user.StoredData[i].Password;
+                passwordButton.Click += new RoutedEventHandler(copyClick);
+                System.Windows.Controls.Grid.SetRow(passwordButton, i + 1);
+                System.Windows.Controls.Grid.SetColumn(passwordButton, 1);
+                //usernameButton.Click += (s, e) => { CopyClick(i - 1, StoredDataType.PASSWORD); };
+
+                grid.Children.Add(referenceText);
+                grid.Children.Add(usernameButton);
+                grid.Children.Add(passwordButton);
+            }
+        }
+         * */
+
+        private void copyClick(object sender, RoutedEventArgs e)
+        {
+            Button clicked = (Button)sender;
+            System.Windows.Clipboard.SetText((String) clicked.Tag);
+        }
 
         private void byPass_Click(object sender, RoutedEventArgs e)
         {
@@ -1663,7 +1885,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 data.Load("users.xml");
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 Console.WriteLine("file not found");
             }
@@ -1706,5 +1928,189 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
         }
+
+
+        /*
+        private void addStoredData_Click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.AddStoredData(reference, username, password);
+                SaveUser(currentUser);
+                //populateGrid(currentUser, this.StoredDataGrid);
+                //this.StoredDataGrid = populateGrid(currentUser);
+                //this.StoredDataGrid = populateGrid(currentUser);
+                //this.StoredDataGridPanel.
+            }
+        }
+        */
+
+
+        private void copy1u_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentUser != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[0].Username);
+            }
+        }
+
+        private void copy1p_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Clipboard.SetText(currentUser.StoredData[0].Password);
+        }
+
+        private void setstored1_click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.SetStoredData(0, reference, username, password);
+                SaveUser(currentUser);
+            }
+            this.NewReferenceNameTextBlock1.Text = reference;
+
+            this.NewReferenceText.Text = "";
+            this.NewUserNameText.Text = "";
+            this.NewPasswordText.Text = "";
+        }
+
+
+
+
+
+
+        private void copy2u_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentUser != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[1].Username);
+            }
+        }
+
+        private void copy2p_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Clipboard.SetText(currentUser.StoredData[1].Password);
+        }
+
+        private void setstored2_click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.SetStoredData(1, reference, username, password);
+                SaveUser(currentUser);
+            }
+            this.NewReferenceNameTextBlock2.Text = reference;
+
+            this.NewReferenceText.Text = "";
+            this.NewUserNameText.Text = "";
+            this.NewPasswordText.Text = "";
+        }
+
+
+
+
+
+        /*
+
+        private void copy3u_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentUser != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[2].Username);
+            }
+        }
+
+        private void copy3p_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Clipboard.SetText(currentUser.StoredData[2].Password);
+        }
+
+        private void setstored3_click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.SetStoredData(2, reference, username, password);
+                SaveUser(currentUser);
+            }
+            this.NewReferenceNameTextBlock3.Text = reference;
+        }
+
+
+
+
+
+
+        private void copy4u_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentUser != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[3].Username);
+            }
+        }
+
+        private void copy4p_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Clipboard.SetText(currentUser.StoredData[3].Password);
+        }
+
+        private void setstored4_click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.SetStoredData(3, reference, username, password);
+                SaveUser(currentUser);
+            }
+            this.NewReferenceNameTextBlock4.Text = reference;
+        }
+
+
+
+
+
+        private void copy5u_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentUser != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[4].Username);
+            }
+        }
+
+        private void copy5p_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Clipboard.SetText(currentUser.StoredData[4].Password);
+        }
+
+        private void setstored5_click(object sender, RoutedEventArgs e)
+        {
+            String reference = this.NewReferenceText.Text;
+            String username = this.NewUserNameText.Text;
+            String password = this.NewPasswordText.Text;
+
+            if (currentUser != null)
+            {
+                currentUser.SetStoredData(4, reference, username, password);
+                SaveUser(currentUser);
+            }
+            this.NewReferenceNameTextBlock5.Text = reference;
+        }*/
     }
 }

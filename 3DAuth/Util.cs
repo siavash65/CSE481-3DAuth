@@ -9,6 +9,8 @@ namespace ThreeDAuth
 
     class Util
     {
+
+        public static int NUM_STORED_DATA = 2;
         
         public static double euclideanDistance(Point2d p1, Point2d p2)
         {

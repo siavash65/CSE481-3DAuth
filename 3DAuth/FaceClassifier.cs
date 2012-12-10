@@ -119,8 +119,17 @@ namespace ThreeDAuth
                             Point2d tmp = new Point2d(x, y);
                             tempPts.Add(tmp);
                         }
-
-                        User current = new User(user["name"].InnerText, user["user-image"].InnerText, tempPts, null);
+                        XmlNode storedDataXml = user["stored-data"];
+                        UserInfoTuple[] storedData = new UserInfoTuple[Util.NUM_STORED_DATA];
+                        for (int i = 0; i < storedDataXml.ChildNodes.Count; i++)
+                        {
+                            XmlNode storedDataTuple = storedDataXml.ChildNodes[i];
+                            string reference = Convert.ToString(storedDataTuple["reference"].InnerText);
+                            string username = Convert.ToString(storedDataTuple["username"].InnerText);
+                            string password = Convert.ToString(storedDataTuple["password"].InnerText);
+                            storedData[i] = new UserInfoTuple(reference, username, password);
+                        }
+                        User current = new User(user["name"].InnerText, user["user-image"].InnerText, tempPts, null, storedData);
                         Console.WriteLine(user["name"].InnerText);
                         Notify(current);
                         return;
@@ -130,7 +139,7 @@ namespace ThreeDAuth
             else
             {
                 Console.WriteLine("New User");
-                User cur = new User("", "", null, null);
+                User cur = new User("", "", null, null, null);
                 Notify(cur);
             }
         }
@@ -175,7 +184,7 @@ namespace ThreeDAuth
                 tempPts.Add(tempPoint);
             }
 
-            User cur = new User("", "", null, tempPts);
+            User cur = new User("", "", null, tempPts, null);
             Notify(cur);
         }
 

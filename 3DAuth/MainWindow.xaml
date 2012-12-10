@@ -74,16 +74,16 @@
         <StackPanel Name="registrationForm" Grid.Row="1" Height="304" HorizontalAlignment="Left" Margin="12,18,0,0"  VerticalAlignment="Top" Width="846" Visibility="Visible">
             <StackPanel  Height="75" Name="InitialPanel" Width="1323" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" Margin="0,0,-477,0">
                 <Button x:Name="New_Account"  Content="New User" Margin="0,10,0,5" Width="207" Height="48" Click="New_Account_Click" Background="#FFC9D800" Foreground="#FF00A8DB" FontWeight="Bold" />
-                <Button Content="Log In" Height="48" Name="login" Margin="30,10,0,5" Width="207" Click="login_Click" HorizontalAlignment="Stretch" Foreground="#FF00A8DB" Background="#FFC9D800" FontWeight="Bold" />
+                <Button Content="Log In" Height="48" Name="login" Margin="30,10,0,5" Width="207" Click="login_Click" Foreground="#FF00A8DB" Background="#FFC9D800" FontWeight="Bold" />
                 <TextBlock Name="welcomeMassage" Margin="0,10,0,5" Foreground="#FF00A5E5" FontSize="20" FontWeight="Bold"  Text="" HorizontalAlignment="Left" Height="34" />
                 <Button Background="#FFC9D800" Content="Rescan" Foreground="#FF00A8DB" Height="48" Name="rescan" Width="207" Margin="30,10,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed" Click="rescan_Click" FontWeight="Bold" IsDefault="True" />
-                <Button Background="#FFC9D800" Content="ByPass Face Scaning" Foreground="#FF00A8DB" Height="48" Name="byPass" Width="207" Margin="30,10,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" IsDefault="True" Click="byPass_Click" Visibility="Hidden" />
+                <Button Background="#FFC9D800" Content="ByPass Face Scanning" Foreground="#FF00A8DB" Height="48" Name="byPass" Width="207" Margin="30,10,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" IsDefault="True" Click="byPass_Click" Visibility="Hidden" />
             </StackPanel>
             <StackPanel Height="43" Name="gestureTracker" Width="650" HorizontalAlignment="Left" Visibility="Collapsed">
                 <TextBlock Height="34" Name="gestureMassage"  FontSize="20" Foreground="#FF00A8DB" FontWeight="Bold" />
             </StackPanel>
             <StackPanel Height="43" Name="scanpanel" Width="844" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Collapsed">
-                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait untill we scan your face" />
+                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="48" Name="scanmassage" Text="Please stand infront of the camera and wait until we scan your face" />
                 <ProgressBar Name="progressBar1" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FF4DC12B" />
                 <ProgressBar Name="progressBar2" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FF4DC12B" />
                 <ProgressBar Name="progressBar3" Width="55" Height="23" Margin="10,5,0,15" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FF4DC12B" />
@@ -98,6 +98,72 @@
                 <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FF00A5E5" Height="39" Name="textBlock1" Text="Select an image for your account" Width="358" VerticalAlignment="Bottom" />
                 <Button Background="#FFC9D800" BorderBrush="#FF00A8DB"  Content="Browse" FontSize="20" FontWeight="Normal" Foreground="#FF00A8DB" Height="48" HorizontalAlignment="Right"  Margin="0" Name="browse" VerticalAlignment="Bottom" Width="207" Click="browse_Click" />
             </StackPanel>
+
+
+            
+            <StackPanel Name="LoggedInUI" Width="800" Height="1000" Visibility="Collapsed">
+                <StackPanel  Height="40" Name="NewReferencePanel" Width="350" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock" Width="118" Foreground="#FF00A8DB" Text="Reference:" FontSize="20" FontWeight="Bold" />
+                    <TextBox Name="NewReferenceText" Height="30" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="20" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />
+                </StackPanel>
+                <StackPanel  Height="40" Name="NewUsernamePanel" Width="350" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewUserNameTextBlock" Width="118" Foreground="#FF00A8DB" Text="User Name:" FontSize="20" FontWeight="Bold" />
+                    <TextBox Name="NewUserNameText" Height="30" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="20" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />
+                </StackPanel>
+                <StackPanel  Height="40" Name="NewPasswordPanel" Width="350" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewPasswordTextBlock" Width="118" Foreground="#FF00A8DB" Text="Password:" FontSize="20" FontWeight="Bold" />
+                    <TextBox Name="NewPasswordText" Height="30" Width="207"  Foreground="#FF00B2E3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#FFC9D800" FontSize="20" Margin="0" DataContext="{Binding}" TextChanged="Username_TextChanged" />
+                </StackPanel>
+                <!--
+                <StackPanel Height="61" Name="NewStoredDataButtonPanel" Width="350" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Collapsed" VerticalAlignment="Top" >
+                    <Button Content="Set" Height="48" Name="NewStoredDataButton" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="addStoredData_Click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>
+            -->
+
+                <StackPanel  Height="40" Name="NewReferencePanel1" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock1" Width="200" Foreground="#FF00A8DB" Text="Reference" FontSize="20" FontWeight="Bold" />
+                    <Button Content="Username" Height="30" Name="UsernameCopy1" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy1u_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Password" Height="30" Name="PasswordCopy1" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy1p_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Set" Height="40" Name="SetStorage1" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="setstored1_click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>
+
+                <StackPanel  Height="40" Name="NewReferencePanel2" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock2" Width="200" Foreground="#FF00A8DB" Text="Reference" FontSize="20" FontWeight="Bold" />
+                    <Button Content="Username" Height="30" Name="UsernameCopy2" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy2u_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Password" Height="30" Name="PasswordCopy2" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy2p_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Set" Height="40" Name="SetStorage2" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="setstored2_click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>
+
+                <!--
+                <StackPanel  Height="40" Name="NewReferencePanel3" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock3" Width="200" Foreground="#FF00A8DB" Text="Reference" FontSize="20" FontWeight="Bold" />
+                    <Button Content="Username" Height="30" Name="UsernameCopy3" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy3u_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Password" Height="30" Name="PasswordCopy3" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy3p_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Set" Height="40" Name="SetStorage3" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="setstored3_click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>
+
+                <StackPanel  Height="40" Name="NewReferencePanel4" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock4" Width="200" Foreground="#FF00A8DB" Text="Reference" FontSize="20" FontWeight="Bold" />
+                    <Button Content="Username" Height="30" Name="UsernameCopy4" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy4u_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Password" Height="30" Name="PasswordCopy4" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy4p_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Set" Height="40" Name="SetStorage4" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="setstored4_click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>
+
+                <StackPanel  Height="40" Name="NewReferencePanel5" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Visible" VerticalAlignment="Top">
+                    <TextBlock Height="29" Name="NewReferenceNameTextBlock5" Width="200" Foreground="#FF00A8DB" Text="Reference" FontSize="20" FontWeight="Bold" />
+                    <Button Content="Username" Height="30" Name="UsernameCopy5" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy5u_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Password" Height="30" Name="PasswordCopy5" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="copy5p_Click" IsEnabled="true" IsDefault="True" />
+                    <Button Content="Set" Height="40" Name="SetStorage5" Width="100" Margin="30,0,0,0" Background="#FFC9D800" BorderBrush="#FF00A8DB" Foreground="#FF00A8DB" FontSize="20" FontWeight="Normal" Click="setstored5_click" IsEnabled="true" IsDefault="True" />
+                </StackPanel>-->
+            </StackPanel>
+            <!--<StackPanel Height="500" Name="StoredDataGridPanel" Width="800" HorizontalAlignment="Left" Orientation="Horizontal" Visibility="Collapsed" VerticalAlignment="Top">-->
+
+            <!--</StackPanel>-->
+            
+            <!--
+            <Grid x:Name="StoredDataGrid" Visibility="Collapsed">
+            </Grid>
+            -->
         </StackPanel>
     </Grid>
 </Window>
