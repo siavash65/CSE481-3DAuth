@@ -1224,7 +1224,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         this.login.Visibility = System.Windows.Visibility.Collapsed;
                         this.rescan.Visibility = System.Windows.Visibility.Collapsed;
                         this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                        this.welcomeMassage.Text = "Hello " + current.name + "! " + "Start drawing your pattern when the circle is blue";
+                        this.welcomeMassage.Text = "Hello " + current.name + "! " + "Start drawing your pattern when the circle is blue.";
                         userImage = new BitmapImage(new Uri(current.imgPath));
                         myImageBox.Source = handSource;
                         this.myImageBox.Visibility = Visibility.Visible;
