@@ -445,13 +445,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="depthFrame"></param>
         /// <param name="p1"></param>
         /// <param name="p2"></param>
-        private void showDepthView(DepthImageFrame depthFrame, int p1, int p2, ThreeDAuth.DepthPoint hand)
+        private void showDepthView(DepthImageFrame depthFrame, DrawingContext drawingContext)//, int p1, int p2)//, ThreeDAuth.DepthPoint hand)
         {
             bmap = new System.Drawing.Bitmap(depthFrame.Width, depthFrame.Height, System.Drawing.Imaging.PixelFormat.Format16bppRgb555);
             System.Drawing.Imaging.BitmapData bmapdata = bmap.LockBits(new System.Drawing.Rectangle(0, 0, depthFrame.Width
                 , depthFrame.Height), ImageLockMode.WriteOnly, bmap.PixelFormat);
             IntPtr ptr = bmapdata.Scan0;
-            //Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
+            Marshal.Copy(imadeData, 0, ptr, depthFrame.Width * depthFrame.Height);
             bmap.UnlockBits(bmapdata);
             /*System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmap);
             this.myImageBox.Source =
@@ -462,7 +462,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height));*/
 
             ThreeDAuth.BoundingRectangle rect = ThreeDAuth.BoundingRectangle.CreateBoundingRectangle(myPointCluster);
-            using (DrawingContext lfdc = this.liveFeedbackGroup.Open())
+            using (DrawingContext lfdc = drawingContext )//this.liveFeedbackGroup.Open())
             {
                 lfdc.DrawImage(System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                 bmap.GetHbitmap(),
@@ -471,10 +471,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 BitmapSizeOptions.FromWidthAndHeight((int)this.myImageBox.Width, (int)this.myImageBox.Height)),
                 new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
+                foreach (DepthPoint point in myPointCluster.points)
+                {
+                    lfdc.DrawRoundedRectangle(Brushes.Red, null, new Rect(point.x, point.y, 3, 3), null, 1, null, 1, null);
+                }
+
+                /*
                 if (userImage != null)
                 {
                     lfdc.DrawImage(userImage, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
                 }
+                 * */
 
                 //Console.WriteLine(myPointCluster.points.Count);
                 /*
@@ -493,7 +500,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 } 
                  */
                 //lfdc.DrawRoundedRectangle(Brushes.Blue, null, new Rect(hand.x - 15, hand.y - 15, 30, 30), null, 14, null, 14, null);
-                ThreeDAuth.PointDistributor.SGivePoint(hand);
+                //ThreeDAuth.PointDistributor.SGivePoint(hand);
             }
 
         }
@@ -739,6 +746,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void drawHands(DrawingContext drawingContext, ThreeDAuth.DepthPoint hand, bool drawHand, DepthImageFrame depthFrame)
         {
+            //showDepthView(depthFrame, drawingContext);
+            //return;
+            
+
             //Start Siavash
 
             double resetButtonTimePercentage = 0.0;
@@ -876,7 +887,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         }
                     }
 
-                    drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+
+                    //drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
 
                     //if (arrived.inPlane)
                     if (planePoint.inPlane)
@@ -920,7 +932,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         }
                     }
 
-                    if (gLearner != null && gLearner.isRecording && inButton && doneButtonTimePercentage >= 1.0)
+                    if (gLearner != null && gLearner.isRecording && doneButtonTimePercentage >= 1.0)
                     {
                         // Done recording
                         gLearner.stopRecording();
@@ -1080,20 +1092,23 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     System.Xml.XmlNode storedDataNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data", null);
                     foreach (UserInfoTuple userInfo in user.StoredData)
                     {
-                        System.Xml.XmlNode tupleNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data-tuple", null);
-                        System.Xml.XmlNode refNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "reference", null);
-                        System.Xml.XmlNode unNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "username", null);
-                        System.Xml.XmlNode pwNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "password", null);
+                        if (userInfo != null)
+                        {
+                            System.Xml.XmlNode tupleNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "stored-data-tuple", null);
+                            System.Xml.XmlNode refNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "reference", null);
+                            System.Xml.XmlNode unNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "username", null);
+                            System.Xml.XmlNode pwNode = userFile.CreateNode(System.Xml.XmlNodeType.Element, "password", null);
 
-                        refNode.InnerText = userInfo.Reference;
-                        unNode.InnerText = userInfo.Username;
-                        pwNode.InnerText = userInfo.Password;
+                            refNode.InnerText = userInfo.Reference;
+                            unNode.InnerText = userInfo.Username;
+                            pwNode.InnerText = userInfo.Password;
 
-                        tupleNode.AppendChild(refNode);
-                        tupleNode.AppendChild(unNode);
-                        tupleNode.AppendChild(pwNode);
+                            tupleNode.AppendChild(refNode);
+                            tupleNode.AppendChild(unNode);
+                            tupleNode.AppendChild(pwNode);
 
-                        storedDataNode.AppendChild(tupleNode);
+                            storedDataNode.AppendChild(tupleNode);
+                        }
                     }
 
                     node.AppendChild(nameNode);
@@ -1579,11 +1594,25 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     this.welcomeMassage.Text = "Congratulations! You are now logged in!";
                 }
-
                 this.NewReferencePanel.Visibility = System.Windows.Visibility.Visible;
                 this.NewUsernamePanel.Visibility = System.Windows.Visibility.Visible;
                 this.NewPasswordPanel.Visibility = System.Windows.Visibility.Visible;
                 this.LoggedInUI.Visibility = System.Windows.Visibility.Visible;
+
+                if (currentUser != null)
+                {
+                    if (currentUser.StoredData != null)
+                    {
+                        if (currentUser.StoredData[0] != null)
+                        {
+                            this.NewReferenceNameTextBlock1.Text = currentUser.StoredData[0].Reference;
+                        }
+                        if (currentUser.StoredData[1] != null)
+                        {
+                            this.NewReferenceNameTextBlock2.Text = currentUser.StoredData[1].Reference;
+                        }
+                    }
+                }
                 //this.NewStoredDataButtonPanel.Visibility = System.Windows.Visibility.Visible;
                 //this.StoredDataGridPanel.Visibility = System.Windows.Visibility.Visible;
                 //this.StoredDataGrid.Visibility = System.Windows.Visibility.Visible;
@@ -1952,7 +1981,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void copy1u_Click(object sender, RoutedEventArgs e)
         {
-            if (currentUser != null)
+            if (currentUser != null && currentUser.StoredData.Length >= 1 && currentUser.StoredData[0] != null && currentUser.StoredData[0].Username != null)
             {
                 System.Windows.Clipboard.SetText(currentUser.StoredData[0].Username);
             }
@@ -1960,7 +1989,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void copy1p_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Clipboard.SetText(currentUser.StoredData[0].Password);
+            if (currentUser != null && currentUser.StoredData.Length >= 1 && currentUser.StoredData[0] != null && currentUser.StoredData[0].Password != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[0].Password);
+            }
         }
 
         private void setstored1_click(object sender, RoutedEventArgs e)
@@ -1988,7 +2020,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void copy2u_Click(object sender, RoutedEventArgs e)
         {
-            if (currentUser != null)
+            if (currentUser != null && currentUser.StoredData.Length >= 2 && currentUser.StoredData[1] != null && currentUser.StoredData[1].Username != null)
             {
                 System.Windows.Clipboard.SetText(currentUser.StoredData[1].Username);
             }
@@ -1996,7 +2028,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void copy2p_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Clipboard.SetText(currentUser.StoredData[1].Password);
+            if (currentUser != null && currentUser.StoredData.Length >= 2 && currentUser.StoredData[1] != null && currentUser.StoredData[1].Password != null)
+            {
+                System.Windows.Clipboard.SetText(currentUser.StoredData[1].Password);
+            }
         }
 
         private void setstored2_click(object sender, RoutedEventArgs e)
