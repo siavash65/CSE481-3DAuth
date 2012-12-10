@@ -72,13 +72,13 @@ namespace ThreeDAuth
 
                     double score = getZScore(vals[i], mean, stdev);
 
-                    Console.WriteLine("Score---------> " + score);
+                    //Console.WriteLine("Score---------> " + score);
                     if(score >= 1) {
                         total += score;
                     }
                 }
 
-                Console.WriteLine("");
+                //Console.WriteLine("");
                 
                 try {
                     matches.Add(user["name"].InnerText, total);
@@ -129,12 +129,10 @@ namespace ThreeDAuth
             }
             else
             {
-                
                 Console.WriteLine("New User");
                 User cur = new User("", "", null, null);
                 Notify(cur);
             }
-
         }
 
 
@@ -179,16 +177,13 @@ namespace ThreeDAuth
 
             User cur = new User("", "", null, tempPts);
             Notify(cur);
-
         }
-
 
 
         private double getZScore(double observed, double mean, double stdev)
         {
             return Math.Abs((observed - mean) / stdev);
         }
-
 
     }
 }

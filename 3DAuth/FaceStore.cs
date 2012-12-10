@@ -174,7 +174,7 @@ namespace ThreeDAuth
                 }
                 else
                 {
-                    // existing user, so done sanding and validate it
+                    // existing user, so done scanning and validate it
                     //Notify(count, NUM_SAMPLES);
                     count++;
                     classifier.verifyUser(totals);
