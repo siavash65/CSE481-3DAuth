@@ -11,7 +11,7 @@ namespace ThreeDAuth
     class FaceClassifier
     {
         private XmlDocument data;
-        private const double MAX_DIFF = 12;
+        private const double MAX_DIFF = 11;
 
         private event GiveUser _onUserRecieved;
         

@@ -1,112 +1,158 @@
 <data>
   <user>
     <name>Anton</name>
-    <user-image>C:\Users\Public\Pictures\Sample Pictures\Desert.jpg</user-image>
+    <user-image>C:\Users\Public\Pictures\Sample Pictures\Penguins.jpg</user-image>
     <face-params>
       <param>
         <id>1</id>
-        <mean>0.1144653</mean>
-        <stdev>0.000131869</stdev>
+        <mean>0.11456248093261</mean>
+        <stdev>0.00010101</stdev>
       </param>
       <param>
         <id>2</id>
-        <mean>0.031669573</mean>
-        <stdev>0.0000241955</stdev>
+        <mean>0.0316875060794163</mean>
+        <stdev>0.00010101</stdev>
       </param>
       <param>
         <id>3</id>
-        <mean>0.235894033</mean>
-        <stdev>0.001549791</stdev>
+        <mean>0.236624458632916</mean>
+        <stdev>0.000958482826334511</stdev>
       </param>
       <param>
         <id>4</id>
-        <mean>0.081217823</mean>
-        <stdev>0.00227153</stdev>
+        <mean>0.0812233856920751</mean>
+        <stdev>0.00068939313118808</stdev>
       </param>
       <param>
         <id>5</id>
-        <mean>0.037247477</mean>
-        <stdev>0.004508904</stdev>
+        <mean>0.0371593252353855</mean>
+        <stdev>0.00137878021526099</stdev>
       </param>
       <param>
         <id>6</id>
-        <mean>0.0423788</mean>
-        <stdev>0.0000460183</stdev>
+        <mean>0.0424125066656382</mean>
+        <stdev>0.00010101</stdev>
+      </param>
+      <param>
+        <id>7</id>
+        <mean>0.127309697703759</mean>
+        <stdev>0.000549505912674216</stdev>
       </param>
     </face-params>
     <points>
       <point>
-        <x>1</x>
-        <y>2</y>
-      </point>
-      <point>
-        <x>3</x>
-        <y>4</y>
+        <x>453</x>
+        <y>249</y>
       </point>
     </points>
   </user>
   <user>
     <name>Siavash</name>
-    <user-image>C:\Users\Public\Pictures\Sample Pictures\Koala.jpg</user-image>
+    <user-image>C:\Users\Public\Pictures\Sample Pictures\Penguins.jpg</user-image>
     <face-params>
       <param>
         <id>1</id>
-        <mean>0.1145625</mean>
-        <stdev>0.001367176</stdev>
+        <mean>0.114518395700214</mean>
+        <stdev>0.00010101</stdev>
       </param>
       <param>
         <id>2</id>
-        <mean>0.0316875</mean>
-        <stdev>0.0000241955</stdev>
+        <mean>0.0316782664734434</mean>
+        <stdev>0.00010101</stdev>
       </param>
       <param>
         <id>3</id>
-        <mean>0.240321867</mean>
-        <stdev>0.001244524</stdev>
+        <mean>0.240111606579363</mean>
+        <stdev>0.00114925545193302</stdev>
       </param>
       <param>
         <id>4</id>
-        <mean>0.084150253</mean>
-        <stdev>0.003053619</stdev>
+        <mean>0.093518579212964</mean>
+        <stdev>0.000250591649586591</stdev>
       </param>
       <param>
         <id>5</id>
-        <mean>0.04301299</mean>
-        <stdev>0.006107221</stdev>
+        <mean>0.0617913060049782</mean>
+        <stdev>0.000572000964730379</stdev>
       </param>
       <param>
         <id>6</id>
-        <mean>0.04241252</mean>
-        <stdev>0.0000241955</stdev>
+        <mean>0.0423984008649513</mean>
+        <stdev>0.00010101</stdev>
+      </param>
+      <param>
+        <id>7</id>
+        <mean>0.12755977624421</mean>
+        <stdev>0.000537231099248818</stdev>
       </param>
     </face-params>
     <points>
       <point>
-        <x>1</x>
-        <y>2</y>
+        <x>449</x>
+        <y>91</y>
       </point>
       <point>
-        <x>3</x>
-        <y>4</y>
+        <x>492</x>
+        <y>218</y>
+      </point>
+      <point>
+        <x>531</x>
+        <y>383</y>
       </point>
     </points>
   </user>
   <user>
-    <name>mason</name>
+    <name>Mason</name>
     <user-image>C:\Users\Public\Pictures\Sample Pictures\Penguins.jpg</user-image>
-    <face-params />
+    <face-params>
+      <param>
+        <id>1</id>
+        <mean>0.114562503841716</mean>
+        <stdev>0.00010101</stdev>
+      </param>
+      <param>
+        <id>2</id>
+        <mean>0.0316874979862881</mean>
+        <stdev>0.00010101</stdev>
+      </param>
+      <param>
+        <id>3</id>
+        <mean>0.235530480829764</mean>
+        <stdev>0.00129481783562263</stdev>
+      </param>
+      <param>
+        <id>4</id>
+        <mean>0.0865147141745358</mean>
+        <stdev>0.00160913923743601</stdev>
+      </param>
+      <param>
+        <id>5</id>
+        <mean>0.0477419289646789</mean>
+        <stdev>0.00321827969513651</stdev>
+      </param>
+      <param>
+        <id>6</id>
+        <mean>0.0424125002900205</mean>
+        <stdev>0.00010101</stdev>
+      </param>
+      <param>
+        <id>7</id>
+        <mean>0.124766637918002</mean>
+        <stdev>0.000312592183093558</stdev>
+      </param>
+    </face-params>
     <points>
       <point>
-        <x>464</x>
-        <y>326</y>
+        <x>466</x>
+        <y>314</y>
       </point>
       <point>
-        <x>370</x>
-        <y>220</y>
+        <x>481</x>
+        <y>321</y>
       </point>
       <point>
-        <x>261</x>
-        <y>53</y>
+        <x>323</x>
+        <y>86</y>
       </point>
     </points>
   </user>
