@@ -11,7 +11,7 @@ namespace ThreeDAuth
     class FaceClassifier
     {
         private XmlDocument data;
-        private const double MAX_DIFF = 10;
+        private const double MAX_DIFF = 12;
 
         private event GiveUser _onUserRecieved;
         
@@ -71,9 +71,14 @@ namespace ThreeDAuth
                     double stdev = Convert.ToDouble(met["stdev"].InnerText);
 
                     double score = getZScore(vals[i], mean, stdev);
-                    total += score;
-                    //Console.WriteLine(score);
+
+                    Console.WriteLine("Score---------> " + score);
+                    if(score >= 1) {
+                        total += score;
+                    }
                 }
+
+                Console.WriteLine("");
                 
                 try {
                     matches.Add(user["name"].InnerText, total);
@@ -161,11 +166,11 @@ namespace ThreeDAuth
 
                 double average = tmp.Average();
                 double sumOfSquaresOfDifferences = tmp.Select(val => (val - average) * (val - average)).Sum();
-                double sd = Math.Sqrt(sumOfSquaresOfDifferences / tmp.Count);
+                double sd = Math.Sqrt(sumOfSquaresOfDifferences / (tmp.Count - 1));
 
-                if (sd == 0)
+                if (sd < 0.0001)
                 {
-                    sd = .00123456;
+                    sd = .00010101;
                 }
 
                 Point2d tempPoint = new Point2d(average, sd);

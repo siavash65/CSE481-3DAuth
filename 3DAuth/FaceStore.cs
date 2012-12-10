@@ -19,6 +19,7 @@ namespace ThreeDAuth
         //private event GiveCount _OnCountReceived;
 
         List<FeaturePair> features;
+        List<double>[] totalsList;
         double[] totals;
         int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34, 15, 48 };
 
@@ -98,6 +99,12 @@ namespace ThreeDAuth
                 features.Add(temp);
             }
 
+            totalsList = new List<double>[features.Count];
+            for (int j = 0; j < totalsList.Length; j++)
+            {
+                totalsList[j] = new List<double>();
+            }
+
             totals = new double[features.Count];
         }
 
@@ -117,12 +124,26 @@ namespace ThreeDAuth
                 //StreamWriter writer = new StreamWriter("C:\\Users\\Administrator\\Documents\\Facial Testing\\" + s + ".txt");
                 //writer.WriteLine("Siavash");
 
-                for (int i = 0; i < totals.Length; i++)
+                if (!CurrentObjectBag.SLearningNewUser)
                 {
-                    totals[i] /= NUM_SAMPLES;
-                    // writer.WriteLine(totals[i]);
-                    //writer.WriteLine(totals[i]);
+                    int trim = NUM_SAMPLES / 4;
+                    for (int i = 0; i < totalsList.Length; i++)
+                    {
+                        totalsList[i].Sort();
+                        totalsList[i].RemoveRange(0, trim);
+                        totalsList[i].RemoveRange(totalsList[i].Count - trim, trim);
+                        totals[i] = totalsList[i].Sum();
+                        totals[i] /= totalsList[i].Count;
+                    }
+                } else {
+                    for (int i = 0; i < totals.Length; i++)
+                    {
+                        totals[i] /= NUM_SAMPLES;
+                        // writer.WriteLine(totals[i]);
+                        //writer.WriteLine(totals[i]);
+                    }
                 }
+
                 // writer.Write("Siavash");
                 // writer.Close();
 
@@ -169,7 +190,9 @@ namespace ThreeDAuth
 
                 for (int i = 0; i < features.Count; i++)
                 {
-                    totals[i] += getDist(pts[features[i].P1], pts[features[i].P2]);
+                    double dist = getDist(pts[features[i].P1], pts[features[i].P2]);
+                    totals[i] += dist;
+                    totalsList[i].Add(dist);
                 }
 
             }
