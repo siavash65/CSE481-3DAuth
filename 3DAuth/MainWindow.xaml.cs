@@ -318,6 +318,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.progressBar2.Value = faceScanCount * 2;
                 if (this.progressBar2.Value == 100)
                 {
+                    faceScanCount = 0;
                     this.progressBar2.Foreground = Brushes.Green;
                 }
             }
@@ -326,6 +327,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.progressBar3.Value = faceScanCount * 2;
                 if (this.progressBar3.Value == 100)
                 {
+                    faceScanCount = 0;
                     this.progressBar3.Foreground = Brushes.Green;
                 }
             }
@@ -970,6 +972,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             int windowWidth,
                                             int windowHeight)
         {
+            return basePoint;
             //armLength *= 1000; // Convert meters to mm
             // Get pixel length of the arm
 
@@ -1195,17 +1198,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
                 else
                 {
-                    
+                    // new user registering, start learner
                     faceTrackingViewer.stopTracking();
                     this.isfaceTrackerOn = false;
                     this.currentUser.faceParams = current.faceParams;
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     this.ImagePanel.Visibility = System.Windows.Visibility.Visible;
-                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
-                    Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
-                    gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
-                    gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
+                    //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                    //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                    // Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
+                    // gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
+                    // gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
            
                 }
 
@@ -1264,7 +1267,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.login.Visibility = System.Windows.Visibility.Collapsed;
                     this.rescan.Visibility = System.Windows.Visibility.Visible;
                     this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
-                    this.welcomeMassage.Text = "Hello " + current.name + "! " + "We did not find you. Please rescan";
+                    this.welcomeMassage.Text = "Hello" + current.name + "! " + "We did not find you. Please rescan";
                     
                 }
 
@@ -1360,7 +1363,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             } 
             this.sensor.DepthFrameReady += null;
             this.sensor.SkeletonFrameReady += null;
-            gValidator.OnCompletedValidation += null;
+            if (gValidator != null)
+            {
+                gValidator.OnCompletedValidation += null;
+            }
+            
             this.currentUser = null;
             this.myImageBox.Source = null;
             this.Username.Text = "";

@@ -11,7 +11,7 @@ namespace ThreeDAuth
     class FaceClassifier
     {
         private XmlDocument data;
-        private const double MAX_DIFF = 6;
+        private const double MAX_DIFF = 7.5;
 
         private event GiveUser _onUserRecieved;
         
@@ -19,14 +19,7 @@ namespace ThreeDAuth
         {
             data = new XmlDocument();
 
-            try
-            {
-                data.Load("users.xml");
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("file not found");
-            }
+
             
         }
 
@@ -51,8 +44,18 @@ namespace ThreeDAuth
 
 
 
-        public void verifyUser(float[] vals)
+        public void verifyUser(double[] vals)
         {
+
+            try
+            {
+                data.Load("users.xml");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("file not found");
+            }
+            
             SortedDictionary<String, double> matches = new SortedDictionary<String, double>();
             
             XmlNodeList users = data.GetElementsByTagName("user");
@@ -66,10 +69,10 @@ namespace ThreeDAuth
                 for (int i = 0; i < mets.ChildNodes.Count; i++)
                 {
                     XmlNode met = mets.ChildNodes[i];
-                    float mean = (float)Convert.ToDouble(met["mean"].InnerText);
-                    float stdev = (float)Convert.ToDouble(met["stdev"].InnerText);
+                    double mean = Convert.ToDouble(met["mean"].InnerText);
+                    double stdev = Convert.ToDouble(met["stdev"].InnerText);
 
-                    float score = getZScore(vals[i], mean, stdev);
+                    double score = getZScore(vals[i], mean, stdev);
                     total += score;
                     //Console.WriteLine(score);
                 }
@@ -108,8 +111,8 @@ namespace ThreeDAuth
                         for (int i = 0; i < points.ChildNodes.Count; i++)
                         {
                             XmlNode point = points.ChildNodes[i];
-                            float x = (float)Convert.ToDouble(point["x"].InnerText);
-                            float y = (float)Convert.ToDouble(point["y"].InnerText);
+                            double x = Convert.ToDouble(point["x"].InnerText);
+                            double y = Convert.ToDouble(point["y"].InnerText);
                             Point2d tmp = new Point2d(x, y);
                             tempPts.Add(tmp);
                         }
@@ -132,18 +135,18 @@ namespace ThreeDAuth
         }
 
 
-        public void addUser(List<List<float>> data)
+        public void addUser(List<List<double>> data)
         {
-            List<float>[] sorted = new List<float>[6];
+            List<double>[] sorted = new List<double>[6];
             for (int h = 0; h < sorted.Length; h++)
             {
-                sorted[h] = new List<float>();
+                sorted[h] = new List<double>();
             }
 
 
             for (int i = 0; i < data.Count; i++)
             {
-                List<float> tmp = data.ElementAt(i);
+                List<double> tmp = data.ElementAt(i);
 
                 for (int j = 0; j < tmp.Count; j++)
                 {
@@ -156,11 +159,16 @@ namespace ThreeDAuth
             // calculate mean and standard deviation
             for (int k = 0; k < sorted.Length; k++)
             {
-                List<float> tmp = sorted[k];
+                List<double> tmp = sorted[k];
 
-                float average = tmp.Average();
-                float sumOfSquaresOfDifferences = tmp.Select(val => (val - average) * (val - average)).Sum();
-                double sd = Math.Sqrt(sumOfSquaresOfDifferences / tmp.Count);
+                double average = tmp.Average();
+                double sumOfSquaresOfDifferences = tmp.Select(val => (val - average) * (val - average)).Sum();
+                double sd = Math.Sqrt(sumOfSquaresOfDifferences / (tmp.Count - 1));
+
+                if (sd == 0)
+                {
+                    sd = .00123456;
+                }
 
                 Point2d tempPoint = new Point2d(average, sd);
                 tempPts.Add(tempPoint);
@@ -173,7 +181,7 @@ namespace ThreeDAuth
 
 
 
-        private float getZScore(float observed, float mean, float stdev)
+        private double getZScore(double observed, double mean, double stdev)
         {
             return Math.Abs((observed - mean) / stdev);
         }

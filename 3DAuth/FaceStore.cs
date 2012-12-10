@@ -19,10 +19,10 @@ namespace ThreeDAuth
         //private event GiveCount _OnCountReceived;
 
         List<FeaturePair> features;
-        float[] totals;
+        double[] totals;
         int[] fts = { 20, 53, 23, 56, 0, 10, 90, 91, 88, 89, 1, 34 };
 
-        List<List<float>> learnList;
+        List<List<double>> learnList;
 
         private const int NUM_SAMPLES = 50;
 
@@ -32,13 +32,22 @@ namespace ThreeDAuth
         FaceClassifier classifier;
 
 
-        public float getDist(Vector3DF point1, Vector3DF point2)
+        public double getDist(Vector3DF point1, Vector3DF point2)
         {
-            float deltaX = point1.X - point2.X;
-            float deltaY = point1.Y - point2.Y;
-            float deltaZ = point1.Z - point2.Z;
+            double X1 = point1.X;
+            double Y1 = point1.Y;
+            double Z1 = point1.Z;
 
-            float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+            double X2 = point2.X;
+            double Y2 = point2.Y;
+            double Z2 = point2.Z;
+
+            
+            double deltaX = X1 - X2;
+            double deltaY = Y1 - Y2;
+            double deltaZ = Z1 - Z2;
+
+            double distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
             return distance;
         }
@@ -49,7 +58,7 @@ namespace ThreeDAuth
             classifier = fc;
 
             features = new List<FeaturePair>();
-            learnList = new List<List<float>>();
+            learnList = new List<List<double>>();
 
             learnCount = 0;
 
@@ -89,7 +98,7 @@ namespace ThreeDAuth
                 features.Add(temp);
             }
 
-            totals = new float[features.Count];
+            totals = new double[features.Count];
         }
 
         public void updateData(EnumIndexableCollection<FeaturePoint, Vector3DF> pts)
@@ -120,7 +129,7 @@ namespace ThreeDAuth
                 if (CurrentObjectBag.SLearningNewUser)
                 {
                     // new user, so do additional scans
-                    List<float> tempList = new List<float>();
+                    List<double> tempList = new List<double>();
                     for (int i = 0; i < totals.Length; i++)
                     {
                         tempList.Add(totals[i]);
