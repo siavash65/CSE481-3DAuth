@@ -41,16 +41,16 @@ namespace ThreeDAuth
             }
 
             this.torsoPosition = new DepthPoint();
-            leftWristPoints = new List<DepthPoint>();
-            rightWristPoints = new List<DepthPoint>();
-            leftShoulderPoints = new List<DepthPoint>();
-            rightShoulderPoints = new List<DepthPoint>();
+            leftWristPoints = new Queue<DepthPoint>();
+            rightWristPoints = new Queue<DepthPoint>();
+            leftShoulderPoints = new Queue<DepthPoint>();
+            rightShoulderPoints = new Queue<DepthPoint>();
             totalArmPoints = 0;
             totalTorsoPoints = 0;
-            
-            shoulderCenterPoints = new List<DepthPoint>();
-            spinePoints = new List<DepthPoint>();
-            hipCenterPoints = new List<DepthPoint>();
+
+            shoulderCenterPoints = new Queue<DepthPoint>();
+            spinePoints = new Queue<DepthPoint>();
+            hipCenterPoints = new Queue<DepthPoint>();
         }
 
 
@@ -99,14 +99,14 @@ namespace ThreeDAuth
             }*/
         }
 
-        private List<DepthPoint> leftWristPoints;
-        private List<DepthPoint> rightWristPoints;
-        private List<DepthPoint> leftShoulderPoints;
-        private List<DepthPoint> rightShoulderPoints;
+        private Queue<DepthPoint> leftWristPoints;
+        private Queue<DepthPoint> rightWristPoints;
+        private Queue<DepthPoint> leftShoulderPoints;
+        private Queue<DepthPoint> rightShoulderPoints;
 
-        private List<DepthPoint> shoulderCenterPoints;
-        private List<DepthPoint> spinePoints;
-        private List<DepthPoint> hipCenterPoints;
+        private Queue<DepthPoint> shoulderCenterPoints;
+        private Queue<DepthPoint> spinePoints;
+        private Queue<DepthPoint> hipCenterPoints;
 
         private int totalArmPoints;
         private int totalTorsoPoints;
@@ -199,10 +199,10 @@ namespace ThreeDAuth
             totalArmPoints++;
             if (totalArmPoints > MIN_POINTS_BEFORE_READING && leftWristPoints.Count < MAX_POINTS_IN_READING)
             {
-                leftWristPoints.Add(leftWristPoint);
-                leftShoulderPoints.Add(leftShoulderPoint);
-                rightWristPoints.Add(rightWristPoint);
-                rightShoulderPoints.Add(rightShoulderPoint);
+                leftWristPoints.Enqueue(leftWristPoint);
+                leftShoulderPoints.Enqueue(leftShoulderPoint);
+                rightWristPoints.Enqueue(rightWristPoint);
+                rightShoulderPoints.Enqueue(rightShoulderPoint);
             }
 
 
@@ -249,11 +249,19 @@ namespace ThreeDAuth
         internal void computerTorsoDepth(DepthPoint shoulderCenter, DepthPoint spine, DepthPoint hipCenter)
         {
             totalTorsoPoints++;
-            if (totalTorsoPoints > MIN_POINTS_BEFORE_READING && shoulderCenterPoints.Count < MAX_POINTS_IN_READING)
+
+            while (shoulderCenterPoints.Count > MAX_POINTS_IN_READING)
             {
-                shoulderCenterPoints.Add(shoulderCenter);
-                hipCenterPoints.Add(hipCenter);
-                spinePoints.Add(spine);
+                shoulderCenterPoints.Dequeue();
+                hipCenterPoints.Dequeue();
+                spinePoints.Dequeue();
+            }
+
+            if (totalTorsoPoints > MIN_POINTS_BEFORE_READING)
+            {
+                shoulderCenterPoints.Enqueue(shoulderCenter);
+                hipCenterPoints.Enqueue(hipCenter);
+                spinePoints.Enqueue(spine);
             }
 
 

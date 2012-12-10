@@ -1,5 +1,4 @@
-﻿
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="MainWindow.xaml.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -383,15 +382,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     // y = (idx - x)/width
                     int xIdx = this.pixelIndex % depthFrame.Width;
                     int yIdx = this.pixelIndex / depthFrame.Width;
-                    /*ThreeDAuth.PointCluster*/
+
                     myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
-                    //Console.WriteLine("Flood filled point count: " + myPointCluster.points.Count);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
 
 
-                    // TODO: we shouldn't filter here, it'll cause us to drop frames, making the whole business choppier
                     // send centroid to filter and draw if valid
-                    if (myPointCluster.points.Count > 50)
+                    int counter = 0;
+                    while (myPointCluster.points.Count < 50 && counter < 20)
+                    {
+                        imagePixelData[pixelIndex].Depth = short.MaxValue;
+                        counter++;
+
+                        findTheClosestPoint(depthFrame.PixelDataLength, depthFrame.Width, depthFrame.Height);
+                        xIdx = this.pixelIndex % depthFrame.Width;
+                        yIdx = this.pixelIndex / depthFrame.Width;
+
+                        myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
+                        centroid = myPointCluster.Centroid;
+                    }
+                    if (counter < 20)
                     {
                         using (DrawingContext dc = this.liveFeedbackGroup.Open())
                         {
@@ -475,7 +485,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <summary>
         /// Siavash
         /// 
-        /// Mason - returns the index of the closest point
         /// </summary>
         /// <param name="pixelDataLenght"></param>
         private void findTheClosestPoint(int pixelDataLenght, int windowWidth, int windowHeight)
@@ -695,14 +704,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             drawHand = true;
             if (drawHand)
             {
-                if (myFrame.torsoPosition != null)
+                if (myFrame.AvgTorsoPosition != null)
+                //if (myFrame.torsoPosition != null)
                 {
                     // Anton's code
                     // when a new frame is available, we check if the wrists are crossing the plane and we draw an appropriately colored
                     // rectangle over them to give the user feedback
                     double planeDepth = myFrame.armLength * .8;
                     int planeDepthPixels = (int)((planeDepth / myFrame.armLength) * myFrame.armLengthPixels);
-                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, planeDepth);
+                    //ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.torsoPosition, planeDepth);
+                    ThreeDAuth.FlatPlane myPlane = new ThreeDAuth.FlatPlane(myFrame.AvgTorsoPosition, planeDepth);
                     //Console.WriteLine("Torso depth: " + torsoSkeletonPoint.Z);
                     //ThreeDAuth.Point3d wristRight = new ThreeDAuth.Point3d(rightWrist.Position.X, rightWrist.Position.Y, rightWrist.Position.Z);
 
