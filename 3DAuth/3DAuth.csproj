@@ -8,7 +8,7 @@
     <ProjectGuid>{8121846D-923E-4BB0-8647-30DA753D156E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Samples.Kinect.SkeletonBasics</RootNamespace>
+    <RootNamespace>ThreeDAuth</RootNamespace>
     <AssemblyName>3DAuth</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -78,6 +78,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DepthViewWindow.xaml.cs">
+      <DependentUpon>DepthViewWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HandTrackingOptions.cs" />
+    <Compile Include="HandTrackingOptionsWindow.xaml.cs">
+      <DependentUpon>HandTrackingOptionsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StateMachine.cs" />
     <Compile Include="Cube.cs" />
     <Compile Include="CurrentObjectBag.cs" />
     <Compile Include="FaceClassifier.cs" />
@@ -106,6 +114,10 @@
     <Compile Include="TargetBox.cs" />
     <Compile Include="User.cs" />
     <Compile Include="Util.cs" />
+    <Page Include="DepthViewWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="FaceTrackingViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -115,6 +127,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GraphPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HandTrackingOptionsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

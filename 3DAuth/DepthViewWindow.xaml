@@ -1,0 +1,8 @@
+﻿<Window x:Class="ThreeDAuth.DepthViewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DepthViewWindow" Height="514" Width="735" Closing="Window_Closing" Loaded="Window_Loaded">
+    <Grid>
+        <Image x:Name="myImageBox" Stretch="Fill" HorizontalAlignment="Left" Margin="0,99,0,20" Grid.Row="1" VerticalAlignment="Center" Opacity="0.8" Visibility="Visible" />
+    </Grid>
+</Window>

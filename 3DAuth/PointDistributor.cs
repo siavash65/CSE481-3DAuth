@@ -6,7 +6,6 @@ using System.Text;
 namespace ThreeDAuth
 {
     delegate void GivePoint(Point p);
-
     // Note: This is a singleton class
     class PointDistributor
     {

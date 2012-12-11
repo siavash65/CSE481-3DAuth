@@ -79,12 +79,15 @@ namespace ThreeDAuth
         /// <param name="height"></param>
         /// <param name="mmCutoff"></param>
         /// <returns></returns>
-        public static PointCluster FloodFill2(DepthImagePixel[] depthData, int x, int y, int width, int height, int mmCutoff)
+        public static PointCluster FloodFill2(DepthImagePixel[] depthData, int x, int y, int width, int height)
         {
             // Queue of tuples storing <newX, newY, previousDepth>
+            int mmCutoff = HandTrackingOptionSet.FloodFillDepth;
             Queue<Tuple<int, int, DepthImagePixel>> explorePoints = new Queue<Tuple<int, int, DepthImagePixel>>();
             HashSet<Tuple<int, int>> exploredPoints = new HashSet<Tuple<int,int>>();
             HashSet<DepthPoint> resultPoints = new HashSet<DepthPoint>();
+
+            int jumpdistance = 2;
 
             // Filtering on points
             // throw out anything closer than 400 and farther than 4000?
@@ -104,6 +107,18 @@ namespace ThreeDAuth
                     resultPoints.Add(new DepthPoint(currentPoint.Item1, currentPoint.Item2, currentDepth.Depth));
                     
                     // Add the neighboring points to be explored
+
+                    Tuple<int, int, DepthImagePixel> leftNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 - jumpdistance, currentPoint.Item2, currentDepth);
+                    Tuple<int, int, DepthImagePixel> rightNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 + jumpdistance, currentPoint.Item2, currentDepth);
+                    Tuple<int, int, DepthImagePixel> topNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1, currentPoint.Item2 + jumpdistance, currentDepth);
+                    Tuple<int, int, DepthImagePixel> bottomNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1, currentPoint.Item2 - jumpdistance, currentDepth);
+
+                    Tuple<int, int> leftNeighborPoint = new Tuple<int, int>(currentPoint.Item1 - jumpdistance, currentPoint.Item2);
+                    Tuple<int, int> rightNeighborPoint = new Tuple<int, int>(currentPoint.Item1 + jumpdistance, currentPoint.Item2);
+                    Tuple<int, int> topNeighborPoint = new Tuple<int, int>(currentPoint.Item1, currentPoint.Item2 + jumpdistance);
+                    Tuple<int, int> bottomNeighborPoint = new Tuple<int, int>(currentPoint.Item1, currentPoint.Item2 - jumpdistance);
+
+                    /*
                     Tuple<int, int, DepthImagePixel> leftNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 - 1, currentPoint.Item2, currentDepth);
                     Tuple<int, int, DepthImagePixel> rightNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1 + 1, currentPoint.Item2, currentDepth);
                     Tuple<int, int, DepthImagePixel> topNeighbor = new Tuple<int, int, DepthImagePixel>(currentPoint.Item1, currentPoint.Item2 + 1, currentDepth);
@@ -113,7 +128,7 @@ namespace ThreeDAuth
                     Tuple<int, int> rightNeighborPoint = new Tuple<int, int>(currentPoint.Item1 + 1, currentPoint.Item2);
                     Tuple<int, int> topNeighborPoint = new Tuple<int, int>(currentPoint.Item1, currentPoint.Item2 + 1);
                     Tuple<int, int> bottomNeighborPoint = new Tuple<int, int>(currentPoint.Item1, currentPoint.Item2 - 1);
-
+                    */
                     if (leftNeighbor.Item1 >= 0 && !exploredPoints.Contains(leftNeighborPoint))
                     {
                         exploredPoints.Add(leftNeighborPoint);

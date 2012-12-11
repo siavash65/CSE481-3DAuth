@@ -445,8 +445,8 @@ namespace ThreeDAuth
             }
 
             // Alpha average between the supplemental points and our stored average torso pos
-
-            if (shoulderCenterPointsSupplemental.Count > 30 && _avgTorsoPosition != null)
+            
+            if (HandTrackingOptionSet.AllowingTorsoMotion && shoulderCenterPointsSupplemental.Count > 30 && _avgTorsoPosition != null)
             {
                 List<double> shoulderCenterX = new List<double>();
                 List<double> shoulderCenterY = new List<double>();

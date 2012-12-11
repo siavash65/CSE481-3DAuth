@@ -1,10 +1,16 @@
-﻿<Window x:Name="mainWindow" x:Class="Microsoft.Samples.Kinect.SkeletonBasics.MainWindow"
+﻿<Window x:Name="mainWindow" x:Class="ThreeDAuth.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:me="clr-namespace:ThreeDAuth"
         Title="3DAuth" Height="735" Width="770" Loaded="WindowLoaded" Closing="WindowClosing" SizeChanged="WindowSizeChanged" MinHeight="600" MinWidth="900">
+    <!--
+    <Window x:Name="mainWindow" x:Class="Microsoft.Samples.Kinect.SkeletonBasics.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:me="clr-namespace:ThreeDAuth"
+        Title="3DAuth" Height="735" Width="770" Loaded="WindowLoaded" Closing="WindowClosing" SizeChanged="WindowSizeChanged" MinHeight="600" MinWidth="900">-->
 
-    <Window.Resources>
+        <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
         <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f"/>
         <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2"/>
@@ -59,8 +65,9 @@
             <!--<Image DockPanel.Dock="Left" Source="Images\Logo.png" Stretch="None" Margin="0 10 0 5"/>-->
             <TextBlock DockPanel.Dock="Right" Margin="0 0 20 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Gesture Based Authentication</TextBlock>
             <Button Name="home" Content="Home" Height="41"  Width="75" Foreground="White" Background="#FF0FCCFF" FontWeight="Bold" Margin="18,0,0,0" Click="home_Click" />
+            <Button Background="#FF0FCCFF" Content="Hand Tracking Options" FontWeight="Bold" Foreground="White" Height="41" Name="HandOptionsButton" Width="155" Margin="20,0,0,0" Click="HandOptionsButton_Click" />
+            <Button Background="#FF0FCCFF" Content="Show Depth View" FontWeight="Bold" Foreground="White" Height="41" Name="DepthViewButton" Width="125" Margin="20,0,0,0" Click="DepthViewButton_Click" />
             <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Height="42" VerticalAlignment="Top"/>
-            
         </DockPanel>
         <Viewbox Grid.Row="1" Stretch="Fill" HorizontalAlignment="Center">
             <me:FaceTrackingViewer x:Name="faceTrackingViewer" />

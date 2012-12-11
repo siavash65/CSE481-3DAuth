@@ -4,23 +4,24 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Samples.Kinect.SkeletonBasics
-{
-    using System.IO;
-    using System.Windows;
-    using System.Windows.Media;
-    using Microsoft.Kinect;
-    using Microsoft.Win32;
-    using System;
-    using System.Windows.Data;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Controls;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using System.Drawing.Imaging;
-    using ThreeDAuth;
-    using System.Xml;
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using Microsoft.Kinect;
+using Microsoft.Win32;
+using System;
+using System.Windows.Data;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
+using ThreeDAuth;
+using System.Xml;
+using Microsoft.Samples.Kinect.SkeletonBasics;
 
+namespace ThreeDAuth //Microsoft.Samples.Kinect.SkeletonBasics
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -146,12 +147,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Mason
-        /// Depth cutoff for flood fill in mm
-        /// </summary>
-        private const int DEPTH_CUTOFF = 50;
-
-        /// <summary>
-        /// Mason
         /// Gaussian filter on position and motion
         /// </summary>
         private ThreeDAuth.PositionMotionFilter positionMotionFilter;
@@ -162,9 +157,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private System.Diagnostics.Stopwatch doneButtonTimer;
 
         private const long BUTTON_HOLD_CUTOFF = 2000; // ms
-
-        private static MainWindow instance; // make it a singleton to allow us to use skeleton projections from the targetBox class
-
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -181,7 +173,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             outOfPlaneTimer = new System.Diagnostics.Stopwatch();
             resetButtonTimer = new System.Diagnostics.Stopwatch();
             doneButtonTimer = new System.Diagnostics.Stopwatch();
-            MainWindow.instance = this;
+
+            State CurrentState = StateMachine.CurrentState; // turn on the state machine
+            HandTrackingOptions options = HandTrackingOptionSet.CurrentOptions; // turn on the options
         }
 
         /// <summary>
@@ -358,6 +352,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private int closestPointCounter = 0;
         private int CLOSEST_POINT_COUNTER_CUTOFF = 1;
 
+        private DepthPoint lastPoint;
         /// <summary>
         /// Start Siavash
         /// </summary>
@@ -365,6 +360,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e"></param>
         private void SensorDepthFrameReady(object sender, DepthImageFrameReadyEventArgs e)
         {
+            if (lastPoint == null)
+            {
+                lastPoint = new DepthPoint(0, 0, 0);
+            }
             using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
             {
                 if (depthFrame != null)
@@ -403,7 +402,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     int xIdx = this.pixelIndex % depthFrame.Width;
                     int yIdx = this.pixelIndex / depthFrame.Width;
 
-                    myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
+                    myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1);
                     ThreeDAuth.DepthPoint centroid = myPointCluster.Centroid;
 
 
@@ -418,7 +417,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         xIdx = this.pixelIndex % depthFrame.Width;
                         yIdx = this.pixelIndex / depthFrame.Width;
 
-                        myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1, DEPTH_CUTOFF);
+                        myPointCluster = ThreeDAuth.Util.FloodFill2(imagePixelData, xIdx, yIdx, depthFrame.Width, depthFrame.Height - 1);
                         centroid = myPointCluster.Centroid;
                     }
                     if (counter < 20)
@@ -427,12 +426,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             drawHands(dc, centroid, positionMotionFilter.IsValidPoint(centroid), depthFrame);
                         }
+                        if (depthViewWindow != null && depthViewWindow.Running)
+                        {
+                            depthViewWindow.GiveFrame(depthFrame, myPointCluster);
+                        }
                     }
-                    //showDepthView(depthFrame, depthFrame.Width, depthFrame.Height,centroid);
-                    //pDistributor.GivePoint(centroid);
-
-                    //Console.WriteLine("Centroid: " + centroid);
-                    //ThreeDAuth.PointDistributor.SGivePoint(centroid);
                 }
             }
         }
@@ -566,6 +564,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             if (null != this.sensor)
             {
+                this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
                 this.sensor.Stop();
             }
         }
@@ -748,6 +748,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             //showDepthView(depthFrame, drawingContext);
             //return;
+            if (Util.EuclideanDistance2d(hand, lastPoint) < 3.0)
+            {
+                hand = lastPoint;
+            }
+            else
+            {
+                lastPoint = hand;
+            }
             
 
             //Start Siavash
@@ -833,13 +841,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     short planeDepthmm = (short)(planeDepth * 1000); // convert m to mm
                     Tuple<int, int> handTuple = new Tuple<int, int>(hand.x, hand.y);
-                    handTuple = ProjectPoint(handTuple,
-                                             myFrame.AvgTorsoPosition,
-                                             myFrame.AvgArmLengthPixels,
-                                             planeDepthPixels,
-                                             .9,
-                                             depthFrame.Width,
-                                             depthFrame.Height);
+                    if (HandTrackingOptionSet.ProjectingPoints)
+                    {
+                        handTuple = ProjectPoint(handTuple,
+                                                 myFrame.AvgTorsoPosition,
+                                                 myFrame.AvgArmLengthPixels,
+                                                 planeDepthPixels,
+                                                 depthFrame.Width,
+                                                 depthFrame.Height);
+                    }
                     if (handTuple == null)
                     {
                         // encountered a problem and won't be able to project this point, so drop this frame
@@ -886,7 +896,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             inButton = true;
                             if (!doneButtonTimer.IsRunning)
                             {
-                                
                                 doneButtonTimer.Start();
                             }
                         }
@@ -900,7 +909,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     }
 
 
-                    //drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                    if (HandTrackingOptionSet.ShowUnprojectedHand)
+                    {
+                        drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(hand.x, hand.y, 30, 30), null, 14, null, 14, null);
+                    }
 
                     //if (arrived.inPlane)
                     if (planePoint.inPlane)
@@ -944,6 +956,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         }
                     }
 
+                    if (gValidator != null && HandTrackingOptionSet.ShowTargetPoints)
+                    {
+                        Queue<ThreeDAuth.Point2d> unhitPoints = gValidator.getUnHitPoints();
+                        Queue<ThreeDAuth.Point2d> hitPoints = gValidator.getHitPoints();
+                        Point2d nextPoint = gValidator.getNextPoint();
+                        foreach (Point2d point in unhitPoints)
+                        {
+                            drawingContext.DrawRoundedRectangle(Brushes.Yellow, null, new Rect(point.x, point.y, 30, 30), null, 14, null, 14, null);
+                        }
+                        foreach (Point2d point in hitPoints)
+                        {
+                            drawingContext.DrawRoundedRectangle(Brushes.Green, null, new Rect(point.x, point.y, 30, 30), null, 14, null, 14, null);
+                        }
+
+                        if (nextPoint != null)
+                        {
+                            drawingContext.DrawRoundedRectangle(Brushes.Purple, null, new Rect(nextPoint.x, nextPoint.y, 30, 30), null, 14, null, 14, null);
+                        }
+                    }
+
                     if (gLearner != null && gLearner.isRecording && doneButtonTimePercentage >= 1.0)
                     {
                         // Done recording
@@ -953,6 +985,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         this.currentUser.password = password;
                         this.gestureMassage.Text = "Success. Your account has been created. Welcome to 3DAuth!";
                         SaveUser(currentUser);
+                        StateMachine.AdvanceState();
+                        SetSensorListeners();
                     }
 
                     if (inButton && resetButtonTimePercentage >= 1.0)
@@ -1249,7 +1283,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                             DepthPoint torsoPosition,
                                             int armLengthPixels,
                                             int planeDepthFromTorsoPixels,
-                                            double alpha,
                                             int windowWidth,
                                             int windowHeight)
         {
@@ -1272,6 +1305,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             // By the pythagorean theorem, (alpha * armLength)^2 = (planeDepthFromTorso)^2 + (distance to corner)^2
             // so distance to corner = + sqrt( (alpha * armLength)^2 - (planeDepthFromTorso)^2 )
 
+            double alpha = HandTrackingOptionSet.Alpha;
             double tempValue = Math.Pow(alpha * armLengthPixels, 2) - Math.Pow(planeDepthFromTorsoPixels, 2);
             // If this tempValue is less than 0 then holding the arm straight out infront of you 
             // (with the given alpha) will not cross the plane and we have bigger problems
@@ -1407,6 +1441,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.Image.Width = this.layoutGrid.Width * .1;
         }
 
+        /*
         private void graphPage(object sender, RoutedEventArgs e)
         {
             ThreeDAuth.GraphWindow grap = new ThreeDAuth.GraphWindow(this);
@@ -1437,9 +1472,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 gValidator.beginPath();
             }
         }
-
+        */
         private void New_Account_Click(object sender, RoutedEventArgs e)
         {
+            StateMachine.CreateUserState();
+
             CurrentObjectBag.SLearningNewUser = true;
 
             this.currentUser = new User("", "", null, null, null);
@@ -1451,6 +1488,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void login_Click(object sender, RoutedEventArgs e)
         {
+            StateMachine.LogInUserState();
+
             CurrentObjectBag.SLearningNewUser = false;
 
             this.currentUser = new User("", "", null, null, null);
@@ -1478,7 +1517,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.scanpanel.Visibility = System.Windows.Visibility.Collapsed;
                     if (string.Compare(this.currentUser.name, current.name, true) == 0)
                     {
-                        this.welcomeMassage.Text = "We have found your scan if thats incorecct click on rescan!";
+                        this.welcomeMassage.Text = "We have found your scan, if that's incorrect then click on rescan!";
                         this.welcomeMassage.Visibility = System.Windows.Visibility.Visible;
                         this.rescan.Visibility = System.Windows.Visibility.Visible;
                     }
@@ -1518,8 +1557,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         userImage = new BitmapImage(new Uri(current.imgPath));
                         myImageBox.Source = handSource;
                         this.myImageBox.Visibility = Visibility.Visible;
-                        this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                        this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
+                        if (StateMachine.CurrentState == State.LOG_IN_FACE)
+                        {
+                            StateMachine.AdvanceState();
+                        }
+                        SetSensorListeners();
+                        //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                        //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
                         Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(current.password);
                         gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
                         gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
@@ -1564,13 +1610,18 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             if (successful)
             {
+                if (StateMachine.CurrentState == State.LOG_IN_DRAW) // Sanity check
+                {
+                    StateMachine.AdvanceState();
+                }
                 if (this.isfaceTrackerOn)
                 {
                     faceTrackingViewer.stopTracking();
                 }
 
-                this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
-                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+                SetSensorListeners();
+                //this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+                //this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
 
                 this.currentUser = LoadUser(this.currentUser.name);
                 this.myImageBox.Source = null;
@@ -1682,6 +1733,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void accountButton_Click(object sender, RoutedEventArgs e)
         {
+            StateMachine.AdvanceState();
             this.userNamestackPanel.Visibility = System.Windows.Visibility.Collapsed;
             this.currentUser.name = this.Username.Text;
 
@@ -1766,8 +1818,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.RegistrationMassage.Visibility = System.Windows.Visibility.Collapsed;
                 this.gestureTracker.Visibility = System.Windows.Visibility.Visible;
                 this.gestureMassage.Text = "Start drawing your pattern when the circle is blue";
-                this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
+                StateMachine.AdvanceState();
+                SetSensorListeners();
+                //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                 gLearner.startRecording();
 
             }
@@ -1794,6 +1849,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void home_Click(object sender, RoutedEventArgs e)
         {
+            StateMachine.MainMenuState();
             if (this.isfaceTrackerOn)
             {
                 faceTrackingViewer.stopTracking();
@@ -1801,8 +1857,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //this.sensor.DepthFrameReady += null;
 
-            this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
-            this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+            SetSensorListeners();
+            //this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+            //this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
 
             //this.sensor.SkeletonFrameReady += null;
             if (gValidator != null)
@@ -1952,6 +2009,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void byPass_Click(object sender, RoutedEventArgs e)
         {
+            if (StateMachine.CurrentState == State.LOG_IN_FACE)
+            {
+                StateMachine.AdvanceState();
+            }
             if (data == null)
             {
                 data = new XmlDocument();
@@ -1998,8 +2059,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     userImage = new BitmapImage(new Uri(this.currentUser.imgPath));
                     myImageBox.Source = handSource;
                     this.myImageBox.Visibility = Visibility.Visible;
-                    this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
-                    this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
+                    //this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                    //this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                    if (StateMachine.CurrentState == State.LOG_IN_FACE)
+                    {
+                        StateMachine.AdvanceState();
+                    }
+                    SetSensorListeners();
+
                     Queue<ThreeDAuth.Point2d> passwordQueue = new Queue<ThreeDAuth.Point2d>(this.currentUser.password);
                     gValidator = new ThreeDAuth.GestureValidator(passwordQueue, 20);
                     gValidator.OnCompletedValidation += new CompletedValidation(gValidator_OnCompletedValidation);
@@ -2104,97 +2172,69 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
 
 
-
-        /*
-
-        private void copy3u_Click(object sender, RoutedEventArgs e)
+        // Sets listeners based on the current state. Always call this to set listeners
+        private void SetSensorListeners()
         {
-            if (currentUser != null)
+            bool scanningFace = StateMachine.IsFaceScanning();
+            bool handTracking = StateMachine.IsHandTracking();
+            if (scanningFace)
             {
-                System.Windows.Clipboard.SetText(currentUser.StoredData[2].Username);
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+            }
+            else
+            {
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+            }
+
+            if (handTracking)
+            {
+                this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
+                this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
+                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+            }
+            else 
+            {
+                this.sensor.DepthFrameReady -= this.SensorDepthFrameReady;
             }
         }
 
-        private void copy3p_Click(object sender, RoutedEventArgs e)
+        // Sets UI visibility based on the current state. Always call this to set visibility
+        private void SetUIVisuals()
         {
-            System.Windows.Clipboard.SetText(currentUser.StoredData[2].Password);
         }
 
-        private void setstored3_click(object sender, RoutedEventArgs e)
+        private void HandOptionsButton_Click(object sender, RoutedEventArgs e)
         {
-            String reference = this.NewReferenceText.Text;
-            String username = this.NewUserNameText.Text;
-            String password = this.NewPasswordText.Text;
+            HandTrackingOptionsWindow handTrackingOptionsWindow = new HandTrackingOptionsWindow(this);
+            handTrackingOptionsWindow.Show();
+        }
 
-            if (currentUser != null)
+        private DepthViewWindow depthViewWindow;
+        private void DepthViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            depthViewWindow = new DepthViewWindow(this);
+            depthViewWindow.Show();
+        }
+
+
+
+        
+        private event GiveDepthFrame _onDepthFrameReceived;
+
+        event GiveDepthFrame OnDepthFrameReceived
+        {
+            add
             {
-                currentUser.SetStoredData(2, reference, username, password);
-                SaveUser(currentUser);
+                _onDepthFrameReceived += value;
             }
-            this.NewReferenceNameTextBlock3.Text = reference;
-        }
-
-
-
-
-
-
-        private void copy4u_Click(object sender, RoutedEventArgs e)
-        {
-            if (currentUser != null)
+            remove
             {
-                System.Windows.Clipboard.SetText(currentUser.StoredData[3].Username);
-            }
-        }
-
-        private void copy4p_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Clipboard.SetText(currentUser.StoredData[3].Password);
-        }
-
-        private void setstored4_click(object sender, RoutedEventArgs e)
-        {
-            String reference = this.NewReferenceText.Text;
-            String username = this.NewUserNameText.Text;
-            String password = this.NewPasswordText.Text;
-
-            if (currentUser != null)
-            {
-                currentUser.SetStoredData(3, reference, username, password);
-                SaveUser(currentUser);
-            }
-            this.NewReferenceNameTextBlock4.Text = reference;
-        }
-
-
-
-
-
-        private void copy5u_Click(object sender, RoutedEventArgs e)
-        {
-            if (currentUser != null)
-            {
-                System.Windows.Clipboard.SetText(currentUser.StoredData[4].Username);
+                _onDepthFrameReceived -= value;
             }
         }
-
-        private void copy5p_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Clipboard.SetText(currentUser.StoredData[4].Password);
-        }
-
-        private void setstored5_click(object sender, RoutedEventArgs e)
-        {
-            String reference = this.NewReferenceText.Text;
-            String username = this.NewUserNameText.Text;
-            String password = this.NewPasswordText.Text;
-
-            if (currentUser != null)
-            {
-                currentUser.SetStoredData(4, reference, username, password);
-                SaveUser(currentUser);
-            }
-            this.NewReferenceNameTextBlock5.Text = reference;
-        }*/
     }
+
+    delegate void GiveDepthFrame(DepthImageFrame depthFrame, PointCluster floodFill);
 }

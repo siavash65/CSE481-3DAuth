@@ -22,7 +22,7 @@ namespace ThreeDAuth
     {
         private Queue<Point2d> targetPoints;
         private Queue<Point2d> manipulatableTargetPoints;
-        private HashSet<Point2d> completedTargets;
+        private Queue<Point2d> completedTargets;
         private double oldDistance;
         private double epsilon;
         private bool failedAuthentication;
@@ -73,7 +73,7 @@ namespace ThreeDAuth
             this.targetPoints = targetPoints;
             this.epsilon = epsilonBoundary;
             manipulatableTargetPoints = new Queue<Point2d>();
-            completedTargets = new HashSet<Point2d>();
+            completedTargets = new Queue<Point2d>();
             PointDistributor.GetInstance().OnPointReceived += new GivePoint(GivePoint);
             CurrentObjectBag.SCurrentGestureValidator = this;
             timer = new System.Diagnostics.Stopwatch();
@@ -84,9 +84,32 @@ namespace ThreeDAuth
             CurrentObjectBag.SCurrentGestureValidator = this;
         }
 
+        public Queue<Point2d> getUnHitPoints()
+        {
+            return manipulatableTargetPoints;
+        }
+
+        public Queue<Point2d> getHitPoints()
+        {
+            return completedTargets;
+        }
+
+        public Point2d getNextPoint()
+        {
+            if (manipulatableTargetPoints.Count > 0)
+            {
+                return manipulatableTargetPoints.Peek();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public void beginPath()
         {
             manipulatableTargetPoints.Clear();
+            completedTargets.Clear();
             for (int i = 0; i < targetPoints.Count; i++) {
                 Point2d point = targetPoints.Dequeue();
                 targetPoints.Enqueue(point);
@@ -147,7 +170,7 @@ namespace ThreeDAuth
                                     {
                                         // Hit the target point, so remove it and target the next one
                                         Console.WriteLine("Hit a target point");
-                                        manipulatableTargetPoints.Dequeue();
+                                        completedTargets.Enqueue(manipulatableTargetPoints.Dequeue());
                                         if (manipulatableTargetPoints.Count > 0)
                                         {
                                             oldDistance = Util.euclideanDistance(newPoint, manipulatableTargetPoints.Peek());

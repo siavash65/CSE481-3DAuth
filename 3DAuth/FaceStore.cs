@@ -162,7 +162,8 @@ namespace ThreeDAuth
                     {
                         count = 0;
                         learnCount++;
-                        Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
+                        //Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter++;
+                        ThreeDAuth.MainWindow.faceScanCounter++;
 
                     }
                     else
@@ -183,9 +184,11 @@ namespace ThreeDAuth
             }
             else
             {
-                
-                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
-                Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter = learnCount;
+
+                //Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCount++;
+                //Microsoft.Samples.Kinect.SkeletonBasics.MainWindow.faceScanCounter = learnCount;
+                ThreeDAuth.MainWindow.faceScanCount++;
+                ThreeDAuth.MainWindow.faceScanCounter = learnCount;
                 count++;
 
                 for (int i = 0; i < features.Count; i++)

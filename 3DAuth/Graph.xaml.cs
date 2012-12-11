@@ -56,7 +56,7 @@ namespace ThreeDAuth
 
         private const long WindowTimeWidth = 10 * 1000; // 10 seconds
 
-        private Microsoft.Samples.Kinect.SkeletonBasics.MainWindow owningWindow;
+        private MainWindow owningWindow;
 
         private const int TargetNumPointsToDisplay = 200;
 
@@ -65,7 +65,7 @@ namespace ThreeDAuth
         /// <summary>
         /// Initializes a new instance of the Graph class.
         /// </summary>
-        public GraphWindow(Microsoft.Samples.Kinect.SkeletonBasics.MainWindow owningWindow)
+        public GraphWindow(MainWindow owningWindow)
         {
             InitializeComponent();
 
